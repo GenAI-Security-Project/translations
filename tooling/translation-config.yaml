@@ -1,0 +1,18 @@
+# tooling/translation-config.yaml
+#
+# The single place the translation LLM is named. translate-draft.yml (and
+# tooling/translate_section.py, which it calls) reads this file at runtime —
+# the model/provider is never hardcoded in the workflow or its scripts, so
+# changing it is a config PR, not a code change.
+
+default:
+  provider: anthropic   # anthropic | openai | google | ...
+  model: claude-sonnet-5
+
+# Optional per-asset override — falls back to `default` when an asset isn't
+# listed here. Keyed by the asset name exactly as it appears in registry.yaml.
+overrides: {}
+# Example, once llm-top-10 exists:
+#   llm-top-10:
+#     provider: anthropic
+#     model: claude-opus-5   # higher-effort model for the flagship asset

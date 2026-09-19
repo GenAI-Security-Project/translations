@@ -1,0 +1,11 @@
+# registry.yaml
+#
+# Single source of truth for every asset this pipeline translates. Every
+# workflow (translate-draft.yml, publish.yml, check-freshness.yml) reads this
+# file to know what exists and how to handle it.
+#
+# Starts empty. Nobody hand-writes an entry or pre-creates a directory: each
+# asset's entry below is created automatically by tooling/bootstrap_asset.py
+# the first time that asset name + version is uploaded through the onboarding
+# form (see tooling/README.md for the schema and a worked example).
+assets: {}
