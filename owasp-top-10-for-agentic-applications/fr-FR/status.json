@@ -1,5 +1,5 @@
 {
-  "asset": "agentic-top-10",
+  "asset": "owasp-top-10-for-agentic-applications",
   "locale": "fr-FR",
   "sections": {
     "ASI01_Agent_Goal_Hijack": {
