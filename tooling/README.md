@@ -60,7 +60,7 @@ each draft was produced. Written by `translation_log.py`, called from
 `translate_section.py`'s per-section loop:
 
 ```json
-{"section": "ASI01_Agent_Goal_Hijack", "start": "2026-09-19T19:04:24+00:00", "finish": "2026-09-19T19:05:09+00:00", "duration_seconds": 45.2, "status": "success", "valid": true, "validation_notes": []}
+{"section": "ASI01_Agent_Goal_Hijack", "start": "2026-09-19T19:04:24+00:00", "finish": "2026-09-19T19:05:09+00:00", "duration_seconds": 45.2, "status": "success", "valid": true, "validation_notes": [], "input_tokens": 1847, "output_tokens": 2103, "estimated_cost_usd": 0.024724}
 ```
 
 - **`status`** is `"success"` or `"failed"` — a section that fails to
@@ -87,6 +87,16 @@ each draft was produced. Written by `translation_log.py`, called from
   that carried under 2% of the document's words, almost entirely per-call
   latency on tiny requests — a pattern this log makes visible without
   having to reconstruct it from file timestamps by hand.
+- **`input_tokens`**/**`output_tokens`** are the real numbers from the
+  API's own `response.usage`, not an estimate from character/word counts.
+  **`estimated_cost_usd`** is computed from `PRICING_PER_MTOK` in
+  `translation_log.py` (currently: `claude-sonnet-5` $2/$10 per MTok,
+  `claude-opus-5` $5/$25 per MTok — update this table when pricing changes
+  or a new model is named in `translation-config.yaml`). A model not in the
+  table still logs real token counts, just with no `estimated_cost_usd`
+  field — an absent number, not a silently wrong one. Sum this field across
+  a run (or across `translation_log.jsonl` for a whole asset) to get real
+  spend, rather than guessing from word count.
 
 Never rewritten — accumulates across every run for that locale, so it
 survives re-runs, added locales, and retried failures.
