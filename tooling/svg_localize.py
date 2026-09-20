@@ -15,10 +15,10 @@ on fixed per-call latency than on the ~3 words each label actually carries.
 from __future__ import annotations
 
 import re
-from typing import List, Match
+from typing import List, Match, Tuple
 from xml.sax.saxutils import escape, unescape
 
-from llm_client import translate_batch
+from llm_client import Usage, translate_batch
 from translation_config import Engine
 
 _TEXT_RE = re.compile(r"(<text\b[^>]*>)(.*?)(</text>)", re.DOTALL)
@@ -33,15 +33,16 @@ def rehome_image_href(svg_text: str) -> str:
     return _HREF_RE.sub(r'\1="../_source/images/', svg_text)
 
 
-def translate_svg(engine: Engine, locale: str, svg_text: str, offline: bool = False) -> str:
+def translate_svg(engine: Engine, locale: str, svg_text: str, offline: bool = False) -> Tuple[str, Usage]:
     matches: List[Match] = list(_TEXT_RE.finditer(svg_text))
     sources = [unescape(m.group(2)) for m in matches]
     translatable = [i for i, s in enumerate(sources) if s.strip()]  # skip empty nodes — nothing to translate
 
     if offline:
         translations = {i: f"[{locale}] {sources[i]}" for i in translatable}
+        usage = Usage()
     else:
-        batch = translate_batch(engine, locale, [sources[i] for i in translatable])
+        batch, usage = translate_batch(engine, locale, [sources[i] for i in translatable])
         translations = dict(zip(translatable, batch))
 
     out: List[str] = []
@@ -56,4 +57,4 @@ def translate_svg(engine: Engine, locale: str, svg_text: str, offline: bool = Fa
         cursor = m.end()
     out.append(svg_text[cursor:])
 
-    return rehome_image_href("".join(out))
+    return rehome_image_href("".join(out)), usage

@@ -2,9 +2,11 @@
 
 One JSON object per line at translations/<asset>/<locale>/translation_log.jsonl:
 section name, start/finish timestamps, duration, outcome (success/failed),
-and — for a success — a validation verdict. Never rewritten, so it
-accumulates across every translate_section.py run for that locale, giving a
-real record of what happened and when.
+a validation verdict for a success, and real input/output token counts with
+an estimated USD cost (PRICING_PER_MTOK below — an unlisted model logs real
+token counts with no cost estimate rather than a silently wrong guess).
+Never rewritten, so it accumulates across every translate_section.py run for
+that locale, giving a real record of what happened, when, and at what cost.
 
 Complements status.json rather than replacing it: status.json is the
 current review state (draft/in_review/reviewed); this is the history of how
@@ -27,10 +29,29 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+from llm_client import Usage
 from text_quality import is_garbled
 
 MIN_LENGTH_RATIO = 0.3  # translated/source shorter than this suggests truncation
 MAX_LENGTH_RATIO = 3.0  # translated/source longer than this suggests runaway repetition
+
+# USD per million tokens, keyed by the same "provider:model" string recorded
+# as a section's `translator` (see status_schema.py). Update when pricing
+# changes or a new model is named in translation-config.yaml — an unlisted
+# model logs real token counts with no estimated_cost_usd rather than a
+# silently wrong guess.
+PRICING_PER_MTOK = {
+    "anthropic:claude-sonnet-5": (2.00, 10.00),   # (input, output)
+    "anthropic:claude-opus-5": (5.00, 25.00),
+}
+
+
+def estimate_cost_usd(translator: str, usage: Usage) -> Optional[float]:
+    rates = PRICING_PER_MTOK.get(translator)
+    if rates is None:
+        return None
+    input_rate, output_rate = rates
+    return round(usage.input_tokens / 1_000_000 * input_rate + usage.output_tokens / 1_000_000 * output_rate, 6)
 
 
 @dataclass
@@ -71,6 +92,8 @@ def append_entry(
     status: str,
     validation: Optional[ValidationResult] = None,
     error: Optional[str] = None,
+    usage: Optional[Usage] = None,
+    translator: Optional[str] = None,
 ) -> None:
     entry = {
         "section": section,
@@ -84,6 +107,11 @@ def append_entry(
         entry["validation_notes"] = validation.notes
     if error:
         entry["error"] = error
+    if usage is not None:
+        entry["input_tokens"] = usage.input_tokens
+        entry["output_tokens"] = usage.output_tokens
+        if translator:
+            entry["estimated_cost_usd"] = estimate_cost_usd(translator, usage)
 
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a") as f:

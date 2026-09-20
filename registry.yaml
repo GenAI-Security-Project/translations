@@ -13,4 +13,5 @@ assets:
     owners:
     - sclintonowasp
     locales:
+    - de-DE
     - fr-FR

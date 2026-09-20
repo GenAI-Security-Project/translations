@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import json
 import re
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
 from translation_config import Engine
 
@@ -28,13 +29,22 @@ BATCH_SYSTEM_PROMPT = (
     "array — no other text, no markdown code fence, no explanation."
 )
 
-
 MAX_EMPTY_RETRIES = 2  # total attempts = this + 1
 
 
-def _anthropic_call(engine: Engine, system: str, user_content: str) -> str:
+@dataclass
+class Usage:
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+    def __add__(self, other: "Usage") -> "Usage":
+        return Usage(self.input_tokens + other.input_tokens, self.output_tokens + other.output_tokens)
+
+
+def _anthropic_call(engine: Engine, system: str, user_content: str) -> Tuple[str, Usage]:
     """One call, returning joined text blocks (which may legitimately be
-    empty, e.g. a refusal) — callers decide whether to retry or raise."""
+    empty, e.g. a refusal) and real token usage — callers decide whether to
+    retry or raise on empty text."""
     import anthropic
 
     client = anthropic.Anthropic()
@@ -44,12 +54,16 @@ def _anthropic_call(engine: Engine, system: str, user_content: str) -> str:
         system=system,
         messages=[{"role": "user", "content": user_content}],
     )
-    return "".join(block.text for block in response.content if block.type == "text")
+    text = "".join(block.text for block in response.content if block.type == "text")
+    usage = Usage(input_tokens=response.usage.input_tokens, output_tokens=response.usage.output_tokens)
+    return text, usage
 
 
-def translate_text(engine: Engine, locale: str, source_text: str, context: str = "", offline: bool = False) -> str:
+def translate_text(
+    engine: Engine, locale: str, source_text: str, context: str = "", offline: bool = False
+) -> Tuple[str, Usage]:
     if offline:
-        return f"<!-- offline stub translation for {locale} -->\n\n{source_text}"
+        return f"<!-- offline stub translation for {locale} -->\n\n{source_text}", Usage()
 
     system = SYSTEM_PROMPT.format(locale=locale)
     if context:
@@ -65,10 +79,12 @@ def translate_text(engine: Engine, locale: str, source_text: str, context: str =
         # actually blank, which only surfaces on a human noticing the file
         # itself is empty in review — as happened here. Retry a couple of
         # times before giving up loudly.
+        usage_so_far = Usage()
         for attempt in range(MAX_EMPTY_RETRIES + 1):
-            result = _anthropic_call(engine, system, source_text)
+            result, usage = _anthropic_call(engine, system, source_text)
+            usage_so_far += usage
             if result.strip():
-                return result
+                return result, usage_so_far
         raise RuntimeError(
             f"translate_text: model returned empty content for {locale} after "
             f"{MAX_EMPTY_RETRIES + 1} attempts (source: {len(source_text)} chars) — "
@@ -95,7 +111,7 @@ def _parse_json_array(raw: str, expected_len: int) -> Optional[List[str]]:
     return None
 
 
-def translate_batch(engine: Engine, locale: str, texts: List[str]) -> List[str]:
+def translate_batch(engine: Engine, locale: str, texts: List[str]) -> Tuple[List[str], Usage]:
     """Translate many short strings (a figure's text labels) in one call
     instead of one call each — each API round-trip has a fixed latency cost
     regardless of how little text it carries, so a diagram with dozens of
@@ -103,18 +119,25 @@ def translate_batch(engine: Engine, locale: str, texts: List[str]) -> List[str]:
     words. Falls back to one-call-per-item only if the model's batch
     response doesn't parse cleanly, trading speed for correctness there."""
     if not texts:
-        return []
+        return [], Usage()
 
     system = BATCH_SYSTEM_PROMPT.format(locale=locale)
 
     if engine.provider == "anthropic":
-        raw = _anthropic_call(engine, system, json.dumps(texts, ensure_ascii=False))
+        raw, usage = _anthropic_call(engine, system, json.dumps(texts, ensure_ascii=False))
         translations = _parse_json_array(raw, expected_len=len(texts))
         if translations is not None:
-            return translations
+            return translations, usage
+
         # Empty/unparseable batch reply falls back to translate_text per
         # item, which has its own empty-response retry-and-raise built in.
-        return [translate_text(engine, locale, t) for t in texts]
+        results = []
+        total_usage = usage
+        for t in texts:
+            result, item_usage = translate_text(engine, locale, t)
+            results.append(result)
+            total_usage += item_usage
+        return results, total_usage
 
     raise SystemExit(
         f"llm_client.py has no implementation for provider '{engine.provider}' yet — "

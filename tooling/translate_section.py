@@ -17,10 +17,11 @@ For a given {asset, locale}:
   4. Write/update status.json with draft entries: source_commit and the
      provider:model string that actually produced the draft.
   5. Append one entry per section to translation_log.jsonl (start/finish
-     time, duration, and a validation verdict) regardless of outcome — a
-     section that fails to translate is logged and skipped, not fatal to
-     the rest of the run; status.json simply has no entry for it, so it's
-     retried automatically the next time this runs for that locale.
+     time, duration, a validation verdict, and real input/output token
+     counts with an estimated USD cost) regardless of outcome — a section
+     that fails to translate is logged and skipped, not fatal to the rest
+     of the run; status.json simply has no entry for it, so it's retried
+     automatically the next time this runs for that locale.
 
 The workflow (not this script) is responsible for opening the PR — this
 script only touches files, so it can be run and tested locally.
@@ -39,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import docx_split
 import pdf_split
 import translation_log
-from llm_client import translate_text
+from llm_client import Usage, translate_text
 from registry_schema import Registry, SplitBy, REGISTRY_PATH
 from status_schema import SectionEntry, SectionStatus, StatusFile, status_path
 from svg_localize import translate_svg
@@ -135,7 +136,7 @@ def main(argv: Optional[List[str]] = None) -> None:
             svg_path = source_dir / f"{section}.svg"
             if svg_path.exists():
                 source_text = svg_path.read_text()
-                translated_text = translate_svg(engine, args.locale, source_text, offline=args.offline)
+                translated_text, usage = translate_svg(engine, args.locale, source_text, offline=args.offline)
                 (locale_dir / f"{section}.svg").write_text(translated_text)
             else:
                 source_text = (source_dir / f"{section}.md").read_text()
@@ -146,10 +147,12 @@ def main(argv: Optional[List[str]] = None) -> None:
                     # section could still end up empty from hand-edited
                     # existing_files content). A real translation call
                     # rejects empty text outright; nothing useful to send it.
-                    translated_text = source_text
+                    translated_text, usage = source_text, Usage()
                 else:
                     context = sibling_context(locale_dir, exclude=section)
-                    translated_text = translate_text(engine, args.locale, source_text, context, offline=args.offline)
+                    translated_text, usage = translate_text(
+                        engine, args.locale, source_text, context, offline=args.offline
+                    )
                 (locale_dir / f"{section}.md").write_text(banner + translated_text)
         except Exception as exc:
             # One section failing (a persistently empty model response, a
@@ -167,7 +170,10 @@ def main(argv: Optional[List[str]] = None) -> None:
 
         finish = datetime.now(timezone.utc)
         validation = translation_log.validate_translation(source_text, translated_text)
-        translation_log.append_entry(log_file, section=section, start=start, finish=finish, status="success", validation=validation)
+        translation_log.append_entry(
+            log_file, section=section, start=start, finish=finish, status="success",
+            validation=validation, usage=usage, translator=engine.label,
+        )
         if not validation.valid:
             flagged_now.append(section)
             print(f"VALIDATION WARNING for {section}: {'; '.join(validation.notes)}")
