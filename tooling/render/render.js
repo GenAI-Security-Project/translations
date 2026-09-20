@@ -188,6 +188,22 @@ function buildWatermarkCss(cfg, fonts) {
 }
 
 const PAGE_HEIGHT_MM = { A4: 297, Letter: 279.4 };
+const PAGE_WIDTH_MM = { A4: 210, Letter: 215.9 };
+
+// The real OWASP cover-band.png (used as-is, unmodified) is a single tall
+// asset: a navy gradient band with the OWASP dragonfly/circle motif across
+// its top ~19%, then plain white for the rest (that white bulk is Word's
+// own background for the page, since Word overlays this image behind body
+// text and doesn't need it to be a self-contained banner). Measured on the
+// real 2551x2771 asset: the navy-to-white transition sits at row 522
+// (522/2771 = 0.1884 of the image's own height). Displayed at the page's
+// full content width, that band renders at (0.1884 * naturalAspectRatio)
+// of the content width; naturalAspectRatio (2771/2551 = 1.086) folds in to
+// give ~0.205 of the content width. This crops (via CSS object-fit, not by
+// touching the file) to just that band, leaving the dragonfly intact and
+// the rest of the cover filled by cfg.cover.background_color instead of
+// the image's own baked-in white.
+const COVER_TOP_BAND_RATIO = 0.205;
 
 function renderCoverHtml(cfg, meta) {
   const logoImg = cfg.cover.logo_path
@@ -232,7 +248,10 @@ function renderCoverHtml(cfg, meta) {
       const heightMm = pageHeightMm * 0.82;
       bgLayer = `<img class="cover-bg cover-bg-full" style="height: ${heightMm}mm;" src="file://${meta.coverBgAbsPath}" alt="">`;
     } else {
-      bgLayer = `<img class="cover-bg cover-bg-top" src="file://${meta.coverBgAbsPath}" alt="">`;
+      const contentWidthMm = (PAGE_WIDTH_MM[cfg.page.size] || PAGE_WIDTH_MM.A4)
+        - cfg.page.margins.left_mm - cfg.page.margins.right_mm;
+      const bandHeightMm = contentWidthMm * COVER_TOP_BAND_RATIO;
+      bgLayer = `<img class="cover-bg cover-bg-top" style="height: ${bandHeightMm}mm;" src="file://${meta.coverBgAbsPath}" alt="">`;
     }
   }
   const contentStyle = "justify-content: center;";
@@ -403,7 +422,11 @@ body {
 .page { page-break-after: always; padding: 20mm; }
 .cover { height: 100%; text-align: center; padding: 0; }
 .cover-bg { position: absolute; left: 0; top: 0; z-index: 0; }
-.cover-bg-top { width: 100%; height: auto; }
+/* object-fit:cover + object-position:top crops the tall source image
+   (used as-is, unmodified -- see COVER_TOP_BAND_RATIO above) down to just
+   its top navy band, dragonfly included, instead of showing the plain
+   white lower ~80% of the asset. */
+.cover-bg-top { width: 100%; object-fit: cover; object-position: top; }
 /* Matches the real OWASP template's own placement exactly: the source
    docx anchors this image at a fixed 8.486in x 9.222in box (a:stretch +
    fillRect = the whole image non-uniformly stretched to fill that exact
