@@ -51,12 +51,52 @@ Writer discipline — each state transition has exactly one writer:
 
 No human ever hand-edits `status.json`.
 
+## translation_log.jsonl (per `<asset>/<locale>/`)
+
+An append-only audit log — one JSON object per line, one line per section-
+translation *attempt* — sitting next to `status.json` rather than replacing
+it: `status.json` is the current review state, this is the history of how
+each draft was produced. Written by `translation_log.py`, called from
+`translate_section.py`'s per-section loop:
+
+```json
+{"section": "ASI01_Agent_Goal_Hijack", "start": "2026-09-19T19:04:24+00:00", "finish": "2026-09-19T19:05:09+00:00", "duration_seconds": 45.2, "status": "success", "valid": true, "validation_notes": []}
+```
+
+- **`status`** is `"success"` or `"failed"` — a section that fails to
+  translate (a persistently empty model response, a network error, ...) no
+  longer crashes the whole run and leaves every later section untried; it's
+  logged with an `error` field and skipped. Since it never gets a
+  `status.json` entry, the next `translate_section.py` run for that locale
+  retries it automatically.
+- **`valid`**/**`validation_notes`** come from `validate_translation()`'s
+  coarse sanity check — empty output, output that still looks garbled after
+  `text_quality.is_garbled()`, or a translated/source length ratio outside
+  0.3×–3× (catching truncation or runaway repetition). This is a heuristic,
+  not a correctness guarantee: it exists to catch the *shape* of a broken
+  translation, like the one that shipped completely blank until a human
+  caught it in review (see PR history) — it does not replace human review,
+  and a section can pass validation here and still need real editorial
+  correction. A flagged section still gets drafted and reviewed normally;
+  `translate_section.py` just prints a warning so it's not missed.
+- **`start`/`finish`/`duration_seconds`** are the real timing data behind
+  any "how long will a document this size take" estimate — sum
+  `duration_seconds` across a run's entries (filter by `status: "success"`,
+  prose vs. figure sections) rather than guessing from word count alone;
+  a real 78-label, 5-figure run spent ~18% of its total time on figures
+  that carried under 2% of the document's words, almost entirely per-call
+  latency on tiny requests — a pattern this log makes visible without
+  having to reconstruct it from file timestamps by hand.
+
+Never rewritten — accumulates across every run for that locale, so it
+survives re-runs, added locales, and retried failures.
+
 ## Components in this repo (Process 1)
 
 | File | Component | Does |
 |---|---|---|
 | `bootstrap_asset.py`, `asset_naming.py` + `.github/workflows/bootstrap-asset.yml` | 1 | Validates a new asset/version, opens a PR with the `registry.yaml` entry + scaffolded folder tree. Never touches an already-registered locale. |
-| `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `image_svg.py`, `svg_localize.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections and figures once per release, machine-translates every section/figure a locale doesn't already have a status for, opens a draft PR. |
+| `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `image_svg.py`, `svg_localize.py`, `text_quality.py`, `translation_log.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections and figures once per release, machine-translates every section/figure a locale doesn't already have a status for, logs each attempt, opens a draft PR. |
 | `review_transition.py` + `.github/workflows/review-transitions.yml` | Process 1B | The only place `status.json`'s human-review states change, triggered by PR "ready for review" and PR merge. |
 
 ## Figures (images with embedded text)

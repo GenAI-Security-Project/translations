@@ -42,6 +42,8 @@ tooling/
   image_svg.py                 # Tier 1: OCR + blank + SVG text overlay for images with embedded text
   svg_localize.py               # translates a figure's SVG <text> nodes per locale
   llm_client.py               # provider-agnostic translation call
+  text_quality.py              # detects garbled extraction artifacts before they reach translation
+  translation_log.py            # per-section start/finish/validation audit log (translation_log.jsonl)
   translate_section.py        # component 2 — drafts sections for one locale
   status_schema.py            # status.json schema + read/write helpers
   review_transition.py        # Process 1B — the only writer of in_review/reviewed

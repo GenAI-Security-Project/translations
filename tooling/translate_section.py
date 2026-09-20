@@ -16,6 +16,11 @@ For a given {asset, locale}:
      copying it per locale) with a `<!-- status: draft -->` banner for .md.
   4. Write/update status.json with draft entries: source_commit and the
      provider:model string that actually produced the draft.
+  5. Append one entry per section to translation_log.jsonl (start/finish
+     time, duration, and a validation verdict) regardless of outcome — a
+     section that fails to translate is logged and skipped, not fatal to
+     the rest of the run; status.json simply has no entry for it, so it's
+     retried automatically the next time this runs for that locale.
 
 The workflow (not this script) is responsible for opening the PR — this
 script only touches files, so it can be run and tested locally.
@@ -25,6 +30,7 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -32,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import docx_split
 import pdf_split
+import translation_log
 from llm_client import translate_text
 from registry_schema import Registry, SplitBy, REGISTRY_PATH
 from status_schema import SectionEntry, SectionStatus, StatusFile, status_path
@@ -116,30 +123,54 @@ def main(argv: Optional[List[str]] = None) -> None:
     status = StatusFile.load_or_new(status_file_path, args.asset, args.locale)
 
     source_commit = git_short_sha(TRANSLATIONS_ROOT)
-    translated_now = []
+    log_file = translation_log.log_path(TRANSLATIONS_ROOT, args.asset, args.locale)
+    translated_now, failed_now, flagged_now = [], [], []
 
     for section in sections:
         if section in status.sections:
             continue  # already drafted/in review/reviewed — never clobber human work
 
-        svg_path = source_dir / f"{section}.svg"
-        if svg_path.exists():
-            translation = translate_svg(engine, args.locale, svg_path.read_text(), offline=args.offline)
-            (locale_dir / f"{section}.svg").write_text(translation)
-        else:
-            source_text = (source_dir / f"{section}.md").read_text()
-            banner = "<!-- status: draft -->\n"
-            if not source_text.strip():
-                # Nothing to translate (see docx_split.py/pdf_split.py — this
-                # shouldn't happen for a freshly-split source, but a section
-                # could still end up empty from hand-edited existing_files
-                # content). A real translation call rejects empty text
-                # outright; there's nothing useful to send it regardless.
-                (locale_dir / f"{section}.md").write_text(banner + source_text)
+        start = datetime.now(timezone.utc)
+        try:
+            svg_path = source_dir / f"{section}.svg"
+            if svg_path.exists():
+                source_text = svg_path.read_text()
+                translated_text = translate_svg(engine, args.locale, source_text, offline=args.offline)
+                (locale_dir / f"{section}.svg").write_text(translated_text)
             else:
-                context = sibling_context(locale_dir, exclude=section)
-                translation = translate_text(engine, args.locale, source_text, context, offline=args.offline)
-                (locale_dir / f"{section}.md").write_text(banner + translation)
+                source_text = (source_dir / f"{section}.md").read_text()
+                banner = "<!-- status: draft -->\n"
+                if not source_text.strip():
+                    # Nothing to translate (see docx_split.py/pdf_split.py —
+                    # this shouldn't happen for a freshly-split source, but a
+                    # section could still end up empty from hand-edited
+                    # existing_files content). A real translation call
+                    # rejects empty text outright; nothing useful to send it.
+                    translated_text = source_text
+                else:
+                    context = sibling_context(locale_dir, exclude=section)
+                    translated_text = translate_text(engine, args.locale, source_text, context, offline=args.offline)
+                (locale_dir / f"{section}.md").write_text(banner + translated_text)
+        except Exception as exc:
+            # One section failing (a persistently empty model response, a
+            # network error, ...) used to crash the whole run, leaving every
+            # later section — alphabetically, regardless of whether it had
+            # anything to do with the failure — untried until a human
+            # re-ran it. Log the failure and move on instead; status.json
+            # never gets an entry for a failed section, so it's picked up
+            # automatically the next time this runs.
+            finish = datetime.now(timezone.utc)
+            translation_log.append_entry(log_file, section=section, start=start, finish=finish, status="failed", error=str(exc))
+            failed_now.append(section)
+            print(f"FAILED to draft {section}: {exc}")
+            continue
+
+        finish = datetime.now(timezone.utc)
+        validation = translation_log.validate_translation(source_text, translated_text)
+        translation_log.append_entry(log_file, section=section, start=start, finish=finish, status="success", validation=validation)
+        if not validation.valid:
+            flagged_now.append(section)
+            print(f"VALIDATION WARNING for {section}: {'; '.join(validation.notes)}")
 
         status.sections[section] = SectionEntry(
             status=SectionStatus.draft,
@@ -154,6 +185,10 @@ def main(argv: Optional[List[str]] = None) -> None:
         print(f"drafted {len(translated_now)} section(s) for {args.asset}/{args.locale}: {translated_now}")
     else:
         print(f"nothing to draft for {args.asset}/{args.locale} — every section already has a status")
+    if flagged_now:
+        print(f"{len(flagged_now)} section(s) flagged by validation, review before approving: {flagged_now}")
+    if failed_now:
+        raise SystemExit(f"{len(failed_now)} section(s) failed to draft: {failed_now} — see {log_file}")
 
 
 if __name__ == "__main__":
