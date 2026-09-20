@@ -1,28 +1,39 @@
+/* Palette/type pulled from genai.owasp.org's own Elementor global tokens
+   (--e-global-color-primary/accent/secondary/text, --e-global-typography-*):
+   primary #0798FF, accent (navy) #233B4F, secondary #EEEEEE, text #313131,
+   heading font Poppins, body font Barlow -- same fonts already used for the
+   PDF templates (see translations-templates/*-template/default/
+   render_config.json), so the web site and the documents it produces now
+   share one visual identity. */
 :root {
   --bg: #ffffff;
-  --fg: #1a1a2e;
-  --muted: #5a5a6e;
-  --border: #d8d8e0;
-  --accent: #2b4c9b;
+  --fg: #313131;
+  --muted: #6b7684;
+  --border: #dbe4ec;
+  --accent: #0798ff;
   --accent-fg: #ffffff;
+  --navy: #233b4f;
   --ok: #1b7a3d;
   --error: #b3261e;
   --warn: #8a5a00;
-  --field-bg: #f7f7fb;
+  --field-bg: #f5f8ff;
+  --font-heading: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #14141c;
-    --fg: #eaeaf2;
-    --muted: #a0a0b4;
-    --border: #33334a;
-    --accent: #6f8fd6;
+    --bg: #12202c;
+    --fg: #eaeef2;
+    --muted: #9fb0bd;
+    --border: #2c4152;
+    --accent: #4fb8ff;
     --accent-fg: #0c1220;
+    --navy: #9fb0bd;
     --ok: #4fbf78;
     --error: #ef6a63;
     --warn: #d9a441;
-    --field-bg: #1c1c28;
+    --field-bg: #1a2c3a;
   }
 }
 
@@ -31,10 +42,12 @@
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   margin: 0;
   padding: 0 16px 64px;
 }
+
+h1, h2, h3, .brand-lockup { font-family: var(--font-heading); }
 
 .page {
   max-width: 720px;
@@ -42,14 +55,29 @@ body {
 }
 
 header.site-header {
-  padding: 24px 0 8px;
+  padding: 24px 0 12px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 24px;
 }
 
-header.site-header h1 {
+/* Text-only brand lockup matching genai.owasp.org's own wordmark treatment
+   (bold "GenAI" in the primary blue, "Security Project" in the navy) --
+   deliberately not the project's dragonfly icon. */
+.brand-lockup {
+  margin: 0 0 2px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.brand-lockup .brand-genai { color: var(--accent); }
+.brand-lockup .brand-rest { color: var(--navy); }
+.brand-tagline {
   margin: 0 0 4px;
-  font-size: 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-transform: uppercase;
 }
 
 header.site-header nav a {
@@ -57,6 +85,7 @@ header.site-header nav a {
   text-decoration: none;
   margin-right: 16px;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 h2 { font-size: 1.1rem; margin-top: 32px; }
