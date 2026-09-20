@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1696" height="1846" viewBox="0 0 1696 1846">
+  <!-- OCR-extracted text overlay. Verify each line against the original image (see the sibling _original file) before trusting this as a translation source. -->
+  <image href="../_source/images/OWASP_Top_10_For_Agentic_Applications_2026_Figure_3.png" xlink:href="../_source/images/OWASP_Top_10_For_Agentic_Applications_2026_Figure_3.png" width="1696" height="1846"/>
+  <text id="t0" x="462" y="681" font-size="56" fill="rgb(0,0,0)" data-ocr-confidence="95">Table des matières</text>
+  <text id="t1" x="461" y="886" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="95">Lettre des dirigeants du Top 10 Agentic</text>
+  <text id="t2" x="459" y="961" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="95"># Agentic Top 10 En Un Coup D'Œil</text>
+  <text id="t3" x="459" y="1035" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="87"># ASIO1 : Détournement d'objectif de l'agent</text>
+  <text id="t4" x="501" y="1104" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Veuillez fournir le texte à traduire. Je remarque que vous avez mentionné une section sur la sécurité pour l'OWASP GenAI Security Project, mais aucun contenu n'a été inclus dans votre message (seul le mot « Description » apparaît).
+
+Merci de coller le texte source en anglais que vous souhaitez faire traduire en français, et je le traiterai en respectant :
+- La structure Markdown (titres, listes, extraits de code, liens)
+- Les identifiants tels que « LLM01 » qui resteront non traduits
+- La terminologie déjà établie dans le glossaire ou les sections précédentes, le cas échéant</text>
+  <text id="t5" x="500" y="1172" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="95">**Exemples courants de la vulnérabilité**</text>
+  <text id="t6" x="501" y="1240" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">**Exemples de scénarios d'attaque**</text>
+  <text id="t7" x="501" y="1307" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Directives de prévention et d'atténuation</text>
+  <text id="t8" x="501" y="1369" font-size="20" fill="rgb(0,0,0)" data-ocr-confidence="96">Références</text>
+  <text id="t9" x="459" y="1449" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="92"># ASI02 : Utilisation abusive et exploitation d'outils</text>
+  <text id="t10" x="501" y="1517" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Description</text>
+  <text id="t11" x="500" y="1585" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="95"># Exemples courants de la vulnérabilité</text>
+  <text id="t12" x="501" y="1653" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Exemples de scénarios d'attaque</text>
+  <text id="t13" x="501" y="1721" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">**Directives de prévention et d'atténuation**</text>
+  <text id="t14" x="501" y="1783" font-size="20" fill="rgb(0,0,0)" data-ocr-confidence="96">## Références</text>
+  <text id="t15" x="787" y="1844" font-size="12" fill="rgb(0,0,0)" data-ocr-confidence="69">Le terme "Deis" ne correspond pas à un contenu ou contexte reconnaissable en anglais nécessitant une traduction vers le français.
+
+Pourriez-vous fournir davantage de contexte ou vérifier s'il s'agit bien du terme exact à traduire ? Il est possible que :
+
+- Il s'agisse d'un acronyme ou d'un identifiant technique (comme "LLM01") qui doit rester non traduit
+- Il manque du texte ou une partie du document
+- Il y ait une erreur de frappe dans le terme fourni
+
+N'hésitez pas à renvoyer la section complète du document que vous souhaitez faire traduire, afin que je puisse vous fournir une traduction fidèle et complète en respectant la structure Markdown et la terminologie du glossaire.</text>
+</svg>

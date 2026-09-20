@@ -1,11 +1,16 @@
 # registry.yaml
 #
-# Single source of truth for every asset this pipeline translates. Every
-# workflow (translate-draft.yml, publish.yml, check-freshness.yml) reads this
-# file to know what exists and how to handle it.
-#
-# Starts empty. Nobody hand-writes an entry or pre-creates a directory: each
-# asset's entry below is created automatically by tooling/bootstrap_asset.py
-# the first time that asset name + version is uploaded through the onboarding
-# form (see tooling/README.md for the schema and a worked example).
-assets: {}
+# Single source of truth for every asset this pipeline translates.
+# Entries are created and edited only by tooling/bootstrap_asset.py —
+# never by hand. See tooling/README.md for the field schema.
+assets:
+  agentic-top-10:
+    version: 2026.12.6
+    source_repo: GenAI-Security-Project/Agentic-Top-10
+    source_path: _source/
+    split_by: pdf_heading
+    template: blue-template
+    owners:
+    - sclintonowasp
+    locales:
+    - fr-FR
