@@ -67,6 +67,4 @@ l'œuvre originale a été diffusée.
 
 Lien vers le texte complet de la licence : https://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-Page 1
-
 genai.owasp.org

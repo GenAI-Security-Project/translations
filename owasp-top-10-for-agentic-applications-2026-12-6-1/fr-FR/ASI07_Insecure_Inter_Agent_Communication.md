@@ -67,8 +67,6 @@ usurpent des descripteurs d'agents, faisant apparaître des commandes malveillan
 
 échanges valides.
 
-Page 27
-
 genai.owasp.org
 
 5. Attaques de routage de messages sur la découverte et la coordination : un trafic de découverte
@@ -147,8 +145,6 @@ session et des horodatages liés aux fenêtres de tâches. Maintenir des emprein
 
 hachages d'état à court terme pour détecter les rejeux inter-contextes.
 
-Page 28
-
 genai.owasp.org
 
 4. Sécurité des protocoles et des capacités : désactiver les modes de communication faibles ou
@@ -216,7 +212,5 @@ communication contrôlés plutôt que sur une tentative d'alignement sémantique
 Learning - NDSS
 
 3. Resilient Consensus Control for Multi-Agent Systems - MDPI / PMC
-
-Page 29
 
 genai.owasp.org

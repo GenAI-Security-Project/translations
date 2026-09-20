@@ -56,8 +56,6 @@ exploiting flawed metrics to generate misleading results or adopt aggressive str
 
 with the original goals.
 
-Page 36
-
 genai.owasp.org
 
 ## Example Attack Scenarios
@@ -134,8 +132,6 @@ tools, and per-run ephemeral credentials with one-time audience binding. All sig
 
 mechanisms assume hardened cryptographic key management (e.g., HSM/KMS-backed keys, least-
 
-Page 37
-
 genai.owasp.org
 
 privilege access, rotation and revocation). Keys must never be directly available to agents; instead,
@@ -163,7 +159,5 @@ Rogue Agents Agent
 2. Preventing Improves Multi- Collaboration (arXiv) [URL:
 
 https://arxiv.org/abs/2502.05986]
-
-Page 38
 
 genai.owasp.org

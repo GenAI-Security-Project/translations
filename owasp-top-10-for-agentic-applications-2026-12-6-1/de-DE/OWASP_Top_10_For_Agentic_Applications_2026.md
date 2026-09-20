@@ -53,6 +53,4 @@ Ihre Beiträge unter derselben Lizenz wie das Original verbreiten.
 
 Link zum vollständigen Lizenztext: https://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-Page 1
-
 genai.owasp.org

@@ -29,8 +29,6 @@ Références 14
 
 Description 15
 
-Page 2
-
 genai.owasp.org
 
 Exemples courants de la vulnérabilité 15
@@ -81,8 +79,6 @@ Références 26
 
 Description 27
 
-Page 3
-
 genai.owasp.org
 
 Exemples courants de la vulnérabilité 27
@@ -131,8 +127,6 @@ Références 38
 
 ## Annexe A - Matrice de correspondance de sécurité OWASP Agentic AI 39 Annexe B - Relation avec OWASP CycloneDX et AIBOM 41
 
-Page 4
-
 genai.owasp.org
 
 ## Annexe C - Correspondance entre le OWASP Non-Human Identities Top 10 (2025) et le OWASP Agentic AI Top 10 42 Annexe D - Suivi des exploits et incidents ASI Agentique 44
@@ -140,7 +134,5 @@ genai.owasp.org
 Tableau des exploits et incidents 44
 
 ## Annexe E – Abréviations 50 Remerciements 52 Sponsors du OWASP GenAI Security Project 55 Soutiens du projet 56
-
-Page 5
 
 genai.owasp.org

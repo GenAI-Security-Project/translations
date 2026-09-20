@@ -63,8 +63,6 @@ OWASP Top 10, la norme CycloneDX, le Top 10 for Non-Human Identities (NHI), et l
 
 Scoring System (AIVSS) pour la notation et la priorisation.
 
-Page 6
-
 genai.owasp.org
 
 Les agents amplifient les vulnérabilités existantes. Nous développons les concepts de moindre privilège et
@@ -112,7 +110,5 @@ John Sotiropoulos, membre du conseil du OWASP GenAI Security Project & co-respon
 Keren Katz, responsable de l'Agentic Top 10, OWASP GenAI Security Project - équipe centrale ASI
 
 Ron F. Del Rosario, membre de l'équipe centrale du OWASP GenAI Security Project & co-responsable ASI
-
-Page 7
 
 genai.owasp.org

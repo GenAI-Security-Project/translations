@@ -17,8 +17,6 @@ Dieser Eintrag ordnet sich T17 Supply Chain Compromise in Agentic Threats and Mi
 
 3. Impersonation und Typosquatting: Wenn ein Agent dynamisch externe Tools oder Dienste entdeckt oder sich mit ihnen verbindet, kann er auf zwei Arten getäuscht werden: durch einen typosquatteten Endpunkt (einen ähnlich aussehenden Namen, der gewählt wurde, um die Auflösung zu täuschen) oder durch einen Symbol-Angriff, bei dem ein bösartiger Dienst absichtlich
 
-Page 18
-
 genai.owasp.org
 
 ein legitimes Tool oder einen legitimen Agenten imitiert, dessen Identität, API und Verhalten nachahmt, um Vertrauen zu gewinnen und bösartige Aktionen auszuführen.
@@ -42,8 +40,6 @@ ein legitimes Tool oder einen legitimen Agenten imitiert, dessen Identität, API
 5. Ein kompromittiertes NPM-Paket (z. B. eine vergiftete nx/debug-Release) wurde automatisch von Coding-Agenten installiert und ermöglichte eine versteckte Backdoor, die SSH-Schlüssel und API-Token exfiltrierte und dadurch eine Supply-Chain-Kompromittierung über agentische Workflows hinweg verbreitete.
 
 6. Agent-in-the-Middle über Agent Cards: Ein kompromittierter oder betrügerischer Peer bewirbt übertriebene Fähigkeiten in seiner Agent Card (z. B. /.well-known/agent.json); dies veranlasst Host-Agenten, ihn für Aufgaben auszuwählen, wodurch sensible Anfragen und Daten über den angreiferkontrollierten Agenten geleitet werden, der daraufhin Antworten exfiltriert oder verfälscht
-
-Page 19
 
 genai.owasp.org
 
@@ -86,7 +82,5 @@ abusing-agent-cards-in-the-agent-2-agent-protocol-to-win-all-the-tasks/
 5. How an AI Agent Vulnerability in LangSmith Could Lead to Stolen API Keys and Hijacked LLM
 
 Responses - Noma Security
-
-Page 20
 
 genai.owasp.org

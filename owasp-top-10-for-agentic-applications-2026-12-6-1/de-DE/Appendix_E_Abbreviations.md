@@ -77,8 +77,6 @@ AIVSS-Felder)
 
 DDOS / DDoS - Distributed Denial of Service
 
-Page 50
-
 genai.owasp.org
 
 NHI - Non-Human Identity SBOM - Software Bill of Materials
@@ -110,7 +108,5 @@ PKI - Public Key Infrastructure Beispielen)
 RAG - Retrieval-Augmented Generation WASM - WebAssembly (erwähnt unter RCE)
 
 RCE - Remote Code Execution
-
-Page 51
 
 genai.owasp.org

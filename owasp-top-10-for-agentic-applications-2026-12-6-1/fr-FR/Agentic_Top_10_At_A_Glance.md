@@ -65,6 +65,4 @@ d'outils d'approvisionnement contexte
 
 agentique
 
-Page 8
-
 genai.owasp.org

@@ -24,8 +24,6 @@ entraîne une
 surface d'attaque
 persistante.
 
-Page 42
-
 genai.owasp.org
 
 NHI2: Fuite de Exposition de clés ASI02 – T6 Manipulation Utilisation de la
@@ -43,8 +41,6 @@ et exploitées. d'approvisionnement Agents renégats & les dépendances
 · ASI03 – Abus de l'agent
 d'identité et de
 privilèges
-
-Page 42
 
 genai.owasp.org
 
@@ -104,7 +100,5 @@ responsabilité et l'agent
 une utilisation
 abusive des
 privilèges.
-
-Page 43
 
 genai.owasp.org

@@ -52,8 +52,6 @@ agents into weaker communication modes or spoof agent descriptors, making malici
 
 appear as valid exchanges.
 
-Page 27
-
 genai.owasp.org
 
 5. Message-routing attacks on discovery and coordination: Misdirected discovery traffic forges
@@ -120,8 +118,6 @@ tied to task windows. Maintain short-term message fingerprints or state hashes t
 
 context replays.
 
-Page 28
-
 genai.owasp.org
 
 4. Protocol and capability security: Disable weak or legacy communication modes. Require agent-
@@ -179,7 +175,5 @@ and controlled communication patterns rather than attempting full semantic align
 Learning - NDSS
 
 3. Resilient Consensus Control for Multi-Agent Systems - MDPI / PMC
-
-Page 29
 
 genai.owasp.org

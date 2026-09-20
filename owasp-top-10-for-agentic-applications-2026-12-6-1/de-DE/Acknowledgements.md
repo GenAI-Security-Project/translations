@@ -31,8 +31,6 @@ ASI09 – Human-Agent Trust Exploitation Adam Morris
 
 ASI10 – Rogue Agents Tomer Elias, Mo Sadek, Priyadharhshini Parthasarathy
 
-Page 52
-
 genai.owasp.org
 
 ## Weitere Mitwirkende
@@ -72,8 +70,6 @@ Trent Holmes, Trend Micro Peter Boucher, abbView
 Emile Delcourt, Panorama Education Neeraj Nagpal
 
 Allie Howe, Growth Cyber
-
-Page 53
 
 genai.owasp.org
 
@@ -124,7 +120,5 @@ Cloud Security Alliance (CSA) – Ken Huang, Jim Reavis, John Yeon
 JPMorgan - Edward Lee
 
 Kainos - Kyle Davidson, Tom Fowler, Daragh McConvile, Greg Wright
-
-Page 54
 
 genai.owasp.org

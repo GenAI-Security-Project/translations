@@ -60,8 +60,6 @@ account.
 
 that impacts business decisions.
 
-Page 9
-
 genai.owasp.org
 
 ## Example Attack Scenarios
@@ -138,8 +136,6 @@ behavioral baseline that includes goal state, tool-use patterns, and invariant p
 
 schema, access patterns). Track a stable identifier for the active goal where feasible, and alert on
 
-Page 10
-
 genai.owasp.org
 
 any deviations-such as unexpected goal changes, anomalous tool sequences, or shifts from the
@@ -165,7 +161,5 @@ vulnerability
 3. ChatGPT Plugin Exploit Explained: From Prompt Injection to Accessing Private Data.
 
 4. AgentFlayer: 0click inception attack on ChatGPT users.
-
-Page 11
 
 genai.owasp.org

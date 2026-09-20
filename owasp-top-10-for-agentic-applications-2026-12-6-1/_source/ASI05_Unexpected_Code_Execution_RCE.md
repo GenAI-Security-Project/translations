@@ -50,8 +50,6 @@ untrusted content.
 
 hostile code executes during installation or import.
 
-Page 21
-
 genai.owasp.org
 
 ## Example Attack Scenarios
@@ -130,8 +128,6 @@ unit tests and detection of unsafe memory evaluators.
 
 limits including network access; lint and block known-vulnerable packages and use framework
 
-Page 22
-
 genai.owasp.org
 
 sandboxes like . Where possible, restrict filesystem access to a dedicated
@@ -161,7 +157,5 @@ for prompt-injection patterns; log and audit all generation and runs.
 2. GitHub Copilot: Remote Code Execution via Prompt Injection
 
 3. RCE + container escape (Positive Security / Auto-GPT) https://positive.security/blog/auto-gpt-rce
-
-Page 23
 
 genai.owasp.org

@@ -63,8 +63,6 @@ mettent en cache des identifiants, des clés ou des données récupérées pour 
 
 réutilisation. Si la mémoire n'est pas segmentée ou effacée entre les tâches ou les utilisateurs, les
 
-Page 15
-
 genai.owasp.org
 
 attaquants peuvent inciter l'agent à réutiliser des secrets mis en cache, à escalader les privilèges ou
@@ -146,8 +144,6 @@ présumée.
 créateur. Il permet ensuite à d'autres utilisateurs de tirer parti implicitement de cette identité en
 
 invoquant ses outils sous cette identité.
-
-Page 16
 
 genai.owasp.org
 
@@ -236,7 +232,5 @@ des jetons en dehors de leur intention initiale et signée.
 4. 15 Ways to Break Your Copilot, BHUSA 2024
 
 5. NVD - cve-2025-31491
-
-Page 17
 
 genai.owasp.org

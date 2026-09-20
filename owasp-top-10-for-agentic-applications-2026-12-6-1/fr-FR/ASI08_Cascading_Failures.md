@@ -13,8 +13,6 @@ Les symptômes observables incluent une propagation rapide où une décision dé
 
 Les défaillances en cascade s'amplifient à travers les agents interconnectés, enchaînant les risques du OWASP LLM Top 10. LLM01:2025 (Injection de prompt) et LLM06:2025 (Agence excessive) peuvent déclencher des exécutions autonomes d'outils qui propagent des erreurs sans contrôles humains, tandis que LLM04:2025 (Empoisonnement des données et du modèle) dans la mémoire persistante peut fausser les décisions à travers les sessions et les flux de travail. Agentic AI - Threats and Mitigations 1.1 traite de cette menace dans T5 – Cascading Hallucination Attacks, tandis que T8 – Repudiation and Untraceability met en évidence une défense fondamentale : la capacité de tracer, d'attribuer et d'auditer les comportements en cascade grâce à des mécanismes de journalisation résiliente et de non-répudiation qui empêchent la propagation silencieuse. Cependant, ces menaces cumulatives illustrent un écart potentiel entre la vitesse et l'échelle de la propagation des fautes dans un système multi-agents et la capacité des humains à suivre le rythme pour garantir un fonctionnement sûr et efficace du système. Cela laisse certains risques non atténués que l'entreprise doit évaluer soigneusement pour s'assurer qu'ils restent dans le budget de risque global de l'organisation.
 
-Page 30
-
 genai.owasp.org
 
 ## Exemples courants de la vulnérabilité
@@ -49,8 +47,6 @@ genai.owasp.org
 
 7. Une panne DNS régionale du cloud chez un hyperscaler peut simultanément casser plusieurs services d'IA qui en dépendent, provoquant une cascade de défaillances d'agents à travers de nombreuses organisations.
 
-Page 31
-
 genai.owasp.org
 
 8. Systèmes de cyberdéfense agentiques et pare-feu : La propagation d'une hallucination concernant une attaque imminente ou d'une fausse alerte injectée se propage dans les systèmes multi-agents sous-jacents, provoquant des actions défensives inutiles mais catastrophiques, telles que des arrêts, des refus et des déconnexions réseau.
@@ -84,7 +80,5 @@ genai.owasp.org
 2.
 
 https://cwe.mitre.org/data/definitions/400.html
-
-Page 32
 
 genai.owasp.org

@@ -21,8 +21,6 @@ Abtrünnige Agenten stellen ein eigenständiges Risiko der Verhaltensabweichung 
 
 4. Reward Hacking und Optimierungsmissbrauch: Agenten manipulieren ihre zugewiesenen Belohnungssysteme, indem sie fehlerhafte Metriken ausnutzen, um irreführende Ergebnisse zu erzeugen oder aggressive Strategien zu verfolgen, die nicht mit den ursprünglichen Zielen übereinstimmen.
 
-Page 36
-
 genai.owasp.org
 
 ## Beispielhafte Angriffsszenarien
@@ -58,7 +56,5 @@ https://arxiv.org/abs/2503.12188]
 
 2. Preventing Rogue Agents Improves Multi-Agent Collaboration (arXiv) [URL:
 https://arxiv.org/abs/2502.05986]
-
-Page 38
 
 genai.owasp.org

@@ -52,8 +52,6 @@ chats, influencing later sessions. Effects include misinformation, unsafe code e
 
 incorrect tool actions.
 
-Page 24
-
 genai.owasp.org
 
 3. Context-window manipulation: An attacker injects crafted content into an ongoing conversation or
@@ -124,8 +122,6 @@ per task; minimize retention by data sensitivity.
 
 frequencies.
 
-Page 25
-
 genai.owasp.org
 
 6. Prevent automatic re-ingestion of an agent’s own generated outputs into trusted memory to
@@ -183,7 +179,5 @@ https://arxiv.org/abs/2504.07952v1
 10. The Trifecta: How Three New Gemini Vulnerabilities in Cloud Assist, Search Model, and Browsing
 
 Allowed Private Data Exfiltration
-
-Page 26
 
 genai.owasp.org

@@ -54,8 +54,6 @@ tools or services, it can be deceived in two ways by a typo squatted endpoint (a
 
 chosen to trick resolution) or by a symbol attack, where a malicious service deliberately
 
-Page 18
-
 genai.owasp.org
 
 impersonates a legitimate tool or agent, mimicking its identity, API, and behavior to gain trust and
@@ -122,8 +120,6 @@ causing sensitive requests and data to be routed through the attacker-controlled
 
 exfiltrates or corrupts responses
 
-Page 19
-
 genai.owasp.org
 
 ## Prevention and Mitigation Guidelines
@@ -187,7 +183,5 @@ abusing-agent-cards-in-the-agent-2-agent-protocol-to-win-all-the-tasks/
 5. How an AI Agent Vulnerability in LangSmith Could Lead to Stolen API Keys and Hijacked LLM
 
 Responses - Noma Security
-
-Page 20
 
 genai.owasp.org

@@ -29,8 +29,6 @@ Referenzen 14
 
 Beschreibung 15
 
-Page 2
-
 genai.owasp.org
 
 Häufige Beispiele der Schwachstelle 15
@@ -81,8 +79,6 @@ Referenzen 26
 
 Beschreibung 27
 
-Page 3
-
 genai.owasp.org
 
 Häufige Beispiele der Schwachstelle 27
@@ -131,8 +127,6 @@ Referenzen 38
 
 ## Anhang A – OWASP Agentic AI Security Mapping Matrix 39 Anhang B – Beziehung zu OWASP CycloneDX und AIBOM 41
 
-Page 4
-
 genai.owasp.org
 
 ## Anhang C – Zuordnung zwischen OWASP Non-Human Identities Top 10 (2025) und OWASP Agentic AI Top 10 42 Anhang D – ASI Agentic Exploits & Incidents Tracker 44
@@ -140,7 +134,5 @@ genai.owasp.org
 Tabelle der Exploits & Vorfälle 44
 
 ## Anhang E – Abkürzungen 50 Danksagungen 52 OWASP GenAI Security Project Sponsoren 55 Projektunterstützer 56
-
-Page 5
 
 genai.owasp.org

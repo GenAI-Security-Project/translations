@@ -19,8 +19,6 @@ In den OWASP ASI Threats and Mitigations entspricht dies eins zu eins T3: Privil
 
 2. Speicherbasierte Privilegienbeibehaltung & Datenleck (Memory-Based Privilege Retention & Data Leakage). Entsteht, wenn Agenten Anmeldedaten, Schlüssel oder abgerufene Daten zur Kontexterhaltung und Wiederverwendung zwischenspeichern. Wenn der Speicher zwischen Aufgaben oder Nutzern nicht segmentiert oder gelöscht wird,
 
-Page 15
-
 genai.owasp.org
 
 können Angreifer den Agenten dazu bringen, zwischengespeicherte Geheimnisse wiederzuverwenden, Privilegien zu eskalieren oder Daten aus einer vorherigen sicheren Sitzung in eine schwächere zu leaken.
@@ -84,8 +82,6 @@ Vertrauen.
 Erstellers, Zugriff auf Systeme. Er ermöglicht anderen Nutzern dann implizit, diese Identität zu
 
 nutzen, indem sie seine Tools als diese Identität aufrufen.
-
-Page 16
 
 genai.owasp.org
 
@@ -172,7 +168,5 @@ Tokens außerhalb ihrer ursprünglichen, signierten Absicht wiederverwenden.
 3. https://css.csail.mit.edu/6.858/2015/readings/confused-deputy.html
 4. 15 Ways to Break Your Copilot, BHUSA 2024
 5. NVD - cve-2025-31491
-
-Page 17
 
 genai.owasp.org

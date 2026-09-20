@@ -52,8 +52,6 @@ default privileges, such as unrestricted Internet access, also inherit more auth
 
 retrieved data for context and reuse. If memory is not segmented or cleared between tasks or users,
 
-Page 15
-
 genai.owasp.org
 
 attackers can prompt the agent to reuse cached secrets, escalate privileges, or leak data from a
@@ -132,8 +130,6 @@ commands under assumed internal trust.
 
 allows other users to leverage that identity implicitly by invoking its tools as that identity.
 
-Page 16
-
 genai.owasp.org
 
 ## Prevention and Mitigation Guidelines
@@ -211,7 +207,5 @@ monitoring when agents request new scopes or reuse tokens outside their original
 4. 15 Ways to Break Your Copilot, BHUSA 2024
 
 5. NVD - cve-2025-31491
-
-Page 17
 
 genai.owasp.org

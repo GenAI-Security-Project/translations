@@ -9,6 +9,4 @@ Gemeinsam bieten die beiden Initiativen eine einheitliche Sicht auf KI-Sicherhei
 
 Wir werden einen ähnlichen Ansatz auch für das neu entstandene AIBOM OWASP-Projekt verfolgen, sobald dieses
 
-Page 41
-
 genai.owasp.org

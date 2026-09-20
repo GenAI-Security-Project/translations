@@ -28,8 +28,6 @@ References 14
 
 Description 15
 
-Page 2
-
 genai.owasp.org
 
 Common Examples of the Vulnerability 15
@@ -80,8 +78,6 @@ References 26
 
 Description 27
 
-Page 3
-
 genai.owasp.org
 
 Common Examples of the Vulnerability 27
@@ -130,8 +126,6 @@ References 38
 
 ## Appendix A - OWASP Agentic AI Security Mapping Matrix 39 Appendix B - Relationship to OWASP CycloneDX and AIBOM 41
 
-Page 4
-
 genai.owasp.org
 
 ## Appendix C - Mapping Between OWASP Non-Human Identities Top 10 (2025) and OWASP Agentic AI Top 10 42 Appendix D - ASI Agentic Exploits & Incidents Tracker 44
@@ -139,7 +133,5 @@ genai.owasp.org
 Exploits & Incidents Table 44
 
 ## Appendix E – Abbreviations 50 Acknowledgements 52 OWASP GenAI Security Project Sponsors 55 Project Supporters 56
-
-Page 5
 
 genai.owasp.org

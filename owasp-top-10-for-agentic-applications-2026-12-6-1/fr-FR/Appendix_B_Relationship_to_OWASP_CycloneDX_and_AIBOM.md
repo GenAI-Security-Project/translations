@@ -9,6 +9,4 @@ Ensemble, ces deux initiatives offrent une vision unifiée de la sécurité de l
 
 Nous poursuivrons également une approche similaire avec le projet OWASP AIBOM nouvellement créé, une fois que celui-ci aura développé
 
-Page 41
-
 genai.owasp.org

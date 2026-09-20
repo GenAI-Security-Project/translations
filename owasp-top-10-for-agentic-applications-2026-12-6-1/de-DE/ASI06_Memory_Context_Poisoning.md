@@ -19,8 +19,6 @@ Es ordnet sich T1 Memory Poisoning in Agentic Threats and Mitigations zu, mit ve
 
 2. Vergiftung des gemeinsam genutzten Benutzerkontexts: Wiederverwendete oder gemeinsam genutzte Kontexte ermöglichen es Angreifern, über normale Chats Daten einzuschleusen, die spätere Sitzungen beeinflussen. Zu den Auswirkungen zählen Fehlinformationen, unsichere Codeausführung oder fehlerhafte Tool-Aktionen.
 
-Page 24
-
 genai.owasp.org
 
 3. Manipulation des Kontextfensters: Ein Angreifer schleust präparierte Inhalte in eine laufende Konversation oder Aufgabe ein, sodass diese später zusammengefasst oder im Gedächtnis gespeichert werden und zukünftiges Reasoning oder Entscheidungen kontaminieren, selbst nachdem die ursprüngliche Sitzung beendet ist.
@@ -60,8 +58,6 @@ Namespace-Filter aus und ziehen durch hohe Kosinus-Ähnlichkeit sensible Chunks 
 4. Zugriff und Aufbewahrung: Nur authentifizierte, kuratierte Quellen zulassen; kontextbewussten Zugriff pro Aufgabe durchsetzen; Aufbewahrung entsprechend der Datensensibilität minimieren.
 
 5. Herkunft und Anomalien: Quellenzuordnung verlangen und verdächtige Aktualisierungen oder Häufigkeiten erkennen.
-
-Page 25
 
 genai.owasp.org
 
@@ -110,7 +106,5 @@ https://arxiv.org/abs/2504.07952v1
 10. The Trifecta: How Three New Gemini Vulnerabilities in Cloud Assist, Search Model, and Browsing
 
 Allowed Private Data Exfiltration
-
-Page 26
 
 genai.owasp.org
