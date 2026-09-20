@@ -54,39 +54,49 @@ h1, h2, h3, .brand-lockup { font-family: var(--font-heading); }
   margin: 0 auto;
 }
 
+/* Full-width black bar, matching genai.owasp.org's own header treatment
+   (a black nav bar with a white wordmark) -- the header is a direct child
+   of <body>, outside .page, so it spans the full viewport; its own inner
+   wrapper re-applies .page's max-width so the content lines up with the
+   rest of the page underneath it. */
 header.site-header {
-  padding: 24px 0 12px;
-  border-bottom: 1px solid var(--border);
+  background: #000000;
+  padding: 20px 0;
   margin-bottom: 24px;
+}
+.site-header-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
 }
 
 /* Text-only brand lockup matching genai.owasp.org's own wordmark treatment
-   (bold "GenAI" in the primary blue, "Security Project" in the navy) --
-   deliberately not the project's dragonfly icon. */
+   -- white on the header's black background, deliberately not the
+   project's dragonfly icon. */
 .brand-lockup {
   margin: 0 0 2px;
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.15;
 }
-.brand-lockup .brand-genai { color: var(--accent); }
-.brand-lockup .brand-rest { color: var(--navy); }
+.brand-lockup .brand-genai, .brand-lockup .brand-rest { color: #ffffff; }
 .brand-tagline {
   margin: 0 0 4px;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--muted);
+  color: #b8c2cc;
   text-transform: uppercase;
 }
 
 header.site-header nav a {
-  color: var(--accent);
+  color: #ffffff;
   text-decoration: none;
   margin-right: 16px;
   font-size: 0.9rem;
   font-weight: 600;
 }
+header.site-header nav a:hover { color: var(--accent); }
 
 h2 { font-size: 1.1rem; margin-top: 32px; }
 
