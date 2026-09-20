@@ -14,7 +14,7 @@ from typing import Iterator, List, Tuple
 
 from docx import Document
 from docx.oxml.ns import qn
-from text_quality import is_garbled
+from text_quality import is_garbled, is_page_number_artifact
 from docx.text.paragraph import Paragraph
 
 import image_svg
@@ -65,7 +65,14 @@ def _split(doc: Document) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes]
             images.append((sections[-1][0], blob))
 
         text = para.text.strip()
-        if not text or is_garbled(text):
+        if not text or is_garbled(text) or is_page_number_artifact(text):
+            # A "Page N" footer typed inline as its own paragraph rather
+            # than living in a real Word header/footer part (observed in
+            # the real LLM Top 10 docx). Pagination from the English
+            # source's layout is meaningless — and wrong — once reflowed
+            # into a translated document with a different page count;
+            # Process 2's render_config.json adds real page numbers for
+            # the final layout.
             continue
         style_name = para.style.name or ""
         if style_name == "Heading 1":
