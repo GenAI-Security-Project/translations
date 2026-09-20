@@ -7,11 +7,6 @@
       "source_commit": "adb7c67",
       "translator": "anthropic:claude-sonnet-5"
     },
-    "ASI02_Tool_Misuse_and_Exploitation": {
-      "status": "draft",
-      "source_commit": "adb7c67",
-      "translator": "anthropic:claude-sonnet-5"
-    },
     "ASI03_Identity_and_Privilege_Abuse": {
       "status": "draft",
       "source_commit": "adb7c67",
@@ -82,11 +77,6 @@
       "source_commit": "adb7c67",
       "translator": "anthropic:claude-sonnet-5"
     },
-    "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10": {
-      "status": "draft",
-      "source_commit": "adb7c67",
-      "translator": "anthropic:claude-sonnet-5"
-    },
     "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10_Figure": {
       "status": "draft",
       "source_commit": "adb7c67",
@@ -130,6 +120,16 @@
     "Table_of_Content": {
       "status": "draft",
       "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI02_Tool_Misuse_and_Exploitation": {
+      "status": "draft",
+      "source_commit": "1a55896",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10": {
+      "status": "draft",
+      "source_commit": "1a55896",
       "translator": "anthropic:claude-sonnet-5"
     }
   },
