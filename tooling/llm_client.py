@@ -29,6 +29,24 @@ BATCH_SYSTEM_PROMPT = (
 )
 
 
+MAX_EMPTY_RETRIES = 2  # total attempts = this + 1
+
+
+def _anthropic_call(engine: Engine, system: str, user_content: str) -> str:
+    """One call, returning joined text blocks (which may legitimately be
+    empty, e.g. a refusal) — callers decide whether to retry or raise."""
+    import anthropic
+
+    client = anthropic.Anthropic()
+    response = client.messages.create(
+        model=engine.model,
+        max_tokens=8192,
+        system=system,
+        messages=[{"role": "user", "content": user_content}],
+    )
+    return "".join(block.text for block in response.content if block.type == "text")
+
+
 def translate_text(engine: Engine, locale: str, source_text: str, context: str = "", offline: bool = False) -> str:
     if offline:
         return f"<!-- offline stub translation for {locale} -->\n\n{source_text}"
@@ -38,16 +56,24 @@ def translate_text(engine: Engine, locale: str, source_text: str, context: str =
         system += f"\n\nGlossary / already-translated sibling sections for consistency:\n{context}"
 
     if engine.provider == "anthropic":
-        import anthropic
-
-        client = anthropic.Anthropic()
-        response = client.messages.create(
-            model=engine.model,
-            max_tokens=8192,
-            system=system,
-            messages=[{"role": "user", "content": source_text}],
+        # A real (rare, observed in practice) failure mode: the API call
+        # succeeds — no exception, no error status — but the model returns
+        # no text content at all for a specific section. That's silently
+        # indistinguishable from a real empty translation unless it's
+        # checked for explicitly; left unchecked it produces a section that
+        # looks drafted (a status.json entry, a committed file) but is
+        # actually blank, which only surfaces on a human noticing the file
+        # itself is empty in review — as happened here. Retry a couple of
+        # times before giving up loudly.
+        for attempt in range(MAX_EMPTY_RETRIES + 1):
+            result = _anthropic_call(engine, system, source_text)
+            if result.strip():
+                return result
+        raise RuntimeError(
+            f"translate_text: model returned empty content for {locale} after "
+            f"{MAX_EMPTY_RETRIES + 1} attempts (source: {len(source_text)} chars) — "
+            "not writing a blank section"
         )
-        return "".join(block.text for block in response.content if block.type == "text")
 
     raise SystemExit(
         f"llm_client.py has no implementation for provider '{engine.provider}' yet — "
@@ -82,19 +108,12 @@ def translate_batch(engine: Engine, locale: str, texts: List[str]) -> List[str]:
     system = BATCH_SYSTEM_PROMPT.format(locale=locale)
 
     if engine.provider == "anthropic":
-        import anthropic
-
-        client = anthropic.Anthropic()
-        response = client.messages.create(
-            model=engine.model,
-            max_tokens=8192,
-            system=system,
-            messages=[{"role": "user", "content": json.dumps(texts, ensure_ascii=False)}],
-        )
-        raw = "".join(block.text for block in response.content if block.type == "text")
+        raw = _anthropic_call(engine, system, json.dumps(texts, ensure_ascii=False))
         translations = _parse_json_array(raw, expected_len=len(texts))
         if translations is not None:
             return translations
+        # Empty/unparseable batch reply falls back to translate_text per
+        # item, which has its own empty-response retry-and-raise built in.
         return [translate_text(engine, locale, t) for t in texts]
 
     raise SystemExit(

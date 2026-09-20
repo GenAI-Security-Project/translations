@@ -36,6 +36,7 @@ from typing import List, Optional, Tuple
 import pdfplumber
 
 import image_svg
+from text_quality import is_garbled
 
 LARGE_RATIO = 1.8    # candidate "meaningfully bigger than body text" floor
 H1_SHRINK_TOLERANCE = 0.75  # a heading can be shrunk to 75% of the dominant heading size and still count
@@ -152,6 +153,12 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
             continue
 
         text = payload
+        if is_garbled(text):
+            # A custom icon/symbol font whose codepoints got extracted as raw
+            # punctuation instead of the text they render as (observed: a
+            # bolded scenario title came out as pure symbol soup). Treat it
+            # as if the line never existed rather than pass it to translation.
+            continue
         lvl = level(size)
         if lvl in ("h1", "h2"):
             if pending_level == lvl:

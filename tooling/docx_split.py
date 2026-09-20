@@ -14,6 +14,7 @@ from typing import Iterator, List, Tuple
 
 from docx import Document
 from docx.oxml.ns import qn
+from text_quality import is_garbled
 from docx.text.paragraph import Paragraph
 
 import image_svg
@@ -64,7 +65,7 @@ def _split(doc: Document) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes]
             images.append((sections[-1][0], blob))
 
         text = para.text.strip()
-        if not text:
+        if not text or is_garbled(text):
             continue
         style_name = para.style.name or ""
         if style_name == "Heading 1":
