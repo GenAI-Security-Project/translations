@@ -1,0 +1,84 @@
+name: translate-draft
+
+# Component 2. Fired once per requested locale by the onboarding/add-locale
+# flow (today: manually via workflow_dispatch while component 6, the GitHub
+# Pages form, doesn't exist yet; eventually: repository_dispatch from that
+# form). Translates every section that doesn't already have a status.json
+# entry for {asset, locale}, then opens a draft PR for human review.
+#
+# MUST NOT hardcode a model/provider anywhere below — tooling/translate_section.py
+# resolves it from tooling/translation-config.yaml at runtime.
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset:
+        description: "Asset id as it appears in registry.yaml (e.g. llm-top-10)"
+        required: true
+      locale:
+        description: "BCP-47 locale code (e.g. de-DE)"
+        required: true
+  repository_dispatch:
+    types: [translate-draft]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    env:
+      ASSET: ${{ github.event.inputs.asset || github.event.client_payload.asset }}
+      LOCALE: ${{ github.event.inputs.locale || github.event.client_payload.locale }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tesseract-ocr
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+
+      - name: Install tooling dependencies
+        run: pip install -r tooling/requirements.txt
+
+      - name: Validate registry.yaml
+        run: python tooling/registry_schema.py
+
+      - name: Draft translations for ${{ env.ASSET }} / ${{ env.LOCALE }}
+        run: python tooling/translate_section.py --asset "$ASSET" --locale "$LOCALE"
+
+      - name: Resolve asset owners for review request
+        id: owners
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import sys, os
+          sys.path.insert(0, "tooling")
+          from registry_schema import Registry
+          entry = Registry.load().assets[os.environ["ASSET"]]
+          print("owners=" + ",".join(entry.owners))
+          PY
+
+      - name: Open draft PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "translate-draft: ${{ env.ASSET }} / ${{ env.LOCALE }}"
+          branch: "translate-draft/${{ env.ASSET }}-${{ env.LOCALE }}-${{ github.run_id }}"
+          title: "[${{ env.ASSET }}] Draft translation: ${{ env.LOCALE }}"
+          body: |
+            Machine-drafted sections for `${{ env.ASSET }}` / `${{ env.LOCALE }}`.
+
+            Every section listed as `draft` in `status.json` needs human review
+            before it can move to `reviewed`. Edit directly on this PR's branch,
+            then flip it to "Ready for review" once you start — that moves the
+            affected sections to `in_review`. Approving and merging moves them
+            to `reviewed`.
+          labels: status:draft
+          reviewers: ${{ steps.owners.outputs.owners }}
+          draft: true
+          add-paths: |
+            registry.yaml
+            ${{ env.ASSET }}/**

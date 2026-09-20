@@ -1,0 +1,144 @@
+{
+  "asset": "owasp-top-10-for-agentic-applications-2026-12-6-1",
+  "locale": "fr-FR",
+  "sections": {
+    "ASI01_Agent_Goal_Hijack": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI03_Identity_and_Privilege_Abuse": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI04_Agentic_Supply_Chain_Vulnerabilities": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI05_Unexpected_Code_Execution_RCE": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI06_Memory_Context_Poisoning": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI07_Insecure_Inter_Agent_Communication": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI08_Cascading_Failures": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI09_Human_Agent_Trust_Exploitation": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI10_Rogue_Agents": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Acknowledgements": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Acknowledgements_Figure_3": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Agentic_Top_10_At_A_Glance": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Agentic_Top_10_At_A_Glance_Figure_2": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_A_OWASP_Agentic_AI_Security_Mapping_Matrix": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_B_Relationship_to_OWASP_CycloneDX_and_AIBOM": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10_Figure": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_D_ASI_Agentic_Exploits_Incidents_Tracker": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_E_Abbreviations": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Letter_from_The_Agentic_Top_10_Leaders": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "OWASP_Top_10_For_Agentic_Applications_2026": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "OWASP_Top_10_For_Agentic_Applications_2026_Figure_3": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Preface_Figure": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Project_Supporters": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Table_of_Content": {
+      "status": "draft",
+      "source_commit": "adb7c67",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "ASI02_Tool_Misuse_and_Exploitation": {
+      "status": "draft",
+      "source_commit": "1a55896",
+      "translator": "anthropic:claude-sonnet-5"
+    },
+    "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10": {
+      "status": "draft",
+      "source_commit": "1a55896",
+      "translator": "anthropic:claude-sonnet-5"
+    }
+  },
+  "summary": {
+    "total": 26,
+    "draft": 26,
+    "in_review": 0,
+    "reviewed": 0,
+    "stale": 0,
+    "migrated": 0
+  }
+}
