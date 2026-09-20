@@ -105,7 +105,8 @@ class FooterConfig(BaseModel):
     show_page_numbers: bool = True
     page_number_format: str = "{page}"  # or "{page} / {total}"
     show_url: bool = True
-    url_text: str = "GenAI.OWASP.org"
+    url_text: str = "https://www.genaisecurityproject.com"
+    url_href: Optional[str] = "https://www.genaisecurityproject.com"  # None: plain text, not a link
 
 
 class WatermarkConfig(BaseModel):

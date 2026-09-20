@@ -54,7 +54,10 @@ const DEFAULT_CONFIG = {
   legal_notice: null,
   headings: {},
   line_breaking: { line_break: "auto", word_break: "normal", word_spacing: "normal", hyphens: "none", hyphens_lang: null },
-  footer: { show_page_numbers: true, page_number_format: "{page}", show_url: true, url_text: "GenAI.OWASP.org" },
+  footer: {
+    show_page_numbers: true, page_number_format: "{page}", show_url: true,
+    url_text: "https://www.genaisecurityproject.com", url_href: "https://www.genaisecurityproject.com",
+  },
   watermark: {
     text: "DRAFT — NOT FOR RELEASE", font_family: "heading", font_size_pt: 60,
     color: "#C0392B", opacity: 0.18, rotation_deg: -35, repeat: false,
@@ -383,9 +386,14 @@ ${sectionsHtml.join("\n")}
 </body>
 </html>`;
 
+  const footerUrlHtml = cfg.footer.show_url
+    ? (cfg.footer.url_href
+        ? `<a href="${cfg.footer.url_href}" style="color:inherit; text-decoration:none;">${cfg.footer.url_text}</a>`
+        : cfg.footer.url_text)
+    : "";
   const pageNumberFooter = cfg.footer.show_page_numbers
     ? `<div style="font-size:8pt; width:100%; display:flex; justify-content:space-between; padding:0 10mm;">
-         <span>${cfg.footer.show_url ? cfg.footer.url_text : ""}</span>
+         <span>${footerUrlHtml}</span>
          <span>${cfg.footer.page_number_format.replace("{page}", '<span class="pageNumber"></span>').replace("{total}", '<span class="totalPages"></span>')}</span>
        </div>`
     : `<div></div>`;
