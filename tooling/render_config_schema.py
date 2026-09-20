@@ -72,6 +72,8 @@ class HeadingStyle(BaseModel):
 
 class CoverConfig(BaseModel):
     logo_path: Optional[str] = None  # relative to assets/images/
+    background_image_path: Optional[str] = None  # relative to assets/images/; a decorative band/pattern, not a solid fill
+    background_image_position: str = "top"  # top | full -- top: a band across the top portion only, like the real OWASP cover art
     title_font: str = "heading"
     subtitle_font: str = "body"
     background_color: str = "#FFFFFF"

@@ -8,6 +8,7 @@
 "use strict";
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 const yaml = require("js-yaml");
@@ -45,7 +46,8 @@ const DEFAULT_CONFIG = {
   page: { size: "A4", margins: { top_mm: 25, bottom_mm: 25, left_mm: 22, right_mm: 22 } },
   fonts: {},
   cover: {
-    logo_path: null, title_font: "heading", subtitle_font: "body",
+    logo_path: null, background_image_path: null, background_image_position: "top",
+    title_font: "heading", subtitle_font: "body",
     background_color: "#FFFFFF", text_color: "#000000", show_version: true, show_date: true,
   },
   toc: { include: true, label: "Table of Contents", max_depth: 2 },
@@ -168,13 +170,32 @@ function renderCoverHtml(cfg, meta) {
     : "";
   const versionLine = cfg.cover.show_version ? `<p class="cover-meta">${meta.version}</p>` : "";
   const dateLine = cfg.cover.show_date ? `<p class="cover-meta">${meta.date}</p>` : "";
+
+  // "top": a decorative band across roughly the top third, like the real
+  // OWASP cover art (a gradient + circle/dragonfly motif graphic, not a
+  // flat fill) -- content sits below it, not on top of it. "full": the
+  // image covers the entire page behind the content.
+  let bgLayer = "";
+  let contentStyle = "justify-content: center;";
+  if (cfg.cover.background_image_path && meta.coverBgAbsPath) {
+    if (cfg.cover.background_image_position === "full") {
+      bgLayer = `<img class="cover-bg cover-bg-full" src="file://${meta.coverBgAbsPath}" alt="">`;
+    } else {
+      bgLayer = `<img class="cover-bg cover-bg-top" src="file://${meta.coverBgAbsPath}" alt="">`;
+      contentStyle = "justify-content: flex-end; padding-bottom: 15%;";
+    }
+  }
+
   return `
-    <section class="page cover" style="background:${cfg.cover.background_color}; color:${cfg.cover.text_color};">
-      ${logoImg}
-      <h1 class="cover-title" style="font-family:${fontFamilyFor(cfg.cover.title_font, cfg.fonts)}">${meta.title}</h1>
-      <p class="cover-subtitle" style="font-family:${fontFamilyFor(cfg.cover.subtitle_font, cfg.fonts)}">${meta.locale}</p>
-      ${versionLine}
-      ${dateLine}
+    <section class="page cover" style="background:${cfg.cover.background_color}; color:${cfg.cover.text_color}; position: relative; overflow: hidden;">
+      ${bgLayer}
+      <div class="cover-content" style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; height: 100%; ${contentStyle}">
+        ${logoImg}
+        <h1 class="cover-title" style="font-family:${fontFamilyFor(cfg.cover.title_font, cfg.fonts)}">${meta.title}</h1>
+        <p class="cover-subtitle" style="font-family:${fontFamilyFor(cfg.cover.subtitle_font, cfg.fonts)}">${meta.locale}</p>
+        ${versionLine}
+        ${dateLine}
+      </div>
     </section>`;
 }
 
@@ -285,6 +306,9 @@ async function main() {
     date: today,
     locale: args.locale,
     logoAbsPath: cfg.cover.logo_path ? path.join(args.templatesRoot, "assets", "images", cfg.cover.logo_path) : null,
+    coverBgAbsPath: cfg.cover.background_image_path
+      ? path.join(args.templatesRoot, "assets", "images", cfg.cover.background_image_path)
+      : null,
   });
   const legalHtml = renderLegalNoticeHtml(cfg);
   const tocHtml = renderTocHtml(cfg, headings);
@@ -310,7 +334,10 @@ body {
   ${cfg.line_breaking.hyphens_lang ? `` : ""}
 }
 .page { page-break-after: always; padding: 20mm; }
-.cover { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+.cover { height: 100%; text-align: center; padding: 0; }
+.cover-bg { position: absolute; left: 0; top: 0; z-index: 0; }
+.cover-bg-top { width: 100%; height: auto; }
+.cover-bg-full { width: 100%; height: 100%; object-fit: cover; }
 .cover-title { font-size: 36pt; margin-bottom: 12pt; }
 .cover-subtitle { font-size: 18pt; margin-bottom: 24pt; }
 .cover-meta { font-size: 12pt; opacity: 0.8; }
@@ -345,13 +372,22 @@ ${sectionsHtml.join("\n")}
        </div>`
     : `<div></div>`;
 
+  // page.setContent() gives the page no real origin, and Chrome refuses
+  // file:// font/image loads from a page with no origin -- fonts silently
+  // fall back to a generic serif/sans and <img src="file://..."> renders
+  // blank, with no error surfaced anywhere. Writing the HTML to a real file
+  // and page.goto()-ing it gives the page an actual file:// origin, under
+  // which same-machine file:// resource loads work normally.
+  const tmpHtmlPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "render-")), "doc.html");
+  fs.writeFileSync(tmpHtmlPath, html);
+
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
   });
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.goto("file://" + tmpHtmlPath, { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: cfg.page.size,
       margin: {
@@ -388,6 +424,7 @@ ${sectionsHtml.join("\n")}
     console.log(`sha256=${contentChecksum}`);
   } finally {
     await browser.close();
+    fs.rmSync(path.dirname(tmpHtmlPath), { recursive: true, force: true });
   }
 }
 
