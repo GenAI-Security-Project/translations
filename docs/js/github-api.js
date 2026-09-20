@@ -134,3 +134,12 @@ async function dispatchBootstrapAsset(clientPayload) {
     body: JSON.stringify({ event_type: "bootstrap-asset", client_payload: clientPayload }),
   });
 }
+
+// Fires publish-direct.yml's repository_dispatch trigger -- one call per
+// (asset, locale) pair, see publish.html/publish.js.
+async function dispatchPublishDirect(clientPayload) {
+  return ghFetch(`/repos/${ORG}/${CONTENT_REPO}/dispatches`, {
+    method: "POST",
+    body: JSON.stringify({ event_type: "publish-direct", client_payload: clientPayload }),
+  });
+}

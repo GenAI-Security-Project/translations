@@ -12,7 +12,36 @@ works end-to-end.
   `bootstrap-asset.yml` via `repository_dispatch`.
 - **`status.html`** — read-only dashboard over every asset/locale's
   `status.json`, live from the repo (NFR6).
-- **`index.html`** — landing page linking the two.
+- **`publish.html`** — Process 2 (Assemble & Publish)'s direct/testing
+  publish trigger. Lists every asset/locale (see "Publish page" below),
+  fires `publish-direct.yml` via `repository_dispatch` once per checked row.
+- **`index.html`** — landing page linking the rest.
+
+## Publish page
+
+A real publish normally requires a three-way sign-off on a "ready to
+publish" issue (`check-freshness.yml` opens it, `publish.yml` enforces the
+gate — see `tooling/check_signoff.py`). `publish.html` is a separate,
+CAPTCHA + authenticator-gated direct path (`publish-direct.yml`) that
+bypasses that sign-off gate, so the rendering pipeline can be exercised
+against real content before a live sign-off process exists.
+
+- **Listing**: a `TESTING_MODE` constant in `js/publish.js` (currently
+  `true`) shows every asset/locale regardless of review completeness, each
+  with a checkbox and its `reviewed/total` count. Flip it to `false` once
+  real sign-off practice + fully-reviewed content exist, to only list a
+  fully-reviewed locale.
+- **Include watermark** (checked by default): controls `render.sh`'s
+  `--final` flag per selected row — checked always renders a watermarked
+  preview (allowed regardless of review status); unchecked requests a real
+  final render, which `render.sh` itself still hard-refuses unless every
+  section is reviewed, regardless of what `TESTING_MODE` lists as
+  selectable.
+- **Publish selected**: one `repository_dispatch` (`publish-direct`) per
+  checked row, each carrying `{asset, locale, watermark, totp_code}`.
+  `publish-direct.yml` verifies the code server-side against
+  `UPLOAD_TOTP_SECRET` (same secret and mechanism as `bootstrap-asset.yml`'s
+  public-form path) before rendering anything.
 
 ## Auth: a pasted token, not "Sign in with GitHub" — and only where a write needs it
 

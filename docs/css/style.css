@@ -169,3 +169,8 @@ button.secondary { background: transparent; color: var(--accent); border: 1px so
 .duplicate-block p { margin: 0 0 10px; }
 .duplicate-confirm-label { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-weight: normal; }
 .duplicate-confirm-label input { width: auto; margin: 0; }
+
+.publish-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.publish-table th, .publish-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.publish-table td:first-child, .publish-table th:first-child { width: 32px; }
+.publish-table input[type="checkbox"] { width: auto; margin: 0; }
