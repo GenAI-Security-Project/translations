@@ -1,13 +1,8 @@
 const REPO_TREE_BASE = `https://github.com/${ORG}/${CONTENT_REPO}/tree/main`;
 
 async function fetchStatusJson(asset, locale) {
-  try {
-    const file = await ghFetch(`/repos/${ORG}/${CONTENT_REPO}/contents/${asset}/${locale}/status.json`);
-    return JSON.parse(decodeBase64Utf8(file.content));
-  } catch (err) {
-    if (String(err).includes("404")) return null; // translate-draft.yml hasn't merged for this locale yet
-    throw err;
-  }
+  const text = await fetchRawFile(`${asset}/${locale}/status.json`);
+  return text === null ? null : JSON.parse(text); // null: translate-draft.yml hasn't merged for this locale yet
 }
 
 function progressLabel(summary) {

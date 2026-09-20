@@ -1,6 +1,9 @@
-// Thin GitHub REST API helper. CONTENT_REPO is public, so reads against it
-// (status/registry) work with no token at all — ghFetch only attaches one
-// when sessionStorage has it. A token is still required to read the private
+// Thin GitHub REST API helper. CONTENT_REPO is public, so registry/status
+// reads go through fetchRawFile() (raw.githubusercontent.com, no token, a
+// much more generous rate limit than the REST API's 60/hour-per-IP
+// unauthenticated cap). ghFetch is the REST API path, still used for
+// everything else; it only attaches a token when sessionStorage has one.
+// A token is still required to read the private
 // TEMPLATES_REPO and to perform either of the two writes (putFile,
 // dispatchBootstrapAsset): a user-pasted PAT (fine-grained or classic), kept
 // only in sessionStorage — never sent anywhere but api.github.com, and
@@ -10,6 +13,7 @@
 // can't complete that flow.
 
 const GH_API = "https://api.github.com";
+const RAW_BASE = "https://raw.githubusercontent.com";
 const ORG = "GenAI-Security-Project";
 const CONTENT_REPO = "translations";
 const TEMPLATES_REPO = "translations-templates";
@@ -48,6 +52,20 @@ async function ghFetch(path, options = {}) {
   return response.status === 204 ? null : response.json();
 }
 
+// Reads a public file straight from CONTENT_REPO's CDN mirror rather than
+// api.github.com/contents — the latter counts against the 60/hour-per-IP
+// unauthenticated core rate limit (shared with everyone else behind the
+// same IP, e.g. an office NAT), which a page that reads on every load can
+// burn through fast. raw.githubusercontent.com serves the same public
+// bytes under a much more generous CDN-level limit instead. Returns null
+// on a 404 (file doesn't exist yet) so callers don't need try/catch.
+async function fetchRawFile(path) {
+  const response = await fetch(`${RAW_BASE}/${ORG}/${CONTENT_REPO}/main/${path}`);
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`raw.githubusercontent.com ${response.status} on ${path}`);
+  return response.text();
+}
+
 // Verifies the token can actually read the still-private templates repo —
 // the cheapest call that proves real collaborator access, not just a
 // syntactically valid token. Checking CONTENT_REPO instead would no longer
@@ -58,17 +76,11 @@ async function verifyToken() {
 }
 
 // Returns the parsed registry.yaml (via js-yaml, loaded globally from the
-// CDN <script> tag in upload.html) or an empty {assets: {}} if it somehow
-// doesn't exist yet.
+// CDN <script> tag) or an empty {assets: {}} if it somehow doesn't exist yet.
 async function fetchRegistry() {
-  try {
-    const file = await ghFetch(`/repos/${ORG}/${CONTENT_REPO}/contents/registry.yaml`);
-    const text = decodeBase64Utf8(file.content);
-    return jsyaml.load(text) || { assets: {} };
-  } catch (err) {
-    if (String(err).includes("404")) return { assets: {} };
-    throw err;
-  }
+  const text = await fetchRawFile("registry.yaml");
+  if (text === null) return { assets: {} };
+  return jsyaml.load(text) || { assets: {} };
 }
 
 // Which locale folders already exist under a template in translations-templates
