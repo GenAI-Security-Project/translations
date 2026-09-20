@@ -6,14 +6,19 @@ Regex-based rather than a full XML round-trip: image_svg.py is the only
 producer of these files, so the format is fully under our control and a
 parse/re-serialize cycle risking attribute reordering or whitespace changes
 isn't worth it here.
+
+All of a figure's labels are translated in a single batched call
+(llm_client.translate_batch) rather than one call per <text> node — measured
+on a real 78-label document, individual calls spent far more wall-clock time
+on fixed per-call latency than on the ~3 words each label actually carries.
 """
 from __future__ import annotations
 
 import re
-from typing import Match
+from typing import List, Match
 from xml.sax.saxutils import escape, unescape
 
-from llm_client import translate_text
+from llm_client import translate_batch
 from translation_config import Engine
 
 _TEXT_RE = re.compile(r"(<text\b[^>]*>)(.*?)(</text>)", re.DOTALL)
@@ -29,13 +34,26 @@ def rehome_image_href(svg_text: str) -> str:
 
 
 def translate_svg(engine: Engine, locale: str, svg_text: str, offline: bool = False) -> str:
-    def replace(match: Match) -> str:
-        open_tag, content, close_tag = match.groups()
-        source = unescape(content)
-        # A prose-oriented "<!-- offline stub -->" banner (llm_client's normal
-        # offline behavior) would itself become visible label text here — use
-        # a short inline marker instead, appropriate for a one-line label.
-        translated = f"[{locale}] {source}" if offline else translate_text(engine, locale, source)
-        return f"{open_tag}{escape(translated.strip())}{close_tag}"
+    matches: List[Match] = list(_TEXT_RE.finditer(svg_text))
+    sources = [unescape(m.group(2)) for m in matches]
+    translatable = [i for i, s in enumerate(sources) if s.strip()]  # skip empty nodes — nothing to translate
 
-    return rehome_image_href(_TEXT_RE.sub(replace, svg_text))
+    if offline:
+        translations = {i: f"[{locale}] {sources[i]}" for i in translatable}
+    else:
+        batch = translate_batch(engine, locale, [sources[i] for i in translatable])
+        translations = dict(zip(translatable, batch))
+
+    out: List[str] = []
+    cursor = 0
+    for i, m in enumerate(matches):
+        out.append(svg_text[cursor:m.start()])
+        open_tag, content, close_tag = m.group(1), m.group(2), m.group(3)
+        if i in translations:
+            out.append(f"{open_tag}{escape(translations[i].strip())}{close_tag}")
+        else:
+            out.append(f"{open_tag}{content}{close_tag}")
+        cursor = m.end()
+    out.append(svg_text[cursor:])
+
+    return rehome_image_href("".join(out))

@@ -166,7 +166,12 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
             sections[-1][1].append(text)
     flush_heading()
 
-    text_sections = [(name, "\n\n".join(body_lines) + "\n") for name, body_lines in sections]
+    # A section name can exist purely to anchor an image encountered before
+    # any heading (e.g. "Preface") with no text ever appended to it — that's
+    # not a translatable section, and an empty/whitespace-only message is
+    # rejected outright by a real translation call (only ever surfaced
+    # in production, never in --offline mode, since that skips the call).
+    text_sections = [(name, "\n\n".join(body_lines) + "\n") for name, body_lines in sections if body_lines]
     return text_sections, section_images
 
 

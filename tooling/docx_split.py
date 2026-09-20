@@ -83,7 +83,12 @@ def _split(doc: Document) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes]
                 sections.append(("Preface", []))
             sections[-1][1].append(text)
 
-    text_sections = [(name, "\n\n".join(lines) + "\n") for name, lines in sections]
+    # A section name can exist purely to anchor an image encountered before
+    # any heading (e.g. "Preface") with no text ever appended to it — that's
+    # not a translatable section, and an empty/whitespace-only message is
+    # rejected outright by a real translation call (only ever surfaced in
+    # production, never in --offline mode, since that skips the call).
+    text_sections = [(name, "\n\n".join(lines) + "\n") for name, lines in sections if lines]
     return text_sections, images
 
 

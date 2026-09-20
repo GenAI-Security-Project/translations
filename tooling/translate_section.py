@@ -128,10 +128,18 @@ def main(argv: Optional[List[str]] = None) -> None:
             (locale_dir / f"{section}.svg").write_text(translation)
         else:
             source_text = (source_dir / f"{section}.md").read_text()
-            context = sibling_context(locale_dir, exclude=section)
-            translation = translate_text(engine, args.locale, source_text, context, offline=args.offline)
             banner = "<!-- status: draft -->\n"
-            (locale_dir / f"{section}.md").write_text(banner + translation)
+            if not source_text.strip():
+                # Nothing to translate (see docx_split.py/pdf_split.py — this
+                # shouldn't happen for a freshly-split source, but a section
+                # could still end up empty from hand-edited existing_files
+                # content). A real translation call rejects empty text
+                # outright; there's nothing useful to send it regardless.
+                (locale_dir / f"{section}.md").write_text(banner + source_text)
+            else:
+                context = sibling_context(locale_dir, exclude=section)
+                translation = translate_text(engine, args.locale, source_text, context, offline=args.offline)
+                (locale_dir / f"{section}.md").write_text(banner + translation)
 
         status.sections[section] = SectionEntry(
             status=SectionStatus.draft,
