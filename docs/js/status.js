@@ -58,25 +58,23 @@ function renderLocaleItem(list, assetId, locale, summary) {
   list.appendChild(li);
 }
 
+// CONTENT_REPO is public, so this reads with no token at all — see
+// github-api.js. If GitHub's unauthenticated rate limit (60/hr per IP) is
+// ever actually hit here, that would surface as a plain fetch error below.
 async function loadStatus() {
-  const statusEl = document.getElementById("token-status");
   const container = document.getElementById("status-container");
   const messageEl = document.getElementById("status-message");
   container.innerHTML = "";
   messageEl.textContent = "Loading…";
 
+  let registry;
   try {
-    await verifyToken();
-    statusEl.textContent = "✓ Token verified.";
-    statusEl.className = "token-status token-status-ok";
+    registry = await fetchRegistry();
   } catch (err) {
-    statusEl.textContent = `✗ ${err.message}`;
-    statusEl.className = "token-status token-status-error";
-    messageEl.textContent = "";
+    messageEl.textContent = `✗ ${err.message}`;
     return;
   }
 
-  const registry = await fetchRegistry();
   const assets = registry.assets || {};
   if (Object.keys(assets).length === 0) {
     messageEl.textContent = "No assets onboarded yet.";
@@ -93,14 +91,4 @@ async function loadStatus() {
   messageEl.textContent = "";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const saved = getToken();
-  if (saved) {
-    document.getElementById("gh-token").value = saved;
-    loadStatus();
-  }
-  document.getElementById("verify-token-button").addEventListener("click", () => {
-    setToken(document.getElementById("gh-token").value);
-    loadStatus();
-  });
-});
+document.addEventListener("DOMContentLoaded", loadStatus);

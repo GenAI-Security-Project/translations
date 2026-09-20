@@ -1,9 +1,13 @@
-// Thin GitHub REST API helper. Auth: a user-pasted PAT (fine-grained or
-// classic), kept only in sessionStorage — never sent anywhere but
-// api.github.com, and cleared when the tab closes. See docs/README.md for
-// why this form doesn't use "Sign in with GitHub": device-flow token
-// exchange doesn't support CORS, so a purely static page (no backend, as
-// the Build Spec requires) can't complete that flow.
+// Thin GitHub REST API helper. CONTENT_REPO is public, so reads against it
+// (status/registry) work with no token at all — ghFetch only attaches one
+// when sessionStorage has it. A token is still required to read the private
+// TEMPLATES_REPO and to perform either of the two writes (putFile,
+// dispatchBootstrapAsset): a user-pasted PAT (fine-grained or classic), kept
+// only in sessionStorage — never sent anywhere but api.github.com, and
+// cleared when the tab closes. See docs/README.md for why this form doesn't
+// use "Sign in with GitHub": device-flow token exchange doesn't support
+// CORS, so a purely static page (no backend, as the Build Spec requires)
+// can't complete that flow.
 
 const GH_API = "https://api.github.com";
 const ORG = "GenAI-Security-Project";
@@ -24,16 +28,13 @@ function clearToken() {
 
 async function ghFetch(path, options = {}) {
   const token = getToken();
-  if (!token) throw new Error("No GitHub token set — paste one above first.");
-  const response = await fetch(`${GH_API}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      ...(options.headers || {}),
-    },
-  });
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    ...(options.headers || {}),
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(`${GH_API}${path}`, { ...options, headers });
   if (!response.ok) {
     let detail = "";
     try {
@@ -47,11 +48,13 @@ async function ghFetch(path, options = {}) {
   return response.status === 204 ? null : response.json();
 }
 
-// Verifies the token can actually read the private content repo — the
-// cheapest possible call that proves the token works before the user fills
-// out the rest of the form.
+// Verifies the token can actually read the still-private templates repo —
+// the cheapest call that proves real collaborator access, not just a
+// syntactically valid token. Checking CONTENT_REPO instead would no longer
+// prove anything, since it's public and answers any token, valid or not
+// (an outright garbage/expired one still 401s).
 async function verifyToken() {
-  return ghFetch(`/repos/${ORG}/${CONTENT_REPO}`);
+  return ghFetch(`/repos/${ORG}/${TEMPLATES_REPO}`);
 }
 
 // Returns the parsed registry.yaml (via js-yaml, loaded globally from the

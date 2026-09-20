@@ -14,7 +14,7 @@ works end-to-end.
   `status.json`, live from the repo (NFR6).
 - **`index.html`** — landing page linking the two.
 
-## Auth: a pasted token, not "Sign in with GitHub"
+## Auth: a pasted token, not "Sign in with GitHub" — and only where a write needs it
 
 The Build Spec calls for "GitHub OAuth device flow or a GitHub App, since
 this is a static Pages site with no backend." In practice, device flow's
@@ -23,22 +23,49 @@ send CORS headers, so a purely static page cannot complete that exchange
 itself — every real implementation needs at least a minimal serverless
 proxy for that one step, which is itself a (small) backend.
 
-Given the explicit "no backend" constraint, this implementation instead
-asks the user to paste a fine-grained PAT scoped to `translations` and
-`translations-templates` (Contents: read/write). The token lives only in
+Given the explicit "no backend" constraint, `upload.html` asks the user to
+paste a fine-grained PAT scoped to `translations` and
+`translations-templates` (Contents: read/write) — needed there because it
+reads the still-private `translations-templates` and performs the two
+writes (`putFile`, `dispatchBootstrapAsset`). The token lives only in
 `sessionStorage` (cleared when the tab closes) and is sent only to
 `api.github.com`, which does support CORS for token-authenticated requests.
-This is a real, load-bearing deviation from the spec's literal wording, not
-an oversight — revisit if/when a GitHub App + a small auth proxy becomes
-worth standing up.
 
-## CAPTCHA
+`index.html` and `status.html` don't ask for a token at all: `translations`
+itself is public, so `fetchRegistry()`/`fetchStatusJson()` work as plain
+unauthenticated reads (`ghFetch` only attaches `Authorization` when
+`sessionStorage` actually has a token — see `github-api.js`). `verifyToken()`
+now checks `translations-templates` specifically, since checking the public
+`translations` repo would no longer prove anything about the pasted token
+(a public repo answers any syntactically valid request, garbage token or
+not — an actually invalid/expired one still 401s regardless of visibility).
+
+This asymmetry (public reads, gated writes) is intentional, not an
+oversight — revisit the pasted-token model if/when a GitHub App + a small
+auth proxy becomes worth standing up.
+
+## CAPTCHA + authenticator code
 
 `js/captcha.js` gates `upload.html`'s submit action behind a simple
-addition problem, regenerated on a wrong answer. Not meant as real
-bot-proofing — a valid token already restricts submission to people with
-write access to a private repo — it's a lightweight "confirm you mean to
-trigger a commit + a workflow run" gate, deliberately simple to start.
+addition problem, regenerated on a wrong answer — a lightweight "confirm
+you mean to trigger a commit + a workflow run" gate, not real bot-proofing.
+
+On top of that, `bootstrap-asset.yml` requires a 6-digit TOTP authenticator
+code (`client_payload.totp_code`, checked in the "Verify authenticator
+code" step) whenever it's reached via `repository_dispatch` — the path the
+public form uses now that the repo and Pages site are both public. This is
+real protection, not just friction, because the shared secret
+(`UPLOAD_TOTP_SECRET`, a repo secret) lives only in the Action's
+environment and is never shipped to the browser — unlike a client-side
+passphrase check would be, which anyone can read straight out of the
+page's own JS. `workflow_dispatch` (manual runs) is exempt: triggering it
+already requires write access to this repo, granted by GitHub itself.
+
+The client only checks the code is 6 digits before submitting — it can't
+verify the code itself without holding the secret, which would defeat the
+point. A wrong/expired code still gets a `repository_dispatch` 204 back
+(that call just queues the event) and fails visibly on the Actions tab
+instead.
 
 ## The two-step submit flow
 

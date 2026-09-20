@@ -100,6 +100,14 @@
 
       <section>
         <h2>5. Confirm</h2>
+        <p class="hint">
+          Enter the current 6-digit code from the shared authenticator
+          (added to Google Authenticator or similar) — ask a pipeline admin
+          if you don't have it. This is checked server-side before anything
+          is processed.
+        </p>
+        <label for="totp-input">Authenticator code</label>
+        <input type="text" id="totp-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="123456" />
         <div id="captcha-container"></div>
       </section>
 
