@@ -138,22 +138,22 @@ repo-root README):
 `--asset` is required to add a locale or bump a version of an **existing**
 asset — there's no reliable way to infer "this new upload continues that
 asset" from a filename alone, since a real version re-upload almost always
-has a different filename (a new date, a new "Final" suffix, ...).
+has a different filename (a new date, a new revision number, ...).
 
 For a **brand-new** asset uploaded as a single `.docx`/`.pdf`, `--asset` is
 optional: `asset_naming.py` derives a stable id from the uploaded file's
 name once, here, and that id is what goes in `registry.yaml` from then on —
 the repo folder is named after the *document*, not an arbitrary short id
-someone has to think up. It strips the extension and tokens that look like
-version/date noise from either end (a 4-digit year, `v2`, `Final`, `July26`,
-a dotted version number, and — only when it directly follows one of those —
-a trailing bare number, so a real "Top 10" isn't mistaken for a version
-suffix), then slugifies what's left:
+someone has to think up. Numbers are always kept — a year, a version
+number, a date stamp is real identifying information about a specific
+document, not noise to discard. Only non-numeric editorial/process words
+(`Final`, `Draft`, `Rev`, a bare `v2`-style marker) are dropped, wherever
+they appear in the filename, then what's left is slugified:
 
 | Uploaded filename | Derived asset id |
 |---|---|
-| `OWASP-Top-10-for-Agentic-Applications-2026-12.6-1.pdf` | `owasp-top-10-for-agentic-applications` |
-| `2026 OWASP GenAI LLM Top 10-Final_July26_01.docx` | `owasp-genai-llm-top-10` |
+| `OWASP-Top-10-for-Agentic-Applications-2026-12.6-1.pdf` | `owasp-top-10-for-agentic-applications-2026-12-6-1` |
+| `2026 OWASP GenAI LLM Top 10-Final_July26_01.docx` | `2026-owasp-genai-llm-top-10-july26-01` |
 
 Best-effort, not exact — if it derives something you don't want, pass
 `--asset` explicitly instead (bootstrap_asset.py also refuses to proceed if

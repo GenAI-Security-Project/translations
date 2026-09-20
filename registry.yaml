@@ -4,7 +4,7 @@
 # Entries are created and edited only by tooling/bootstrap_asset.py —
 # never by hand. See tooling/README.md for the field schema.
 assets:
-  owasp-top-10-for-agentic-applications:
+  owasp-top-10-for-agentic-applications-2026-12-6-1:
     version: 2026.12.6
     source_repo: GenAI-Security-Project/Agentic-Top-10
     source_path: _source/
