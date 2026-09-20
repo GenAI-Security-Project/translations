@@ -1,4 +1,6 @@
-"""Split a PDF into one Markdown file per top-level section.
+"""Split a PDF into one Markdown file per top-level section, plus one SVG
+"figure" per embedded image that turns out to carry translatable text (see
+image_svg.py for the OCR/blank/overlay mechanism).
 
 Real asset uploads observed in practice are finished PDFs (e.g. an OWASP
 Top-10-style document), not the Heading-1-styled .docx the Build Spec
@@ -25,16 +27,20 @@ real headings cluster at 30pt (one outlier at 24pt) bold, subsection labels
 """
 from __future__ import annotations
 
+import io
 import re
 from collections import Counter
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pdfplumber
+
+import image_svg
 
 LARGE_RATIO = 1.8    # candidate "meaningfully bigger than body text" floor
 H1_SHRINK_TOLERANCE = 0.75  # a heading can be shrunk to 75% of the dominant heading size and still count
 H2_RATIO = 1.3
+IMAGE_RASTER_RESOLUTION = 200
 
 
 def _slugify(heading: str) -> str:
@@ -58,10 +64,10 @@ def _thresholds(lines: List[Tuple[str, float]]) -> Tuple[float, float]:
     return h1_min, body_size * H2_RATIO
 
 
-def _lines(pdf: "pdfplumber.PDF") -> List[Tuple[str, float]]:
-    """[(text, max_word_size), ...] for every visual line in the document, in order."""
+def _line_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, str, float]]:
+    """[(page_index, top, text, max_word_size), ...] for every visual line, in document order."""
     out = []
-    for page in pdf.pages:
+    for page_index, page in enumerate(pdf.pages):
         words = page.extract_words(extra_attrs=["size"])
         grouped = {}
         for w in words:
@@ -70,16 +76,41 @@ def _lines(pdf: "pdfplumber.PDF") -> List[Tuple[str, float]]:
         for top in sorted(grouped):
             ws = grouped[top]
             text = " ".join(w["text"] for w in ws)
-            out.append((text, max(round(w["size"], 1) for w in ws)))
+            out.append((page_index, top, text, max(round(w["size"], 1) for w in ws)))
     return out
 
 
-def split_pdf(pdf_path: Path) -> List[Tuple[str, str]]:
-    """Return [(section_name, markdown_body), ...] split on detected top-level headings."""
-    with pdfplumber.open(str(pdf_path)) as pdf:
-        lines = _lines(pdf)
+def _image_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, bytes]]:
+    """[(page_index, top, png_bytes), ...] for every embedded image, rasterized
+    at a fixed resolution so image_svg's OCR has enough pixels to work with."""
+    out = []
+    for page_index, page in enumerate(pdf.pages):
+        for img in page.images:
+            bbox = (
+                max(img["x0"], 0), max(img["top"], 0),
+                min(img["x1"], page.width), min(img["bottom"], page.height),
+            )
+            if bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
+                continue
+            try:
+                pil_image = page.crop(bbox).to_image(resolution=IMAGE_RASTER_RESOLUTION).original
+            except Exception:
+                continue
+            buf = io.BytesIO()
+            pil_image.convert("RGB").save(buf, format="PNG")
+            out.append((page_index, img["top"], buf.getvalue()))
+    return out
 
-    h1_min, h2_min = _thresholds(lines)
+
+def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes]]]:
+    """Returns ([(section_name, markdown_body), ...], [(section_name, image_bytes), ...]),
+    walking lines and images together in true document order so each image is
+    tagged with whichever section was open when it appeared."""
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        lines = _line_events(pdf)
+        images = _image_events(pdf)
+
+    h1_min, h2_min = _thresholds([(text, size) for _, _, text, size in lines])
 
     def level(size: float) -> str:
         if size >= h1_min:
@@ -88,9 +119,16 @@ def split_pdf(pdf_path: Path) -> List[Tuple[str, str]]:
             return "h2"
         return "body"
 
+    events = sorted(
+        [(p, t, "line", text, size) for p, t, text, size in lines]
+        + [(p, t, "image", blob, None) for p, t, blob in images],
+        key=lambda e: (e[0], e[1]),
+    )
+
     sections: List[Tuple[str, List[str]]] = []
+    section_images: List[Tuple[str, bytes]] = []
     pending_heading: List[str] = []
-    pending_level: str | None = None
+    pending_level: Optional[str] = None
 
     def flush_heading():
         nonlocal pending_heading, pending_level
@@ -105,7 +143,15 @@ def split_pdf(pdf_path: Path) -> List[Tuple[str, str]]:
             sections[-1][1].append(f"## {text}")
         pending_heading, pending_level = [], None
 
-    for text, size in lines:
+    for _, _, kind, payload, size in events:
+        if kind == "image":
+            flush_heading()
+            if not sections:
+                sections.append(("Preface", []))
+            section_images.append((sections[-1][0], payload))
+            continue
+
+        text = payload
         lvl = level(size)
         if lvl in ("h1", "h2"):
             if pending_level == lvl:
@@ -120,15 +166,46 @@ def split_pdf(pdf_path: Path) -> List[Tuple[str, str]]:
             sections[-1][1].append(text)
     flush_heading()
 
-    return [(name, "\n\n".join(lines) + "\n") for name, lines in sections]
+    text_sections = [(name, "\n\n".join(body_lines) + "\n") for name, body_lines in sections]
+    return text_sections, section_images
+
+
+def split_pdf(pdf_path: Path) -> List[Tuple[str, str]]:
+    """Return [(section_name, markdown_body), ...] split on detected top-level headings."""
+    return _split(pdf_path)[0]
 
 
 def split_into_source(pdf_path: Path, source_dir: Path) -> List[str]:
-    """Write each split section as <source_dir>/<name>.md; return the names written."""
+    """Write each split section as <source_dir>/<name>.md, plus a <name>.svg
+    + images/<name>.png(+_original.png) per image with enough confidently-
+    recognized text to be worth localizing. Returns all names written."""
+    text_sections, image_candidates = _split(pdf_path)
+
     written = []
-    for name, body in split_pdf(pdf_path):
+    for name, body in text_sections:
         (source_dir / f"{name}.md").write_text(body)
         written.append(name)
+
+    images_dir = source_dir / "images"
+    figure_counts: dict = {}
+    for section_name, blob in image_candidates:
+        figure_counts[section_name] = figure_counts.get(section_name, 0) + 1
+        suffix = "" if figure_counts[section_name] == 1 else f"_{figure_counts[section_name]}"
+        name_hint = f"{section_name}_Figure{suffix}"
+        href = f"images/{name_hint}.png"
+
+        try:
+            figure = image_svg.convert_image(blob, name_hint, href)
+        except Exception:
+            continue
+        if figure is None:
+            continue
+
+        images_dir.mkdir(exist_ok=True)
+        (images_dir / f"{figure.name}.png").write_bytes(figure.base_png)
+        (images_dir / f"{figure.name}_original.png").write_bytes(figure.original_png)
+        (source_dir / f"{figure.name}.svg").write_text(figure.svg)
+        written.append(figure.name)
 
     raw_dir = source_dir / "_raw"
     raw_dir.mkdir(exist_ok=True)

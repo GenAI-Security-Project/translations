@@ -56,8 +56,71 @@ No human ever hand-edits `status.json`.
 | File | Component | Does |
 |---|---|---|
 | `bootstrap_asset.py` + `.github/workflows/bootstrap-asset.yml` | 1 | Validates a new asset/version, opens a PR with the `registry.yaml` entry + scaffolded folder tree. Never touches an already-registered locale. |
-| `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections once per release, machine-translates every section a locale doesn't already have a status for, opens a draft PR. |
+| `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `image_svg.py`, `svg_localize.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections and figures once per release, machine-translates every section/figure a locale doesn't already have a status for, opens a draft PR. |
 | `review_transition.py` + `.github/workflows/review-transitions.yml` | Process 1B | The only place `status.json`'s human-review states change, triggered by PR "ready for review" and PR merge. |
+
+## Figures (images with embedded text)
+
+Both real test documents turned out to contain diagrams with text baked into
+a flattened image (an architecture diagram, a risk-mapping graphic) — the
+Build Spec didn't anticipate this, so it's handled as an addition to
+Process 1, not a Process 2 rendering concern:
+
+- **Tier 1 only** (what's implemented): `image_svg.py` OCRs each embedded
+  image, blanks out whatever text it found (even text too garbled to
+  transcribe safely — see below), and hands back an SVG that overlays the
+  confidently-recognized text as real `<text>` nodes on top of the
+  now-text-free base image. The underlying graphic itself is never
+  vectorized or redrawn — only its text layer becomes swappable per locale.
+- `docx_split.py`/`pdf_split.py` extract every embedded image in document
+  order, tag each with whichever section was open when it appeared, and run
+  it through `image_svg.convert_image()`. An image needs at least 3
+  confidently-recognized text clusters and to be at least 300px in each
+  dimension to be converted at all — anything smaller/textless (icons, a
+  bullet glyph, a photo) is left as an ordinary, non-localized image.
+- A converted image becomes a `<name>_Figure.svg` "section" right alongside
+  the `.md` sections it was found next to — same `status.json` states, same
+  draft → in_review → reviewed loop, same PR review. `translate_section.py`
+  and `review_transition.py` treat `.md` and `.svg` sections identically.
+- The blanked base image is a **single shared, locale-agnostic file** at
+  `_source/images/<name>.png` — every locale's `.svg` references it via a
+  relative path (`translate_section.py`/`svg_localize.py` rehomes the href
+  automatically), so fixing the graphic (or the auto-blanking quality) once
+  in `_source/images/` fixes it for every locale's rendering. That fix is an
+  ordinary whole-file replace in a PR, the same as any other artifact here.
+  The pristine, un-blanked original is also kept alongside it
+  (`_source/images/<name>_original.png`) so a reviewer has something to
+  diff the SVG's extracted text against.
+
+**Known limitations — a figure needs *more* scrutiny in review than a prose
+section, not less:**
+
+- OCR confidence does not reliably track semantic correctness — a garbled
+  read can still score high enough to get transcribed and translated,
+  producing fluent nonsense in the target language. The conservative
+  default (only overlay high-confidence clusters; blank everything
+  text-shaped regardless of confidence, so nothing doubled/overlapping ever
+  ships) avoids the worst failure mode, but doesn't catch every bad
+  transcription — verified on a real diagram where a stylized callout box
+  had just enough recognizable words to pass the bar while getting several
+  words wrong.
+- A short, isolated label immediately next to an icon can get an inflated
+  OCR-detected height, producing oversized overlay text (observed on
+  "Agent"/"Tools" labels next to icon glyphs in a real diagram) — a rendering
+  glitch, not a translation error, but still something a reviewer needs to
+  eyeball.
+- Text below the confidence bar is blanked but not replaced, leaving a
+  visible gap rather than stale English — correct by design, but a reviewer
+  needs to notice the gap and manually complete it (using the `_original`
+  file as reference) rather than assume the figure is fully localized.
+- Runs entirely through `pytesseract`, which wraps the `tesseract-ocr` CLI
+  binary — `translate-draft.yml` installs it via `apt-get`; it is not on a
+  bare `pip install -r requirements.txt` and must stay in the workflow.
+- **Tier 2 (fully vectorizing the underlying graphic, not just its text
+  layer) is out of scope** — raster-tracing shapes/gradients/icons
+  reliably enough to trust automatically is a substantially harder problem
+  with no good automated failure signal; revisit only if Tier 1's
+  text-overlay approach proves insufficient in practice.
 
 Deliberately **not** in this repo yet (Process 2 / later phases — see
 repo-root README):

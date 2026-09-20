@@ -7,9 +7,13 @@ For a given {asset, locale}:
      files first (once per release, not once per locale).
   2. Translate every section that doesn't yet have a status.json entry for
      this locale — never re-translates a section a human is already
-     reviewing or has reviewed.
-  3. Commit each translated section as its own .md file under
-     translations/<asset>/<locale>/ with a `<!-- status: draft -->` banner.
+     reviewing or has reviewed. A "section" is either a prose .md file or a
+     Tier-1 image-localization .svg figure (see image_svg.py) — both are
+     drafted, reviewed, and tracked in status.json identically.
+  3. Commit each translated section as its own .md/.svg file under
+     translations/<asset>/<locale>/ (an .svg figure references the single
+     shared, locale-agnostic base image in _source/images/ rather than
+     copying it per locale) with a `<!-- status: draft -->` banner for .md.
   4. Write/update status.json with draft entries: source_commit and the
      provider:model string that actually produced the draft.
 
@@ -31,6 +35,7 @@ import pdf_split
 from llm_client import translate_text
 from registry_schema import Registry, SplitBy, REGISTRY_PATH
 from status_schema import SectionEntry, SectionStatus, StatusFile, status_path
+from svg_localize import translate_svg
 from translation_config import resolve_engine
 
 SPLITTERS = {
@@ -63,7 +68,12 @@ def ensure_split(asset: str, split_by: SplitBy, source_dir: Path) -> None:
 
 
 def list_sections(source_dir: Path) -> List[str]:
-    return sorted(p.stem for p in source_dir.glob("*.md"))
+    """Prose sections (.md) and Tier-1 image-localization figures (.svg,
+    produced by docx_split.py/pdf_split.py alongside the images/ folder they
+    live next to) are both "sections" from status.json's point of view."""
+    md = source_dir.glob("*.md")
+    svg = source_dir.glob("*.svg")
+    return sorted({p.stem for p in md} | {p.stem for p in svg})
 
 
 def sibling_context(locale_dir: Path, exclude: str, limit: int = 2) -> str:
@@ -112,12 +122,16 @@ def main(argv: Optional[List[str]] = None) -> None:
         if section in status.sections:
             continue  # already drafted/in review/reviewed — never clobber human work
 
-        source_text = (source_dir / f"{section}.md").read_text()
-        context = sibling_context(locale_dir, exclude=section)
-        translation = translate_text(engine, args.locale, source_text, context, offline=args.offline)
-
-        banner = "<!-- status: draft -->\n"
-        (locale_dir / f"{section}.md").write_text(banner + translation)
+        svg_path = source_dir / f"{section}.svg"
+        if svg_path.exists():
+            translation = translate_svg(engine, args.locale, svg_path.read_text(), offline=args.offline)
+            (locale_dir / f"{section}.svg").write_text(translation)
+        else:
+            source_text = (source_dir / f"{section}.md").read_text()
+            context = sibling_context(locale_dir, exclude=section)
+            translation = translate_text(engine, args.locale, source_text, context, offline=args.offline)
+            banner = "<!-- status: draft -->\n"
+            (locale_dir / f"{section}.md").write_text(banner + translation)
 
         status.sections[section] = SectionEntry(
             status=SectionStatus.draft,

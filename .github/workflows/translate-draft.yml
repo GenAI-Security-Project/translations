@@ -39,6 +39,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install tesseract-ocr
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+
       - name: Install tooling dependencies
         run: pip install -r tooling/requirements.txt
 
