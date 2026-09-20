@@ -79,6 +79,9 @@ header.site-header {
   font-weight: 700;
   line-height: 1.15;
 }
+.brand-lockup-link { text-decoration: none; }
+.brand-lockup-link:hover .brand-genai { color: var(--accent); }
+.brand-lockup-link:hover .brand-rest { color: #d8dee3; }
 .brand-lockup .brand-genai, .brand-lockup .brand-rest { color: #ffffff; }
 .brand-tagline {
   margin: 0 0 4px;
