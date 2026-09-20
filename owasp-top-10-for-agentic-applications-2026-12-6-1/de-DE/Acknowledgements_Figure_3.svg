@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="3542" height="4584" viewBox="0 0 3542 4584">
+  <!-- OCR-extracted text overlay. Verify each line against the original image (see the sibling _original file) before trusting this as a translation source. -->
+  <image href="../_source/images/Acknowledgements_Figure_3.png" xlink:href="../_source/images/Acknowledgements_Figure_3.png" width="3542" height="4584"/>
+  <text id="t0" x="422" y="885" font-size="106" fill="rgb(0,0,0)" data-ocr-confidence="92">OWASP</text>
+  <text id="t1" x="1695" y="922" font-size="160" fill="rgb(0,0,0)" data-ocr-confidence="96">Security Project</text>
+  <text id="t2" x="422" y="1122" font-size="146" fill="rgb(0,0,0)" data-ocr-confidence="96">Sponsoren</text>
+  <text id="t3" x="419" y="1401" font-size="50" fill="rgb(0,0,0)" data-ocr-confidence="96">Wir schätzen unsere Projektsponsoren, deren finanzielle Beiträge dazu beitragen, die Ziele des</text>
+  <text id="t4" x="422" y="1476" font-size="50" fill="rgb(0,0,0)" data-ocr-confidence="95">Projekts zu unterstützen und die operativen Kosten und Outreach-Kosten zu decken, die die von der</text>
+  <text id="t5" x="422" y="1548" font-size="50" fill="rgb(0,0,0)" data-ocr-confidence="94">OWASP.org-Stiftung bereitgestellten Ressourcen ergänzen. Das OWASP GenAI Security Project bewahrt weiterhin einen anbieterneutralen und</text>
+  <text id="t6" x="422" y="1617" font-size="46" fill="rgb(0,0,0)" data-ocr-confidence="95">unvoreingenommenen Ansatz. Sponsoren erhalten keine besonderen Governance-Vorteile im Rahmen ihrer</text>
+  <text id="t7" x="422" y="1690" font-size="42" fill="rgb(0,0,0)" data-ocr-confidence="95">Unterstützung.</text>
+  <text id="t8" x="419" y="1837" font-size="47" fill="rgb(0,0,0)" data-ocr-confidence="95">Sponsoren erhalten Anerkennung für ihre Beiträge in unseren Materialien und Web-Auftritten. Alle</text>
+  <text id="t9" x="422" y="1912" font-size="50" fill="rgb(0,0,0)" data-ocr-confidence="95">vom Projekt erstellten Materialien werden von der Community entwickelt, vorangetrieben und unter Open-Source- und</text>
+  <text id="t10" x="422" y="1972" font-size="37" fill="rgb(0,0,0)" data-ocr-confidence="96">Creative-Commons-Lizenzen veröffentlicht</text>
+  <text id="t11" x="1172" y="1981" font-size="46" fill="rgb(0,0,0)" data-ocr-confidence="96">Für weitere Informationen zur Sponsorenschaft besuchen Sie den Sponsoring-</text>
+  <text id="t12" x="419" y="2134" font-size="49" fill="rgb(0,0,0)" data-ocr-confidence="95">Bereich auf unserer Website, um mehr darüber zu erfahren, wie Sie das Projekt durch Sponsoring unterstützen können.</text>
+  <text id="t13" x="422" y="2307" font-size="78" fill="rgb(0,0,0)" data-ocr-confidence="96">Projektsponsoren:</text>
+  <text id="t14" x="458" y="2476" font-size="16" fill="rgb(136,144,152)" data-ocr-confidence="91">SECURI</text>
+  <text id="t15" x="631" y="2782" font-size="42" fill="rgb(8,32,56)" data-ocr-confidence="88">HIDDENLAYER</text>
+  <text id="t16" x="2275" y="2793" font-size="61" fill="rgb(16,16,16)" data-ocr-confidence="78">@ paloalto</text>
+  <text id="t17" x="1186" y="2866" font-size="40" fill="rgb(32,72,152)" data-ocr-confidence="87">Mend.io</text>
+  <text id="t18" x="1800" y="2896" font-size="78" fill="rgb(0,24,48)" data-ocr-confidence="93">snyk</text>
+  <text id="t19" x="2964" y="2862" font-size="33" fill="rgb(32,32,32)" data-ocr-confidence="96">TREND:</text>
+  <text id="t20" x="458" y="3016" font-size="26" fill="rgb(136,144,152)" data-ocr-confidence="90">GenAl</text>
+  <text id="t21" x="458" y="3051" font-size="16" fill="rgb(80,96,104)" data-ocr-confidence="95">SECURITY</text>
+  <text id="t22" x="531" y="3335" font-size="39" fill="rgb(0,0,0)" data-ocr-confidence="82">SPLX</text>
+  <text id="t23" x="2267" y="3341" font-size="51" fill="rgb(56,8,88)" data-ocr-confidence="83">&lt;pangea</text>
+  <text id="t24" x="2978" y="3357" font-size="77" fill="rgb(0,48,96)" data-ocr-confidence="96">Cobalt</text>
+  <text id="t25" x="436" y="3574" font-size="39" fill="rgb(0,0,0)" data-ocr-confidence="80">ca LAKERA</text>
+  <text id="t26" x="1617" y="3579" font-size="73" fill="rgb(72,80,184)" data-ocr-confidence="83">a) ActiveFence</text>
+  <text id="t27" x="1122" y="3645" font-size="35" fill="rgb(32,32,40)" data-ocr-confidence="88">securiti</text>
+  <text id="t28" x="3081" y="3738" font-size="25" fill="rgb(240,240,240)" data-ocr-confidence="84">= 1</text>
+  <text id="t29" x="2303" y="3830" font-size="68" fill="rgb(0,0,0)" data-ocr-confidence="72">\ Synack.</text>
+  <text id="t30" x="436" y="3860" font-size="45" fill="rgb(48,0,0)" data-ocr-confidence="92">LASSO</text>
+  <text id="t31" x="1742" y="3865" font-size="16" fill="rgb(112,112,112)" data-ocr-confidence="90">PROMPTARMOR</text>
+  <text id="t32" x="1770" y="4020" font-size="80" fill="rgb(80,104,248)" data-ocr-confidence="67">INA</text>
+  <text id="t33" x="431" y="4068" font-size="78" fill="rgb(32,40,64)" data-ocr-confidence="80">&lt;&gt; apiiro</text>
+  <text id="t34" x="1217" y="4043" font-size="61" fill="rgb(96,0,232)" data-ocr-confidence="87">akto</text>
+  <text id="t35" x="2400" y="4057" font-size="44" fill="rgb(32,32,40)" data-ocr-confidence="90">Starseer</text>
+  <text id="t36" x="2947" y="4077" font-size="62" fill="rgb(8,8,8)" data-ocr-confidence="93">Capsule</text>
+  <text id="t37" x="1717" y="4089" font-size="35" fill="rgb(32,48,56)" data-ocr-confidence="92">NeuralTrust</text>
+  <text id="t38" x="1128" y="4333" font-size="40" fill="rgb(0,0,0)" data-ocr-confidence="93">Sponsorenliste, Stand des Veröffentlichungsdatums. Die vollständige Sponsorenliste finden Sie hier.</text>
+  <text id="t39" x="422" y="4416" font-size="45" fill="rgb(0,0,0)" data-ocr-confidence="71">genai.owasp.org</text>
+  <text id="t40" x="2931" y="4413" font-size="45" fill="rgb(0,0,0)" data-ocr-confidence="96">Seite 55</text>
+</svg>
