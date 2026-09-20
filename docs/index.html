@@ -32,11 +32,28 @@
     that already exists.
   </p>
 
-  <h2><a href="status.html">Check translation status</a></h2>
+  <h2>Current translations</h2>
   <p class="hint">
-    See every asset's section-by-section progress: drafted, in review,
-    reviewed — across every locale.
+    Every document onboarded so far and its locales, read live from GitHub.
+    A locale links straight to its translated files once it has one — see
+    <a href="status.html">the full status page</a> for section-by-section
+    draft/review counts.
   </p>
+
+  <section>
+    <label for="gh-token">Personal access token</label>
+    <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_…" />
+    <button id="verify-token-button" type="button">Load</button>
+    <span id="token-status" class="token-status"></span>
+  </section>
+
+  <p id="status-message" class="hint"></p>
+
+  <div id="status-container"></div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/status.js"></script>
 </body>
 </html>
