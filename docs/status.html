@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Status — OWASP GenAI Translations</title>
 <link rel="stylesheet" href="css/style.css" />
-<style>
-  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.9rem; }
-  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 600; }
-</style>
 </head>
 <body>
 <div class="page">
@@ -23,10 +18,11 @@
   </header>
 
   <p class="hint">
-    Section counts per asset/locale, read live from each locale's
-    <code>status.json</code>. This mirrors <code>status.json</code> exactly —
-    nothing here is computed differently than what the pipeline itself
-    tracks.
+    Every onboarded document and its translations, read live from each
+    locale's <code>status.json</code>. A locale links to its actual
+    translated files on GitHub once at least one section has been drafted;
+    one registered with no draft yet shows "no sections yet" and isn't
+    linked, since there's nothing on <code>main</code> to link to.
   </p>
 
   <section>
@@ -38,15 +34,7 @@
 
   <p id="status-message" class="hint"></p>
 
-  <table id="status-table">
-    <thead>
-      <tr>
-        <th>Asset</th><th>Locale</th><th>Total</th><th>Draft</th>
-        <th>In review</th><th>Reviewed</th><th>Stale</th><th>Migrated</th><th>% Reviewed</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div id="status-container"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
