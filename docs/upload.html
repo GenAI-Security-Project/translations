@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Onboard an asset — OWASP GenAI Translations</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <h1>OWASP GenAI Translations</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="upload.html">Onboard / add locale</a>
+      <a href="status.html">Status</a>
+    </nav>
+  </header>
+
+  <p class="hint">
+    Upload a finished English asset to start translating it, or add locales to
+    one that's already onboarded. This one form does both — see
+    <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/README.md" target="_blank">tooling/README.md</a>
+    for how the pipeline works underneath.
+  </p>
+
+  <section>
+    <h2>1. GitHub access</h2>
+    <p class="hint">
+      Paste a fine-grained personal access token scoped to
+      <code>GenAI-Security-Project/translations</code> and
+      <code>GenAI-Security-Project/translations-templates</code>, with
+      <strong>Contents: Read and write</strong> permission (needed to check
+      render-template coverage and stage your upload). Generate one at
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a>.
+      The token is kept only in this browser tab's memory — it's never sent
+      anywhere but api.github.com, and it's gone when you close the tab.
+    </p>
+    <label for="gh-token">Personal access token</label>
+    <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_…" />
+    <button id="verify-token-button" type="button">Verify token</button>
+    <span id="token-status" class="token-status"></span>
+  </section>
+
+  <div id="form-body" hidden>
+    <form id="upload-form">
+      <section>
+        <h2>2. What are you onboarding?</h2>
+        <label><input type="radio" name="mode" value="new" checked /> A brand-new asset</label>
+        <label><input type="radio" name="mode" value="existing" /> Add locale(s)/a new version to an existing asset</label>
+      </section>
+
+      <section id="new-asset-fields">
+        <h2>New asset</h2>
+        <label for="file-input">Finished English source (.docx or .pdf)</label>
+        <input type="file" id="file-input" accept=".docx,.pdf" />
+        <p class="hint" id="asset-id-preview"></p>
+
+        <label for="template-select">Render template</label>
+        <select id="template-select">
+          <option value="">— choose —</option>
+          <option value="blue-template">blue-template — ranked-risk-list docs (Top 10 style)</option>
+          <option value="green-template">green-template — narrative long-form reports</option>
+          <option value="yellow-template">yellow-template — checklist/matrix documents</option>
+        </select>
+
+        <details class="optional-fields">
+          <summary>Optional: attribution</summary>
+          <label for="source-repo-input">Source repo (owner/repo, if this asset has one)</label>
+          <input type="text" id="source-repo-input" placeholder="GenAI-Security-Project/…" />
+          <label for="source-path-input">Path within that repo</label>
+          <input type="text" id="source-path-input" placeholder="_source/" />
+          <label for="owners-input">Owners (comma-separated GitHub usernames)</label>
+          <input type="text" id="owners-input" placeholder="octocat, hubot" />
+        </details>
+      </section>
+
+      <section id="existing-asset-fields" hidden>
+        <h2>Existing asset</h2>
+        <label for="existing-asset-select">Asset</label>
+        <select id="existing-asset-select"></select>
+      </section>
+
+      <section>
+        <h2>3. Version</h2>
+        <label for="version-input">Version identifier</label>
+        <input type="text" id="version-input" placeholder="2026.1" />
+      </section>
+
+      <section>
+        <h2>4. Locales</h2>
+        <p class="hint">
+          A locale flagged with ⚠ has no render override in
+          translations-templates yet — the draft translation still proceeds,
+          it just can't be published until an admin adds one.
+        </p>
+        <div id="locale-checklist"></div>
+      </section>
+
+      <section>
+        <h2>5. Confirm</h2>
+        <div id="captcha-container"></div>
+      </section>
+
+      <button id="submit-button" type="submit">Submit</button>
+      <div id="submit-result"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="js/locales.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/captcha.js"></script>
+<script src="js/upload.js"></script>
+</body>
+</html>

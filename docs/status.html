@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Status — OWASP GenAI Translations</title>
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <h1>OWASP GenAI Translations</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="upload.html">Onboard / add locale</a>
+      <a href="status.html">Status</a>
+    </nav>
+  </header>
+
+  <p class="hint">
+    Section counts per asset/locale, read live from each locale's
+    <code>status.json</code>. This mirrors <code>status.json</code> exactly —
+    nothing here is computed differently than what the pipeline itself
+    tracks.
+  </p>
+
+  <section>
+    <label for="gh-token">Personal access token</label>
+    <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_…" />
+    <button id="verify-token-button" type="button">Load status</button>
+    <span id="token-status" class="token-status"></span>
+  </section>
+
+  <p id="status-message" class="hint"></p>
+
+  <table id="status-table">
+    <thead>
+      <tr>
+        <th>Asset</th><th>Locale</th><th>Total</th><th>Draft</th>
+        <th>In review</th><th>Reviewed</th><th>Stale</th><th>Migrated</th><th>% Reviewed</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/status.js"></script>
+</body>
+</html>
