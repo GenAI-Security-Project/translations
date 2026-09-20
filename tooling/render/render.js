@@ -54,7 +54,7 @@ const DEFAULT_CONFIG = {
   legal_notice: null,
   headings: {},
   line_breaking: { line_break: "auto", word_break: "normal", word_spacing: "normal", hyphens: "none", hyphens_lang: null },
-  footer: { show_page_numbers: true, page_number_format: "{page}", show_url: true, url_text: "genai.owasp.org" },
+  footer: { show_page_numbers: true, page_number_format: "{page}", show_url: true, url_text: "GenAI.OWASP.org" },
   watermark: {
     text: "DRAFT — NOT FOR RELEASE", font_family: "heading", font_size_pt: 60,
     color: "#C0392B", opacity: 0.18, rotation_deg: -35, repeat: false,
@@ -315,9 +315,7 @@ async function main() {
 
   const googleLinkTags = googleHrefs.map((href) => `<link rel="stylesheet" href="${href}">`).join("\n");
 
-  const html = `<!DOCTYPE html>
-<html lang="${args.locale}" dir="${cfg.direction}">
-<head>
+  const sharedHead = `
 <meta charset="utf-8">
 <title>${assetEntry.title || args.asset} -- ${args.locale}</title>
 ${googleLinkTags}
@@ -353,12 +351,32 @@ ${watermarkCss}
   color: #000000; opacity: 0.12; pointer-events: none; z-index: 9998;
   white-space: nowrap;
 }
-</style>
-</head>
-<body ${cfg.line_breaking.hyphens_lang ? `lang="${cfg.line_breaking.hyphens_lang}"` : ""}>
+</style>`;
+
+  const bodyAttrs = cfg.line_breaking.hyphens_lang ? ` lang="${cfg.line_breaking.hyphens_lang}"` : "";
+
+  // The page-number/URL footer excludes the cover (a common convention --
+  // a cover isn't "page 1" the way a reader counts pages) -- Puppeteer's
+  // footerTemplate has no per-page toggle, so the cover renders as its own
+  // single-page PDF with no footer at all, and everything else renders
+  // separately with the footer on; the two are merged below. The watermark
+  // and tracking stamp are unaffected -- both still appear on the cover.
+  const coverOnlyHtml = `<!DOCTYPE html>
+<html lang="${args.locale}" dir="${cfg.direction}">
+<head>${sharedHead}</head>
+<body${bodyAttrs}>
 <div class="tracking-stamp">${trackingText}</div>
 ${watermarkHtml}
 ${coverHtml}
+</body>
+</html>`;
+
+  const restHtml = `<!DOCTYPE html>
+<html lang="${args.locale}" dir="${cfg.direction}">
+<head>${sharedHead}</head>
+<body${bodyAttrs}>
+<div class="tracking-stamp">${trackingText}</div>
+${watermarkHtml}
 ${legalHtml}
 ${tocHtml}
 ${sectionsHtml.join("\n")}
@@ -366,53 +384,76 @@ ${sectionsHtml.join("\n")}
 </html>`;
 
   const pageNumberFooter = cfg.footer.show_page_numbers
-    ? `<div style="font-size:8pt; width:100%; text-align:center;">
-         ${cfg.footer.page_number_format.replace("{page}", '<span class="pageNumber"></span>').replace("{total}", '<span class="totalPages"></span>')}
-         ${cfg.footer.show_url ? ` &mdash; ${cfg.footer.url_text}` : ""}
+    ? `<div style="font-size:8pt; width:100%; display:flex; justify-content:space-between; padding:0 10mm;">
+         <span>${cfg.footer.show_url ? cfg.footer.url_text : ""}</span>
+         <span>${cfg.footer.page_number_format.replace("{page}", '<span class="pageNumber"></span>').replace("{total}", '<span class="totalPages"></span>')}</span>
        </div>`
     : `<div></div>`;
 
   // page.setContent() gives the page no real origin, and Chrome refuses
   // file:// font/image loads from a page with no origin -- fonts silently
   // fall back to a generic serif/sans and <img src="file://..."> renders
-  // blank, with no error surfaced anywhere. Writing the HTML to a real file
-  // and page.goto()-ing it gives the page an actual file:// origin, under
-  // which same-machine file:// resource loads work normally.
-  const tmpHtmlPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "render-")), "doc.html");
-  fs.writeFileSync(tmpHtmlPath, html);
+  // blank, with no error surfaced anywhere. Writing each HTML doc to a real
+  // file and page.goto()-ing it gives the page an actual file:// origin,
+  // under which same-machine file:// resource loads work normally.
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "render-"));
+  const coverHtmlPath = path.join(tmpDir, "cover.html");
+  const restHtmlPath = path.join(tmpDir, "rest.html");
+  fs.writeFileSync(coverHtmlPath, coverOnlyHtml);
+  fs.writeFileSync(restHtmlPath, restHtml);
+
+  const pdfMargin = {
+    top: `${cfg.page.margins.top_mm}mm`,
+    bottom: `${cfg.page.margins.bottom_mm}mm`,
+    left: `${cfg.page.margins.left_mm}mm`,
+    right: `${cfg.page.margins.right_mm}mm`,
+  };
 
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
   });
   try {
-    const page = await browser.newPage();
-    await page.goto("file://" + tmpHtmlPath, { waitUntil: "networkidle0" });
-    const pdfBuffer = await page.pdf({
+    const coverPage = await browser.newPage();
+    await coverPage.goto("file://" + coverHtmlPath, { waitUntil: "networkidle0" });
+    const coverPdfBuffer = await coverPage.pdf({
       format: cfg.page.size,
-      margin: {
-        top: `${cfg.page.margins.top_mm}mm`,
-        bottom: `${cfg.page.margins.bottom_mm}mm`,
-        left: `${cfg.page.margins.left_mm}mm`,
-        right: `${cfg.page.margins.right_mm}mm`,
-      },
+      margin: pdfMargin,
+      displayHeaderFooter: false,
+      printBackground: true,
+    });
+
+    const restPage = await browser.newPage();
+    await restPage.goto("file://" + restHtmlPath, { waitUntil: "networkidle0" });
+    const restPdfBuffer = await restPage.pdf({
+      format: cfg.page.size,
+      margin: pdfMargin,
       displayHeaderFooter: true,
       headerTemplate: "<div></div>",
       footerTemplate: pageNumberFooter,
       printBackground: true,
     });
 
+    // Merge: the cover's own single-page PDF (no footer) followed by every
+    // page of the footer-enabled body PDF, whose own pageNumber counter
+    // starts at 1 -- so "page 1" as shown to the reader is the first page
+    // after the cover, matching "exclude the cover" as the reader sees it.
+    const mergedDoc = await PDFDocument.create();
+    const coverSrc = await PDFDocument.load(coverPdfBuffer);
+    const restSrc = await PDFDocument.load(restPdfBuffer);
+    for (const p of await mergedDoc.copyPages(coverSrc, coverSrc.getPageIndices())) mergedDoc.addPage(p);
+    for (const p of await mergedDoc.copyPages(restSrc, restSrc.getPageIndices())) mergedDoc.addPage(p);
+
     // Same tracking info as the on-page stamp, but as real PDF metadata --
     // survives independently of the visual stamp (readable by any PDF tool,
     // e.g. `exiftool` or `pdfinfo`, without opening/rendering the file) and
     // gives a second, redundant channel: a page could be re-printed/scanned
     // and lose the metadata while keeping the on-page stamp, or vice versa.
-    const pdfDoc = await PDFDocument.load(pdfBuffer);
-    pdfDoc.setSubject("OWASP GenAI Security Project translations pipeline output");
-    pdfDoc.setKeywords([PROJECT_URL, `published:${publicationDate}`, `sha256:${contentChecksum}`, `bytes:${contentLength}`]);
-    pdfDoc.setProducer("OWASP GenAI Security Project translations pipeline");
-    pdfDoc.setCreator(PROJECT_URL);
-    const finalBuffer = Buffer.from(await pdfDoc.save());
+    mergedDoc.setSubject("OWASP GenAI Security Project translations pipeline output");
+    mergedDoc.setKeywords([PROJECT_URL, `published:${publicationDate}`, `sha256:${contentChecksum}`, `bytes:${contentLength}`]);
+    mergedDoc.setProducer("OWASP GenAI Security Project translations pipeline");
+    mergedDoc.setCreator(PROJECT_URL);
+    const finalBuffer = Buffer.from(await mergedDoc.save());
 
     const outPath = args.out || path.join(
       args.root, args.asset, args.locale, "release",
@@ -424,7 +465,7 @@ ${sectionsHtml.join("\n")}
     console.log(`sha256=${contentChecksum}`);
   } finally {
     await browser.close();
-    fs.rmSync(path.dirname(tmpHtmlPath), { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }
 
