@@ -55,7 +55,7 @@ No human ever hand-edits `status.json`.
 
 | File | Component | Does |
 |---|---|---|
-| `bootstrap_asset.py` + `.github/workflows/bootstrap-asset.yml` | 1 | Validates a new asset/version, opens a PR with the `registry.yaml` entry + scaffolded folder tree. Never touches an already-registered locale. |
+| `bootstrap_asset.py`, `asset_naming.py` + `.github/workflows/bootstrap-asset.yml` | 1 | Validates a new asset/version, opens a PR with the `registry.yaml` entry + scaffolded folder tree. Never touches an already-registered locale. |
 | `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `image_svg.py`, `svg_localize.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections and figures once per release, machine-translates every section/figure a locale doesn't already have a status for, opens a draft PR. |
 | `review_transition.py` + `.github/workflows/review-transitions.yml` | Process 1B | The only place `status.json`'s human-review states change, triggered by PR "ready for review" and PR merge. |
 
@@ -132,6 +132,37 @@ repo-root README):
   pipeline works end-to-end." Until then, `bootstrap-asset.yml` and
   `translate-draft.yml` are triggered via `workflow_dispatch` (or
   `repository_dispatch`, once the form exists) instead of a web form.
+
+## Asset naming
+
+`--asset` is required to add a locale or bump a version of an **existing**
+asset — there's no reliable way to infer "this new upload continues that
+asset" from a filename alone, since a real version re-upload almost always
+has a different filename (a new date, a new "Final" suffix, ...).
+
+For a **brand-new** asset uploaded as a single `.docx`/`.pdf`, `--asset` is
+optional: `asset_naming.py` derives a stable id from the uploaded file's
+name once, here, and that id is what goes in `registry.yaml` from then on —
+the repo folder is named after the *document*, not an arbitrary short id
+someone has to think up. It strips the extension and tokens that look like
+version/date noise from either end (a 4-digit year, `v2`, `Final`, `July26`,
+a dotted version number, and — only when it directly follows one of those —
+a trailing bare number, so a real "Top 10" isn't mistaken for a version
+suffix), then slugifies what's left:
+
+| Uploaded filename | Derived asset id |
+|---|---|
+| `OWASP-Top-10-for-Agentic-Applications-2026-12.6-1.pdf` | `owasp-top-10-for-agentic-applications` |
+| `2026 OWASP GenAI LLM Top 10-Final_July26_01.docx` | `owasp-genai-llm-top-10` |
+
+Best-effort, not exact — if it derives something you don't want, pass
+`--asset` explicitly instead (bootstrap_asset.py also refuses to proceed if
+a derived id collides with an asset already in `registry.yaml`, rather than
+silently treating an unrelated upload as a new version of it).
+
+`existing_files` uploads (a folder of already-split sections, not a single
+document) have no single filename to derive from, so `--asset` stays
+required there regardless.
 
 ## Trying it locally
 

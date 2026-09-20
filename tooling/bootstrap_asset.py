@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from asset_naming import asset_id_from_filename
 from registry_schema import AssetEntry, Registry, SplitBy, Template, REGISTRY_PATH
 
 TRANSLATIONS_ROOT = REGISTRY_PATH.parent
@@ -28,7 +29,15 @@ TRANSLATIONS_ROOT = REGISTRY_PATH.parent
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--asset", required=True, help="Asset id, e.g. llm-top-10")
+    p.add_argument(
+        "--asset",
+        help=(
+            "Asset id, e.g. llm-top-10. Required to add a locale or bump a version of an "
+            "EXISTING asset. Optional when onboarding a brand-new asset from a single "
+            "--uploaded-path file (.docx/.pdf) — omit it to derive a stable id from that "
+            "file's name once, here, rather than typing one by hand."
+        ),
+    )
     p.add_argument("--version", required=True, help='e.g. "2026.1"')
     p.add_argument(
         "--locales",
@@ -97,6 +106,23 @@ def main(argv: Optional[List[str]] = None) -> None:
         raise SystemExit("--locales must name at least one locale")
 
     registry = Registry.load()
+
+    if not args.asset:
+        if not args.uploaded_path or Path(args.uploaded_path).is_dir():
+            raise SystemExit(
+                "--asset is required unless onboarding a brand-new asset from a single "
+                "--uploaded-path file (.docx/.pdf) to derive an id from"
+            )
+        args.asset = asset_id_from_filename(Path(args.uploaded_path).name)
+        if args.asset in registry.assets:
+            raise SystemExit(
+                f"derived asset id '{args.asset}' from the filename already exists in "
+                f"registry.yaml. If this is a new version of that asset, pass --asset "
+                f"{args.asset} explicitly to confirm; if it's unrelated, pass --asset "
+                f"explicitly with a different id."
+            )
+        print(f"derived asset id '{args.asset}' from {Path(args.uploaded_path).name!r}")
+
     existing = registry.assets.get(args.asset)
 
     if existing is None:
@@ -157,6 +183,11 @@ def main(argv: Optional[List[str]] = None) -> None:
     if not args.dry_run:
         print(f"registry.yaml updated: {args.asset} -> locales {entry.locales}")
         print("Next: open a PR with these changes; translate-draft.yml then runs per new locale.")
+
+    # Always the last line, always this exact shape — the one thing a caller
+    # (bootstrap-asset.yml) should ever parse to learn the resolved asset id,
+    # whether it was given explicitly or derived from the uploaded filename.
+    print(f"asset_id={args.asset}")
 
 
 if __name__ == "__main__":
