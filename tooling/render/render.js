@@ -117,6 +117,25 @@ function loadStatus(root, asset, locale) {
 // file:// URL under translations-templates/assets/fonts/ -- Puppeteer needs
 // an absolute path here, a relative url() won't resolve once the HTML is
 // handed to page.setContent() with no base URL of its own.
+// A figure's svg is written at <asset>/<locale>/<name>.svg and its <image>
+// deliberately points at the shared base file with a relative href,
+// "../_source/images/<name>.png" (see svg_localize.py) -- correct from
+// that svg's own real location, but this svg gets inlined verbatim into a
+// generated HTML document that lives somewhere else entirely (a temp
+// directory), where the same relative path resolves to nothing. Chrome
+// doesn't error on a broken image src -- it silently renders nothing for
+// a normal <img>, but for an SVG <image> element it was observed to paint
+// a corrupted/garbled placeholder over the whole figure instead. Rewriting
+// every href/xlink:href to an absolute file:// URL, resolved from the
+// svg's real directory, fixes it regardless of where the temp HTML lives.
+function resolveSvgImagePaths(svgText, localeDir) {
+  return svgText.replace(/((?:xlink:)?href)="([^"]+)"/g, (match, attr, value) => {
+    if (/^(https?:|data:|file:)/.test(value)) return match;
+    const absPath = path.resolve(localeDir, value);
+    return `${attr}="file://${absPath}"`;
+  });
+}
+
 function fontFaceCss(fonts, templatesRoot) {
   const blocks = [];
   const googleHrefs = [];
@@ -270,7 +289,7 @@ async function main() {
     } else if (fs.existsSync(svgPath)) {
       const svg = fs.readFileSync(svgPath, "utf-8");
       rawContentParts.push(svg);
-      sectionsHtml.push(`<section class="content-section figure">${svg}</section>`);
+      sectionsHtml.push(`<section class="content-section figure">${resolveSvgImagePaths(svg, localeDir)}</section>`);
     }
     // A section/figure not yet drafted (no file either way) is simply
     // skipped in a non-final preview; --final already refused above if
