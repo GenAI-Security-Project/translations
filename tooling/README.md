@@ -70,15 +70,22 @@ each draft was produced. Written by `translation_log.py`, called from
   `status.json` entry, the next `translate_section.py` run for that locale
   retries it automatically.
 - **`valid`**/**`validation_notes`** come from `validate_translation()`'s
-  coarse sanity check — empty output, output that still looks garbled after
-  `text_quality.is_garbled()`, or a translated/source length ratio outside
-  0.3×–3× (catching truncation or runaway repetition). This is a heuristic,
-  not a correctness guarantee: it exists to catch the *shape* of a broken
-  translation, like the one that shipped completely blank until a human
-  caught it in review (see PR history) — it does not replace human review,
-  and a section can pass validation here and still need real editorial
-  correction. A flagged section still gets drafted and reviewed normally;
-  `translate_section.py` just prints a warning so it's not missed.
+  coarse sanity check: empty output, output that still looks garbled after
+  `text_quality.is_garbled()`, a translated/source length ratio outside
+  0.3×–3× (truncation or runaway repetition), or — the sharper check —
+  fewer Markdown headings (`#`/`##`/...) than the source has. Length ratio
+  alone missed a real truncation in review: a section cut off mid-list at
+  53% of source length (comfortably inside the ratio bounds) was silently
+  missing 3 of its 5 subsections; heading count catches that a raw
+  character ratio can't. This is still a heuristic, not a correctness
+  guarantee — it does not replace human review, and a section can pass
+  validation here and still need real editorial correction. **A flagged
+  section is discarded, not just warned about**: `translate_section.py`
+  deletes the file and never writes a `status.json` entry for it, so the
+  next run retries it automatically — the same treatment as an outright
+  failure, and for the same reason: a broken draft sitting in
+  `status.json` looking identical to a good one is exactly the failure
+  mode this log exists to prevent.
 - **`start`/`finish`/`duration_seconds`** are the real timing data behind
   any "how long will a document this size take" estimate — sum
   `duration_seconds` across a run's entries (filter by `status: "success"`,

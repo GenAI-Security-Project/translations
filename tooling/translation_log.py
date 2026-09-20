@@ -24,6 +24,7 @@ validation here and still need real editorial correction.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +35,7 @@ from text_quality import is_garbled
 
 MIN_LENGTH_RATIO = 0.3  # translated/source shorter than this suggests truncation
 MAX_LENGTH_RATIO = 3.0  # translated/source longer than this suggests runaway repetition
+_HEADING_RE = re.compile(r"^#{1,6}\s", re.MULTILINE)
 
 # USD per million tokens, keyed by the same "provider:model" string recorded
 # as a section's `translator` (see status_schema.py). Update when pricing
@@ -75,6 +77,21 @@ def validate_translation(source_text: str, translated_text: str) -> ValidationRe
             notes.append(f"translated length is only {ratio:.0%} of source — possible truncation")
         elif ratio > MAX_LENGTH_RATIO:
             notes.append(f"translated length is {ratio:.1f}x source — possible runaway repetition")
+
+        # Length ratio alone missed a real truncation caught in review: a
+        # section cut off mid-list at 53% of source length (comfortably
+        # above the 30% floor) was missing 3 of its 5 "## " subsections.
+        # Heading count is a much sharper signal for this document's
+        # consistently-structured sections — a translation covering every
+        # heading the source has can't have silently dropped a whole
+        # subsection the way a raw length ratio can miss.
+        source_headings = len(_HEADING_RE.findall(source_stripped))
+        translated_headings = len(_HEADING_RE.findall(stripped))
+        if source_headings > 0 and translated_headings < source_headings:
+            notes.append(
+                f"translated content has {translated_headings} heading(s), source has "
+                f"{source_headings} — likely missing section(s)/truncated"
+            )
 
     return ValidationResult(valid=not notes, notes=notes)
 

@@ -13,15 +13,20 @@ For a given {asset, locale}:
   3. Commit each translated section as its own .md/.svg file under
      translations/<asset>/<locale>/ (an .svg figure references the single
      shared, locale-agnostic base image in _source/images/ rather than
-     copying it per locale) with a `<!-- status: draft -->` banner for .md.
+     copying it per locale) with a `<!-- status: draft -->` banner for .md —
+     unless it fails validate_translation()'s sanity check (empty, garbled,
+     or badly truncated/runaway output), in which case the file is
+     discarded rather than committed.
   4. Write/update status.json with draft entries: source_commit and the
-     provider:model string that actually produced the draft.
+     provider:model string that actually produced the draft. A section that
+     raised an exception or failed validation gets no entry either way.
   5. Append one entry per section to translation_log.jsonl (start/finish
      time, duration, a validation verdict, and real input/output token
-     counts with an estimated USD cost) regardless of outcome — a section
-     that fails to translate is logged and skipped, not fatal to the rest
-     of the run; status.json simply has no entry for it, so it's retried
-     automatically the next time this runs for that locale.
+     counts with an estimated USD cost) regardless of outcome. A section
+     that fails outright or fails validation is logged and skipped, not
+     fatal to the rest of the run; since it never gets a status.json entry,
+     it's retried automatically the next time this runs for that locale —
+     but the run still exits non-zero so the failure isn't silently missed.
 
 The workflow (not this script) is responsible for opening the PR — this
 script only touches files, so it can be run and tested locally.
@@ -175,8 +180,19 @@ def main(argv: Optional[List[str]] = None) -> None:
             validation=validation, usage=usage, translator=engine.label,
         )
         if not validation.valid:
+            # A validation failure (empty/garbled/truncated output — caught
+            # for real on the first tracked run: a section came back with
+            # leaked context formatting and cut off mid-word at 7% of source
+            # length) is treated like an outright failure, not a soft
+            # warning a reviewer could miss: discard the file rather than
+            # leave a broken draft with a status.json entry that looks like
+            # any other successful section. No status entry means the next
+            # run retries it automatically, same as an API failure above.
+            output_path = (locale_dir / f"{section}.svg") if svg_path.exists() else (locale_dir / f"{section}.md")
+            output_path.unlink(missing_ok=True)
             flagged_now.append(section)
-            print(f"VALIDATION WARNING for {section}: {'; '.join(validation.notes)}")
+            print(f"VALIDATION FAILED for {section}, discarded (will retry next run): {'; '.join(validation.notes)}")
+            continue
 
         status.sections[section] = SectionEntry(
             status=SectionStatus.draft,
@@ -192,9 +208,11 @@ def main(argv: Optional[List[str]] = None) -> None:
     else:
         print(f"nothing to draft for {args.asset}/{args.locale} — every section already has a status")
     if flagged_now:
-        print(f"{len(flagged_now)} section(s) flagged by validation, review before approving: {flagged_now}")
-    if failed_now:
-        raise SystemExit(f"{len(failed_now)} section(s) failed to draft: {failed_now} — see {log_file}")
+        print(f"{len(flagged_now)} section(s) discarded by validation, will retry next run: {flagged_now}")
+    if failed_now or flagged_now:
+        raise SystemExit(
+            f"{len(failed_now)} failed, {len(flagged_now)} discarded by validation — see {log_file}"
+        )
 
 
 if __name__ == "__main__":
