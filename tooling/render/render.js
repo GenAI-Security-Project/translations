@@ -187,6 +187,8 @@ function buildWatermarkCss(cfg, fonts) {
     }`;
 }
 
+const PAGE_HEIGHT_MM = { A4: 297, Letter: 279.4 };
+
 function renderCoverHtml(cfg, meta) {
   const logoImg = cfg.cover.logo_path
     ? `<img src="file://${meta.logoAbsPath}" style="max-width: 220px; margin-bottom: 48px;" />`
@@ -198,19 +200,45 @@ function renderCoverHtml(cfg, meta) {
   // OWASP cover art (a gradient + circle/dragonfly motif graphic, not a
   // flat fill) -- content sits below it, not on top of it. "full": the
   // image covers the entire page behind the content.
+  // .cover's own height:100% (in the stylesheet) resolves against body,
+  // which has no defined height in this print-layout DOM (no single
+  // fixed-height "page" element exists before Puppeteer paginates) -- so
+  // it was actually shrinking to fit its short flowing text content, and
+  // silently clipping anything taller (a full-bleed cover image) via its
+  // own overflow:hidden. An explicit physical height sidesteps that.
+  // Puppeteer's own margin option reserves this much space outside the
+  // printable content area -- the HTML only ever needs to fill what's left.
+  const pageHeightMm = (PAGE_HEIGHT_MM[cfg.page.size] || PAGE_HEIGHT_MM.A4)
+    - cfg.page.margins.top_mm - cfg.page.margins.bottom_mm;
+
+  // An explicit physical height on the cover section itself, applied
+  // whenever there's a background image, regardless of "top" or "full" --
+  // needed for "full" so the image isn't clipped to the section's own
+  // shrink-to-fit height (see above); applied to "top" too so the section
+  // (and its background_color fill) spans the whole page, leaving no bare
+  // white gap below a short decorative band. This only works cleanly
+  // alongside the .cover-title/subtitle/meta margin resets below --
+  // without those, unaccounted default <p>/<h1> margins push the last
+  // centered line past this fixed height and Chrome's print paginator
+  // spills it onto the *next* page instead of containing it here
+  // (overflow:hidden clips visually but doesn't prevent that).
+  const sectionHeightStyle = (cfg.cover.background_image_path && meta.coverBgAbsPath)
+    ? `height: ${pageHeightMm}mm;`
+    : "";
+
   let bgLayer = "";
-  let contentStyle = "justify-content: center;";
   if (cfg.cover.background_image_path && meta.coverBgAbsPath) {
     if (cfg.cover.background_image_position === "full") {
-      bgLayer = `<img class="cover-bg cover-bg-full" src="file://${meta.coverBgAbsPath}" alt="">`;
+      const heightMm = pageHeightMm * 0.82;
+      bgLayer = `<img class="cover-bg cover-bg-full" style="height: ${heightMm}mm;" src="file://${meta.coverBgAbsPath}" alt="">`;
     } else {
       bgLayer = `<img class="cover-bg cover-bg-top" src="file://${meta.coverBgAbsPath}" alt="">`;
-      contentStyle = "justify-content: flex-end; padding-bottom: 15%;";
     }
   }
+  const contentStyle = "justify-content: center;";
 
   return `
-    <section class="page cover" style="background:${cfg.cover.background_color}; color:${cfg.cover.text_color}; position: relative; overflow: hidden;">
+    <section class="page cover" style="background:${cfg.cover.background_color}; color:${cfg.cover.text_color}; position: relative; overflow: hidden; ${sectionHeightStyle}">
       ${bgLayer}
       <div class="cover-content" style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; height: 100%; ${contentStyle}">
         ${logoImg}
@@ -376,10 +404,23 @@ body {
 .cover { height: 100%; text-align: center; padding: 0; }
 .cover-bg { position: absolute; left: 0; top: 0; z-index: 0; }
 .cover-bg-top { width: 100%; height: auto; }
-.cover-bg-full { width: 100%; height: 100%; object-fit: cover; }
-.cover-title { font-size: 36pt; margin-bottom: 12pt; }
-.cover-subtitle { font-size: 18pt; margin-bottom: 24pt; }
-.cover-meta { font-size: 12pt; opacity: 0.8; }
+/* Matches the real OWASP template's own placement exactly: the source
+   docx anchors this image at a fixed 8.486in x 9.222in box (a:stretch +
+   fillRect = the whole image non-uniformly stretched to fill that exact
+   box, not cropped) on a page whose height puts that at ~79-84% --
+   object-fit:cover would crop this image's near-square aspect ratio down
+   to an unrecognizable sliver on a portrait page; fill (stretch) is what
+   Word itself actually does here. */
+.cover-bg-full { width: 100%; object-fit: fill; }
+/* Explicit margin resets throughout -- default browser <p>/<h1> margins
+   (~1em top+bottom each) go uncorrected as long as .cover's height is
+   auto/shrink-to-fit, but once it has a fixed physical height (needed for
+   a full-bleed cover image), that unaccounted margin is enough to push
+   the last centered line past the section's own bottom edge and onto the
+   next page instead of being contained on the cover. */
+.cover-title { font-size: 36pt; margin: 0 0 12pt; }
+.cover-subtitle { font-size: 18pt; margin: 0 0 24pt; }
+.cover-meta { font-size: 12pt; opacity: 0.8; margin: 0 0 8pt; }
 .toc ul { list-style: none; padding: 0; }
 .toc-level-1 { font-weight: 600; margin-top: 8pt; }
 .toc-level-2 { margin-left: 16pt; }
