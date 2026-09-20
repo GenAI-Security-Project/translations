@@ -52,5 +52,3 @@ ShareAlike — Wenn Sie das Material remixen, transformieren oder darauf aufbaue
 Ihre Beiträge unter derselben Lizenz wie das Original verbreiten.
 
 Link zum vollständigen Lizenztext: https://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-genai.owasp.org

@@ -60,4 +60,3 @@ Coalfire IT University Copenhagen Prompt Security
 
 Supporters list, as of publication date. Find the full supporter list here.
 
-genai.owasp.org

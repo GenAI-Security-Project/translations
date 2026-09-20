@@ -61,8 +61,6 @@ Dazu zählen verschiedene weitere OWASP Top 10, der CycloneDX-Standard, die Top 
 
 Identities (NHI) sowie das OWASP AI Vulnerability Scoring System (AIVSS) zur Bewertung und Priorisierung.
 
-genai.owasp.org
-
 Agenten verstärken bestehende Schwachstellen. Wir erweitern die Konzepte des Least-Privilege und der
 
 Excessive Agency, indem wir Least-Agency anführen. Dies fasst unseren Rat an Organisationen zusammen,
@@ -104,5 +102,3 @@ John Sotiropoulos, OWASP GenAI Security Project Board Member & ASI Co-Lead, Agen
 Keren Katz, Agentic Top 10 Lead, OWASP GenAI Security Project - ASI Core Team
 
 Ron F. Del Rosario, OWASP GenAI Security Project Core Team Member & ASI Co-Lead
-
-genai.owasp.org

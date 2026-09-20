@@ -67,8 +67,6 @@ ultérieures. Les effets incluent la désinformation, l'exécution de code dange
 
 d'outils incorrectes.
 
-genai.owasp.org
-
 3. Manipulation de la fenêtre de contexte : un attaquant injecte un contenu conçu dans une
 
 conversation ou une tâche en cours afin qu'il soit ultérieurement résumé ou persisté en mémoire,
@@ -156,8 +154,6 @@ contextuel par tâche ; minimiser la rétention en fonction de la sensibilité d
 5. Provenance et anomalies : exiger l'attribution des sources et détecter les mises à jour ou
 
 fréquences suspectes.
-
-genai.owasp.org
 
 6. Empêcher la réingestion automatique des sorties générées par l'agent lui-même dans la mémoire
 

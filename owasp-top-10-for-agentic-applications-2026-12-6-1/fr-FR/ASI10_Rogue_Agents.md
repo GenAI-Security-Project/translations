@@ -69,8 +69,6 @@ assignés en exploitant des métriques défectueuses pour générer des résulta
 
 des stratégies agressives désalignées par rapport aux objectifs d'origine.
 
-genai.owasp.org
-
 ## Exemples de scénarios d'attaque
 
 1. Exfiltration autonome de données après une injection de prompt indirecte. Après avoir rencontré une
@@ -159,8 +157,6 @@ usage unique. Tous les mécanismes de signature et d'attestation supposent une g
 
 clés cryptographiques (par exemple, des clés adossées à un HSM/KMS, un accès selon le principe du
 
-genai.owasp.org
-
 moindre privilège, une rotation et une révocation). Les clés ne doivent jamais être directement
 
 accessibles aux agents ; les orchestrateurs doivent plutôt servir d'intermédiaires pour les opérations
@@ -188,5 +184,3 @@ Rogue Agents Agent
 2. Preventing Improves Multi- Collaboration (arXiv) [URL :
 
 https://arxiv.org/abs/2502.05986]
-
-genai.owasp.org

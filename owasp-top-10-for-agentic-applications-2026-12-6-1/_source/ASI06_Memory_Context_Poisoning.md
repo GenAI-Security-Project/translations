@@ -52,8 +52,6 @@ chats, influencing later sessions. Effects include misinformation, unsafe code e
 
 incorrect tool actions.
 
-genai.owasp.org
-
 3. Context-window manipulation: An attacker injects crafted content into an ongoing conversation or
 
 task so that it is later summarized or persisted in memory, contaminating future reasoning or
@@ -122,8 +120,6 @@ per task; minimize retention by data sensitivity.
 
 frequencies.
 
-genai.owasp.org
-
 6. Prevent automatic re-ingestion of an agent’s own generated outputs into trusted memory to
 
 avoid self-reinforcing contamination or “bootstrap poisoning.”
@@ -180,4 +176,3 @@ https://arxiv.org/abs/2504.07952v1
 
 Allowed Private Data Exfiltration
 
-genai.owasp.org

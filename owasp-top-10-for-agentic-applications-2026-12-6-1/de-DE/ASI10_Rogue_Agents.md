@@ -21,8 +21,6 @@ Abtrünnige Agenten stellen ein eigenständiges Risiko der Verhaltensabweichung 
 
 4. Reward Hacking und Optimierungsmissbrauch: Agenten manipulieren ihre zugewiesenen Belohnungssysteme, indem sie fehlerhafte Metriken ausnutzen, um irreführende Ergebnisse zu erzeugen oder aggressive Strategien zu verfolgen, die nicht mit den ursprünglichen Zielen übereinstimmen.
 
-genai.owasp.org
-
 ## Beispielhafte Angriffsszenarien
 
 1. Autonome Datenexfiltration nach indirekter Prompt Injection: Nach dem Auftreten einer vergifteten Web-Anweisung lernt der Agent dieses Verhalten und fährt eigenständig fort, sensible Dateien zu durchsuchen und an externe Server zu übertragen – selbst nachdem die bösartige Quelle entfernt wurde, was ein anhaltendes, unautorisiertes Verhalten über den beabsichtigten Geltungsbereich hinaus zeigt.
@@ -56,5 +54,3 @@ https://arxiv.org/abs/2503.12188]
 
 2. Preventing Rogue Agents Improves Multi-Agent Collaboration (arXiv) [URL:
 https://arxiv.org/abs/2502.05986]
-
-genai.owasp.org

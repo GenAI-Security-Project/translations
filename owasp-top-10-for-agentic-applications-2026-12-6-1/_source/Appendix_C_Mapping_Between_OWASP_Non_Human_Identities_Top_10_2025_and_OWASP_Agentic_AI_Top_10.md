@@ -46,8 +46,6 @@ NHI compromised and ASI03 – Identity & Rogue Agents
 
 exploited. Privilege Abuse
 
-genai.owasp.org
-
 NHI4: Insecure Weak or deprecated ASI03 – Identity & T16 Insecure Inter- Agent Access
 
 Authentication authentication Privilege Abuse · Agent Protocol Control Violation
@@ -114,4 +112,3 @@ accountability and – Agent Goal Hijack Deceptive Manipulation
 
 privilege misuse. Behaviors
 
-genai.owasp.org

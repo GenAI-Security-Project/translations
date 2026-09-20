@@ -56,8 +56,6 @@ exploiting flawed metrics to generate misleading results or adopt aggressive str
 
 with the original goals.
 
-genai.owasp.org
-
 ## Example Attack Scenarios
 
 1. Autonomous data exfiltration after indirect prompt injection. After encountering a poisoned web
@@ -132,8 +130,6 @@ tools, and per-run ephemeral credentials with one-time audience binding. All sig
 
 mechanisms assume hardened cryptographic key management (e.g., HSM/KMS-backed keys, least-
 
-genai.owasp.org
-
 privilege access, rotation and revocation). Keys must never be directly available to agents; instead,
 
 orchestrators should mediate signing operations so that a compromised agent cannot simply
@@ -160,4 +156,3 @@ Rogue Agents Agent
 
 https://arxiv.org/abs/2502.05986]
 
-genai.owasp.org

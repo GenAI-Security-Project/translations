@@ -62,4 +62,3 @@ ASI02: Tool Misuse ASI04: Agentic ASI06: Memory & ASI08: Cascading ASI10: Rogue
 
 Vulnerabilities
 
-genai.owasp.org

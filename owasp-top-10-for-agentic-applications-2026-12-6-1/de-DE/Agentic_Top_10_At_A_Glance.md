@@ -68,5 +68,3 @@ Ausnutzung von Tools Chain Vulnerabilities Context Poisoning Fehler
 (Tool Misuse &
 
 Exploitation)
-
-genai.owasp.org

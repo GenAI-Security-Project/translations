@@ -58,4 +58,3 @@ contributions under the same license as the original.
 
 Link to full license text: https://creativecommons.org/licenses/by-sa/4.0/legalcode
 
-genai.owasp.org

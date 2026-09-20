@@ -60,8 +60,6 @@ account.
 
 that impacts business decisions.
 
-genai.owasp.org
-
 ## Example Attack Scenarios
 
 1. EchoLeak: Zero-Click Indirect Prompt Injection - An attacker emails a crafted message that
@@ -136,8 +134,6 @@ behavioral baseline that includes goal state, tool-use patterns, and invariant p
 
 schema, access patterns). Track a stable identifier for the active goal where feasible, and alert on
 
-genai.owasp.org
-
 any deviations-such as unexpected goal changes, anomalous tool sequences, or shifts from the
 
 established baseline-so that unauthorized goal drift is immediately visible in operations.
@@ -162,4 +158,3 @@ vulnerability
 
 4. AgentFlayer: 0click inception attack on ChatGPT users.
 
-genai.owasp.org

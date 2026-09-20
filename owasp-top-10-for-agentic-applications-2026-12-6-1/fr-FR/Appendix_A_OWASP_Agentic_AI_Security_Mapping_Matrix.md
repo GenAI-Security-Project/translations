@@ -61,8 +61,6 @@ de la mémoire et du contexte de prompt · LLM04:2025 mémoire · T4 Surcharge S
 
 Empoisonnement des données de mémoire · T6 Objectifs
 
-genai.owasp.org
-
 et du modèle · rompus · T12 Empoisonnement
 
 LLM08:2025 Vecteurs & de la mémoire partagée
