@@ -68,6 +68,49 @@ the payload always leaves `asset` unset for a new upload, so
 `bootstrap_asset.py` derives the real, authoritative id server-side. Never
 trust the browser's copy as the source of truth.
 
+## Duplicate-asset detection
+
+`bootstrap_asset.py`'s own "derived id already exists" refusal only catches
+an *exact* id collision — and since a derived id now keeps numbers (a year,
+a version), two uploads of the same real document with a different edition
+year produce two genuinely different ids, so that check alone won't catch
+this. `js/upload.js`'s `findLikelyDuplicate()` adds a fuzzy check on top,
+run client-side whenever the selected file or locales change (new-asset
+mode only):
+
+1. Tokenize the filename and every existing `registry.yaml` asset id, same
+   noise-word filtering as `deriveAssetIdPreview()` — **plus** dropping
+   purely numeric tokens (years, versions, page numbers), since that's
+   exactly the part most likely to differ between two uploads of the same
+   document and would otherwise mask the match.
+2. Score every existing asset by **overlap coefficient**
+   (`intersection / size of the smaller token set`), not Jaccard — Jaccard
+   under-scores an abbreviated re-upload ("Agentic Top 10 Final v3" against
+   the full "OWASP Top 10 for Agentic Applications") just for being short;
+   overlap coefficient correctly scores it near 1.0 since every word in the
+   short title appears in the long one. Threshold: 0.6, deliberately
+   generous — a false positive costs one extra click, a missed true
+   positive is exactly what this exists to reduce.
+3. If the best-scoring match is above threshold, check whether any of the
+   **currently selected locales** are already registered for that asset:
+   - **Yes** (same document, that exact locale already exists): hard stop.
+     The message states the matched asset and colliding locale(s), links to
+     the asset's GitHub folder, and offers only a "Return to home" button —
+     no path to submit is left open for this combination.
+   - **No** (same-looking document, but this locale isn't registered for it
+     yet — a completely normal "add a locale" case dressed up as a new
+     upload): soft warning. Shows the match, its already-registered
+     locales, a "Use this asset instead" button (switches to existing-asset
+     mode with it pre-selected — reusing the same locale-disabling logic
+     `handleModeChange()` already has), and a required confirmation
+     checkbox ("this is a genuinely different, new document") that must be
+     checked before submit is allowed.
+
+Verified against the real registry (one real asset, `de-DE`+`fr-FR`
+registered): a re-upload naming the same document with a different year and
+`de-DE` selected correctly hard-blocks; the same file with `es-ES` selected
+correctly soft-warns; an unrelated filename correctly triggers neither.
+
 ## Locale catalog and the override-readiness warning
 
 `js/locales.js` hardcodes the 22 locales enumerated in the Build Spec's own

@@ -17,6 +17,53 @@ function deriveAssetIdPreview(filename) {
   return slug || "asset";
 }
 
+// Same noise-word filtering as deriveAssetIdPreview, plus dropping purely
+// numeric tokens (years, versions, day/page numbers) — those are exactly
+// the part of a filename most likely to differ between two uploads of the
+// same underlying document (a new edition, a version bump), so keeping
+// them in a *duplicate-detection* comparison would hide the very case this
+// check exists to catch.
+function titleTokens(idOrFilename) {
+  const stem = idOrFilename.replace(/\.[^/.]+$/, "");
+  const tokens = stem.split(/[\s_-]+/).filter(Boolean).map((t) => t.toLowerCase());
+  const noiseWordRe = /^(final|draft|rev|revision)\d*$/i;
+  const vNumRe = /^v\d+$/i;
+  const numericRe = /^\d+$/;
+  return tokens.filter((t) => !noiseWordRe.test(t) && !vNumRe.test(t) && !numericRe.test(t));
+}
+
+// Overlap coefficient (intersection / smaller set's size), not Jaccard —
+// deliberately so an abbreviated re-upload ("Agentic Top 10 Final v3" vs.
+// the full "OWASP Top 10 for Agentic Applications") still scores as a
+// near-total match: every word in the shorter title appears in the longer
+// one, which Jaccard would under-score just for being short.
+function overlapCoefficient(a, b) {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  if (setA.size === 0 || setB.size === 0) return 0;
+  const intersection = [...setA].filter((x) => setB.has(x)).length;
+  return intersection / Math.min(setA.size, setB.size);
+}
+
+const DUPLICATE_SIMILARITY_THRESHOLD = 0.6;
+
+// Best-matching existing asset for this filename, or null. Non-blocking by
+// design: a false positive costs the user one extra confirmation click; a
+// missed true positive is exactly what this exists to reduce, so the
+// threshold errs toward flagging more rather than fewer candidates.
+function findLikelyDuplicate(filename) {
+  if (!registryCache) return null;
+  const newTokens = titleTokens(filename);
+  let best = null;
+  for (const [assetId, entry] of Object.entries(registryCache.assets || {})) {
+    const score = overlapCoefficient(newTokens, titleTokens(assetId));
+    if (score >= DUPLICATE_SIMILARITY_THRESHOLD && (!best || score > best.score)) {
+      best = { assetId, entry, score };
+    }
+  }
+  return best;
+}
+
 function splitByForFilename(filename) {
   const ext = filename.split(".").pop().toLowerCase();
   if (ext === "docx") return "heading_1";
@@ -85,6 +132,88 @@ function selectedLocales() {
   return Array.from(document.querySelectorAll(".locale-checkbox:checked")).map((el) => el.value);
 }
 
+let submitBlockedByDuplicate = false;
+
+// Two-layer check, run whenever the selected file or locales change (new-
+// asset mode only — "existing asset" mode already disables already-added
+// locales directly via the checklist). Layer 1: does this filename look
+// like an existing asset (findLikelyDuplicate)? Layer 2, only if layer 1
+// matched: is one of the *currently selected* locales already registered
+// for that asset? That second layer is the meaningful distinction between
+// "heads up, double-check this" and "this exact translation already
+// exists" — same asset match, different selected locale, is a completely
+// normal add-a-locale case dressed up as a new upload, not a duplicate.
+function checkDuplicateAndLocales() {
+  const container = document.getElementById("duplicate-warning");
+  const submitButton = document.getElementById("submit-button");
+  container.innerHTML = "";
+  submitBlockedByDuplicate = false;
+
+  const fileInput = document.getElementById("file-input");
+  const file = fileInput.files[0];
+  if (!file) {
+    submitButton.disabled = false;
+    return;
+  }
+
+  const match = findLikelyDuplicate(file.name);
+  if (!match) {
+    submitButton.disabled = false;
+    return;
+  }
+
+  const assetLocales = match.entry.locales || [];
+  const selected = selectedLocales();
+  const colliding = selected.filter((loc) => assetLocales.includes(loc));
+  const assetUrl = `https://github.com/${ORG}/${CONTENT_REPO}/tree/main/${match.assetId}`;
+
+  if (colliding.length > 0) {
+    // Same document, and the exact locale(s) requested already exist for
+    // it — per instruction, do nothing further: block submission and hand
+    // the user back to the home page rather than let them proceed.
+    submitBlockedByDuplicate = true;
+    submitButton.disabled = true;
+    container.innerHTML = `
+      <div class="duplicate-block">
+        <p><strong>This translation already exists.</strong> "${file.name}" looks like the
+        existing asset <a href="${assetUrl}" target="_blank">${match.assetId}</a>, which
+        already has <strong>${colliding.join(", ")}</strong> registered.</p>
+        <a href="index.html"><button type="button">Return to home</button></a>
+      </div>`;
+    return;
+  }
+
+  submitButton.disabled = false;
+  const otherLocales = assetLocales.length
+    ? `Locales already added to it: ${assetLocales.join(", ")}.`
+    : "It has no locales added yet.";
+  container.innerHTML = `
+    <div class="duplicate-warning-soft">
+      <p>⚠ "${file.name}" looks similar to the existing asset
+      <a href="${assetUrl}" target="_blank">${match.assetId}</a>. ${otherLocales}
+      If this is the same document, use that asset instead of creating a new one.</p>
+      <button type="button" id="use-existing-instead-button" data-asset-id="${match.assetId}">
+        Use "${match.assetId}" instead
+      </button>
+      <label class="duplicate-confirm-label">
+        <input type="checkbox" id="confirm-different-document" />
+        This is a genuinely different, new document — continue as a new asset
+      </label>
+    </div>`;
+
+  document.getElementById("use-existing-instead-button").addEventListener("click", () => {
+    document.querySelector('input[name="mode"][value="existing"]').checked = true;
+    document.getElementById("existing-asset-select").value = match.assetId;
+    handleModeChange();
+    container.innerHTML = "";
+    submitButton.disabled = false;
+  });
+  document.getElementById("confirm-different-document").addEventListener("change", (e) => {
+    submitBlockedByDuplicate = !e.target.checked;
+  });
+  submitBlockedByDuplicate = true; // requires the checkbox above until explicitly confirmed
+}
+
 async function handleVerifyToken(statusEl) {
   const tokenInput = document.getElementById("gh-token");
   setToken(tokenInput.value);
@@ -128,6 +257,14 @@ function handleModeChange() {
   renderLocaleChecklist(document.getElementById("locale-checklist"), disabled);
   const template = currentTemplate();
   if (template) refreshOverrideWarnings(template);
+
+  if (mode === "new") {
+    checkDuplicateAndLocales();
+  } else {
+    document.getElementById("duplicate-warning").innerHTML = "";
+    submitBlockedByDuplicate = false;
+    document.getElementById("submit-button").disabled = false;
+  }
 }
 
 function currentTemplate() {
@@ -151,6 +288,12 @@ async function handleSubmit(event) {
   }
 
   const mode = document.querySelector('input[name="mode"]:checked').value;
+  if (mode === "new" && submitBlockedByDuplicate) {
+    resultEl.textContent = "Resolve the duplicate-asset check above before submitting.";
+    resultEl.className = "result-error";
+    return;
+  }
+
   const version = document.getElementById("version-input").value.trim();
   const locales = selectedLocales();
   if (!version || locales.length === 0) {
@@ -244,11 +387,15 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       preview.textContent = "";
     }
+    checkDuplicateAndLocales();
   });
   document.getElementById("locale-checklist").addEventListener("change", (e) => {
     if (e.target.classList.contains("locale-checkbox")) {
       const t = currentTemplate();
       if (t) refreshOverrideWarnings(t);
+      if (document.querySelector('input[name="mode"]:checked').value === "new") {
+        checkDuplicateAndLocales();
+      }
     }
   });
   document.getElementById("upload-form").addEventListener("submit", handleSubmit);

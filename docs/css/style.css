@@ -156,3 +156,16 @@ button.secondary { background: transparent; color: var(--accent); border: 1px so
 .status-pill-none { background: var(--field-bg); color: var(--muted); }
 .status-pill-progress { background: rgba(138, 90, 0, 0.15); color: var(--warn); }
 .status-pill-done { background: rgba(27, 122, 61, 0.15); color: var(--ok); }
+
+.duplicate-warning-soft, .duplicate-block {
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+}
+.duplicate-warning-soft { background: rgba(138, 90, 0, 0.1); border: 1px solid var(--warn); }
+.duplicate-warning-soft p { margin: 0 0 8px; }
+.duplicate-block { background: rgba(179, 38, 30, 0.1); border: 1px solid var(--error); }
+.duplicate-block p { margin: 0 0 10px; }
+.duplicate-confirm-label { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-weight: normal; }
+.duplicate-confirm-label input { width: auto; margin: 0; }
