@@ -9,9 +9,13 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const yaml = require("js-yaml");
 const MarkdownIt = require("markdown-it");
 const puppeteer = require("puppeteer");
+const { PDFDocument } = require("pdf-lib");
+
+const PROJECT_URL = "https://www.genaisecurityproject.com";
 
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
 
@@ -226,6 +230,9 @@ async function main() {
   const localeDir = path.join(args.root, args.asset, args.locale);
 
   const sectionsHtml = [];
+  const rawContentParts = []; // feeds the authenticity checksum below -- the
+  // actual translated text/figures, not the generated HTML wrapper around them,
+  // so the checksum reflects content changes, not renderer/styling changes.
   for (const name of order) {
     const mdPath = path.join(localeDir, `${name}.md`);
     const svgPath = path.join(localeDir, `${name}.svg`);
@@ -234,15 +241,30 @@ async function main() {
       // banner for GitHub PR review -- pipeline metadata, not content; with
       // HTML parsing off, markdown-it would otherwise print it as literal text.
       const raw = fs.readFileSync(mdPath, "utf-8").replace(/^<!--\s*status:.*?-->\n?/, "");
+      rawContentParts.push(raw);
       sectionsHtml.push(`<section class="content-section">${md.render(raw)}</section>`);
     } else if (fs.existsSync(svgPath)) {
       const svg = fs.readFileSync(svgPath, "utf-8");
+      rawContentParts.push(svg);
       sectionsHtml.push(`<section class="content-section figure">${svg}</section>`);
     }
     // A section/figure not yet drafted (no file either way) is simply
     // skipped in a non-final preview; --final already refused above if
     // anything required is missing.
   }
+
+  // Authenticity tracking, stamped faintly on every page (per request: URL +
+  // publication date + a checksum over the document) -- covers the actual
+  // assembled content, not the PDF bytes themselves (which would be
+  // circular: the checksum can't depend on a PDF that doesn't exist until
+  // after this render finishes). A reader can re-split the same locale's
+  // files, recompute this same hash, and confirm the PDF wasn't altered
+  // after publication.
+  const rawContent = rawContentParts.join("\n");
+  const contentChecksum = crypto.createHash("sha256").update(rawContent, "utf-8").digest("hex");
+  const contentLength = Buffer.byteLength(rawContent, "utf-8");
+  const publicationDate = new Date().toISOString().slice(0, 10);
+  const trackingText = `${PROJECT_URL} — published ${publicationDate} — sha256:${contentChecksum} (${contentLength} bytes)`;
 
   const headings = extractHeadings(sectionsHtml);
   const { faceCss, googleHrefs } = fontFaceCss(cfg.fonts, args.templatesRoot);
@@ -298,9 +320,16 @@ body {
 .content-section { margin-bottom: 18pt; page-break-inside: avoid; }
 .content-section.figure svg { max-width: 100%; height: auto; }
 ${watermarkCss}
+.tracking-stamp {
+  position: fixed; left: 0; bottom: 3mm; width: 100%; text-align: center;
+  font-family: sans-serif; font-size: 5pt; letter-spacing: 0.2px;
+  color: #000000; opacity: 0.12; pointer-events: none; z-index: 9998;
+  white-space: nowrap;
+}
 </style>
 </head>
 <body ${cfg.line_breaking.hyphens_lang ? `lang="${cfg.line_breaking.hyphens_lang}"` : ""}>
+<div class="tracking-stamp">${trackingText}</div>
 ${watermarkHtml}
 ${coverHtml}
 ${legalHtml}
@@ -337,13 +366,26 @@ ${sectionsHtml.join("\n")}
       printBackground: true,
     });
 
+    // Same tracking info as the on-page stamp, but as real PDF metadata --
+    // survives independently of the visual stamp (readable by any PDF tool,
+    // e.g. `exiftool` or `pdfinfo`, without opening/rendering the file) and
+    // gives a second, redundant channel: a page could be re-printed/scanned
+    // and lose the metadata while keeping the on-page stamp, or vice versa.
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    pdfDoc.setSubject("OWASP GenAI Security Project translations pipeline output");
+    pdfDoc.setKeywords([PROJECT_URL, `published:${publicationDate}`, `sha256:${contentChecksum}`, `bytes:${contentLength}`]);
+    pdfDoc.setProducer("OWASP GenAI Security Project translations pipeline");
+    pdfDoc.setCreator(PROJECT_URL);
+    const finalBuffer = Buffer.from(await pdfDoc.save());
+
     const outPath = args.out || path.join(
       args.root, args.asset, args.locale, "release",
       `${args.asset}_${args.locale}_${assetEntry.version}${args.final ? "" : "_DRAFT"}.pdf`
     );
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    fs.writeFileSync(outPath, pdfBuffer);
+    fs.writeFileSync(outPath, finalBuffer);
     console.log(`out=${outPath}`);
+    console.log(`sha256=${contentChecksum}`);
   } finally {
     await browser.close();
   }
