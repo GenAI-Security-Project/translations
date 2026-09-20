@@ -5,8 +5,13 @@ optionally, confirms the checksum still matches the locale's current
 section files -- i.e. the PDF hasn't drifted from what's on disk since
 publication.
 
-Usage: verify_pdf.py <path-to-pdf> [--asset <id> --locale <code> --root <translations-checkout>]
-Without --asset/--locale/--root, only prints the embedded metadata.
+Usage: verify_pdf.py <path-to-pdf> [--asset <id> --locale <code> --root <translations-checkout> --templates-root <translations-templates-checkout>]
+Without --asset/--locale/--root/--templates-root, only prints the embedded
+metadata. --templates-root is needed to recompute the checksum correctly
+whenever the asset's template has a sponsors.image_path configured -- see
+render.js, which excludes a sponsors-matched figure from the checksum
+since it's shared template content, not this asset's own; recomputing
+without knowing that would always mismatch for such an asset.
 """
 from __future__ import annotations
 
@@ -16,8 +21,10 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
 from pypdf import PdfReader
 
+from render_config_schema import load_render_config
 from source_manifest import read_manifest
 
 
@@ -36,13 +43,24 @@ def parse_keywords(keywords: str) -> dict:
     return info
 
 
-def recompute_checksum(root: Path, asset: str, locale: str) -> str:
+def recompute_checksum(root: Path, asset: str, locale: str, templates_root: "Path | None") -> str:
     order = read_manifest(root / asset / "_source")
     locale_dir = root / asset / locale
+
+    sponsors_keywords = []
+    if templates_root is not None:
+        registry = yaml.safe_load((root / "registry.yaml").read_text())
+        template = registry["assets"][asset]["template"]
+        cfg = load_render_config(templates_root, template, locale)
+        if cfg.sponsors.image_path:
+            sponsors_keywords = [kw.lower() for kw in cfg.sponsors.match_keywords]
+
     parts = []
     for name in order:
         md_path = locale_dir / f"{name}.md"
         svg_path = locale_dir / f"{name}.svg"
+        if svg_path.exists() and any(kw in name.lower() for kw in sponsors_keywords):
+            continue  # shared template asset, not this asset's own content -- see render.js
         if md_path.exists():
             raw = md_path.read_text(encoding="utf-8")
             raw = re.sub(r"^<!--\s*status:.*?-->\n?", "", raw)
@@ -58,6 +76,7 @@ def main() -> int:
     parser.add_argument("--asset")
     parser.add_argument("--locale")
     parser.add_argument("--root", default=".")
+    parser.add_argument("--templates-root")
     args = parser.parse_args()
 
     reader = PdfReader(args.pdf_path)
@@ -73,7 +92,8 @@ def main() -> int:
     print(f"Content length:   {info.get('bytes', '?')} bytes")
 
     if args.asset and args.locale:
-        current = recompute_checksum(Path(args.root), args.asset, args.locale)
+        templates_root = Path(args.templates_root) if args.templates_root else None
+        current = recompute_checksum(Path(args.root), args.asset, args.locale, templates_root)
         match = current == info.get("sha256")
         print(f"Current sha256:   {current}")
         print("MATCH -- unchanged since publication." if match else "MISMATCH -- content has changed since this PDF was published.")
