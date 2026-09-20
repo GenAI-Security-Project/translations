@@ -42,7 +42,7 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     p.add_argument("--owners", default="", help="Comma-separated GitHub usernames")
     p.add_argument(
         "--uploaded-path",
-        help="Local path to the uploaded file (.docx) or folder (existing_files) to sync into _source/",
+        help="Local path to the uploaded file (.docx/.pdf) or folder (existing_files) to sync into _source/",
     )
     p.add_argument("--dry-run", action="store_true", help="Print the plan; write nothing")
     return p.parse_args(argv)
@@ -70,9 +70,9 @@ def sync_source(asset: str, split_by: SplitBy, uploaded_path: Optional[str], dry
                 shutil.copytree(item, target, dirs_exist_ok=True)
             else:
                 shutil.copy2(item, target)
-    else:  # heading_1: stash the raw .docx; translate-draft.yml splits it on first run
+    else:  # heading_1 / pdf_heading: stash the raw file; translate-draft.yml splits it on first run
         if src.is_dir():
-            raise SystemExit("split_by=heading_1 requires --uploaded-path to be a single .docx file")
+            raise SystemExit(f"split_by={split_by.value} requires --uploaded-path to be a single file")
         shutil.copy2(src, dest_dir / src.name)
 
 

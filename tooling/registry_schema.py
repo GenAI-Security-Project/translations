@@ -20,7 +20,8 @@ BCP47_LOCALE_RE = r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
 
 class SplitBy(str, Enum):
     existing_files = "existing_files"
-    heading_1 = "heading_1"
+    heading_1 = "heading_1"      # Word .docx, split on the Heading 1 style
+    pdf_heading = "pdf_heading"  # PDF, split by font-size-detected top-level headings
 
 
 class Template(str, Enum):

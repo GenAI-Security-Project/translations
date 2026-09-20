@@ -38,6 +38,7 @@ tooling/
   translation_config.py     # resolves it at runtime
   bootstrap_asset.py         # component 1 — onboard an asset/locale
   docx_split.py              # splits a heading_1 .docx into English sections
+  pdf_split.py                # splits a pdf_heading PDF into English sections (font-size heuristic)
   llm_client.py               # provider-agnostic translation call
   translate_section.py        # component 2 — drafts sections for one locale
   status_schema.py            # status.json schema + read/write helpers

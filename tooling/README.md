@@ -13,9 +13,9 @@ ever writes to it.
 | Field | Type | Meaning |
 |---|---|---|
 | `source_repo` | string | Where the English source lives (`owner/repo`) |
-| `source_path` | string | Path within that repo — a folder of split files, or a single `.docx` |
+| `source_path` | string | Path within that repo — a folder of split files, or a single `.docx`/`.pdf` |
 | `version` | string | Version identifier of the current English source, e.g. `"2026.1"` |
-| `split_by` | `existing_files` \| `heading_1` | Whether sections already exist as files, or need splitting from a Word doc on Heading 1 styles |
+| `split_by` | `existing_files` \| `heading_1` \| `pdf_heading` | Whether sections already exist as files, need splitting from a Word doc on Heading 1 styles, or need splitting from a finished PDF by detected heading font sizes — real uploads observed in practice are PDFs, not `.docx` |
 | `template` | `blue-template` \| `green-template` \| `yellow-template` | Which shared render template this asset uses (lives in the separate `translations-templates` repo) |
 | `owners` | list of GitHub usernames | This asset's initiative lead(s) — feeds CODEOWNERS + publish sign-off |
 | `locales` | list of BCP-47 codes | Every locale requested for this asset so far — grows via `bootstrap_asset.py`, never hand-edited |
@@ -56,7 +56,7 @@ No human ever hand-edits `status.json`.
 | File | Component | Does |
 |---|---|---|
 | `bootstrap_asset.py` + `.github/workflows/bootstrap-asset.yml` | 1 | Validates a new asset/version, opens a PR with the `registry.yaml` entry + scaffolded folder tree. Never touches an already-registered locale. |
-| `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` into English sections (once per release), machine-translates every section a locale doesn't already have a status for, opens a draft PR. |
+| `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections once per release, machine-translates every section a locale doesn't already have a status for, opens a draft PR. |
 | `review_transition.py` + `.github/workflows/review-transitions.yml` | Process 1B | The only place `status.json`'s human-review states change, triggered by PR "ready for review" and PR merge. |
 
 Deliberately **not** in this repo yet (Process 2 / later phases — see

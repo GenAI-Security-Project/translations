@@ -2,9 +2,9 @@
 """Component 2 — translate-draft.yml's payload script.
 
 For a given {asset, locale}:
-  1. If the asset's split_by is heading_1 and _source/ still holds the raw
-     .docx, split it into per-section English Markdown files first (once per
-     release, not once per locale).
+  1. If the asset's split_by is heading_1 or pdf_heading and _source/ still
+     holds the raw .docx/.pdf, split it into per-section English Markdown
+     files first (once per release, not once per locale).
   2. Translate every section that doesn't yet have a status.json entry for
      this locale — never re-translates a section a human is already
      reviewing or has reviewed.
@@ -26,11 +26,17 @@ from typing import List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from docx_split import split_into_source
+import docx_split
+import pdf_split
 from llm_client import translate_text
 from registry_schema import Registry, SplitBy, REGISTRY_PATH
 from status_schema import SectionEntry, SectionStatus, StatusFile, status_path
 from translation_config import resolve_engine
+
+SPLITTERS = {
+    SplitBy.heading_1: (docx_split.split_into_source, "*.docx"),
+    SplitBy.pdf_heading: (pdf_split.split_into_source, "*.pdf"),
+}
 
 TRANSLATIONS_ROOT = REGISTRY_PATH.parent
 
@@ -45,14 +51,15 @@ def git_short_sha(cwd: Path) -> str:
 
 
 def ensure_split(asset: str, split_by: SplitBy, source_dir: Path) -> None:
-    if split_by is not SplitBy.heading_1:
+    if split_by not in SPLITTERS:
         return
-    docx_files = list(source_dir.glob("*.docx"))
-    if not docx_files:
+    splitter, glob_pattern = SPLITTERS[split_by]
+    raw_files = list(source_dir.glob(glob_pattern))
+    if not raw_files:
         return  # already split on a prior run
-    for docx_file in docx_files:
-        written = split_into_source(docx_file, source_dir)
-        print(f"split {docx_file.name} -> {written}")
+    for raw_file in raw_files:
+        written = splitter(raw_file, source_dir)
+        print(f"split {raw_file.name} -> {written}")
 
 
 def list_sections(source_dir: Path) -> List[str]:
