@@ -58,6 +58,7 @@ const DEFAULT_CONFIG = {
     show_page_numbers: true, page_number_format: "{page}", show_url: true,
     url_text: "https://www.genaisecurityproject.com", url_href: "https://www.genaisecurityproject.com",
   },
+  sponsors: { image_path: null, match_keywords: ["sponsor", "supporter", "acknowledgement"] },
   watermark: {
     text: "DRAFT — NOT FOR RELEASE", font_family: "heading", font_size_pt: 60,
     color: "#C0392B", opacity: 0.18, rotation_deg: -35, repeat: false,
@@ -276,9 +277,27 @@ async function main() {
   const rawContentParts = []; // feeds the authenticity checksum below -- the
   // actual translated text/figures, not the generated HTML wrapper around them,
   // so the checksum reflects content changes, not renderer/styling changes.
+  const sponsorsImageAbsPath = cfg.sponsors.image_path
+    ? path.join(args.templatesRoot, "assets", "images", cfg.sponsors.image_path)
+    : null;
+
   for (const name of order) {
     const mdPath = path.join(localeDir, `${name}.md`);
     const svgPath = path.join(localeDir, `${name}.svg`);
+    // A sponsors/supporters FIGURE changes on the org's own sponsor-roster
+    // schedule, not this asset's translation cycle -- when the template
+    // configures a shared image, a figure (never a text section -- matching
+    // must not touch mdPath, or a same-named text section like a plain
+    // "Acknowledgements" heading gets silently swallowed too) whose name
+    // matches gets that one shared, swappable file instead of this asset's
+    // own (per-locale, OCR'd) figure. See SponsorsConfig's docstring.
+    const isSponsorsFigure = sponsorsImageAbsPath && fs.existsSync(svgPath)
+      && cfg.sponsors.match_keywords.some((kw) => name.toLowerCase().includes(kw.toLowerCase()));
+    if (isSponsorsFigure) {
+      sectionsHtml.push(`<section class="content-section figure"><img src="file://${sponsorsImageAbsPath}" alt="Sponsors"></section>`);
+      continue; // shared template asset, not this asset's own content -- excluded from the content checksum below
+    }
+
     if (fs.existsSync(mdPath)) {
       // Every section file leads with a <!-- status: draft|reviewed|... -->
       // banner for GitHub PR review -- pipeline metadata, not content; with
@@ -365,7 +384,7 @@ body {
 .toc-level-1 { font-weight: 600; margin-top: 8pt; }
 .toc-level-2 { margin-left: 16pt; }
 .content-section { margin-bottom: 18pt; page-break-inside: avoid; }
-.content-section.figure svg { max-width: 100%; height: auto; }
+.content-section.figure svg, .content-section.figure img { max-width: 100%; height: auto; }
 ${watermarkCss}
 .tracking-stamp {
   position: fixed; left: 0; bottom: 3mm; width: 100%; text-align: center;

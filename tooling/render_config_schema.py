@@ -109,6 +109,24 @@ class FooterConfig(BaseModel):
     url_href: Optional[str] = "https://www.genaisecurityproject.com"  # None: plain text, not a link
 
 
+class SponsorsConfig(BaseModel):
+    """A sponsors/supporters figure (logos + often an intro blurb, bundled
+    as one OCR'd image by Tier 1 image localization -- see image_svg.py)
+    changes on its own schedule, tied to the org's actual sponsor roster,
+    not to any one asset's translation cycle. Rather than editing 3 asset
+    files x 19 locales every time a sponsor is added, one shared image
+    here replaces whichever figure(s) match -- update it by swapping this
+    one file, nothing per-asset or per-locale to touch.
+
+    Trades away per-locale translation of that figure's own text (the
+    image is static, shown identically in every locale) for update
+    simplicity -- appropriate for content that's substantially brand
+    logos anyway, not prose that needs translating."""
+
+    image_path: Optional[str] = None  # relative to assets/images/; None: no substitution, render each asset's own figure
+    match_keywords: List[str] = Field(default_factory=lambda: ["sponsor", "supporter", "acknowledgement"])
+
+
 class WatermarkConfig(BaseModel):
     """A diagonal DRAFT stamp applied to every page of a render that hasn't
     gone through publish.yml's three-way sign-off (FR4.2/NFR7) yet. The
@@ -138,6 +156,7 @@ class RenderConfig(BaseModel):
     line_breaking: LineBreakingConfig = Field(default_factory=LineBreakingConfig)
     footer: FooterConfig = Field(default_factory=FooterConfig)
     watermark: WatermarkConfig = Field(default_factory=WatermarkConfig)
+    sponsors: SponsorsConfig = Field(default_factory=SponsorsConfig)
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
