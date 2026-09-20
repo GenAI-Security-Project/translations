@@ -1,0 +1,16 @@
+# CODEOWNERS for translations
+#
+# Per the Build Spec, this is meant to become dynamic: per-locale GitHub
+# Teams get Write access and review responsibility via registry.yaml's
+# `owners:` map as the asset count grows, rather than being enumerated here
+# as static glob lines. Until the two initiative leads are named (see
+# tooling/README.md's Outstanding decisions), this file is an interim
+# placeholder so branch protection's "require review from code owners" has
+# someone real to route to.
+#
+# TODO: replace @sclintonowasp with the two named initiative leads once
+# assigned, and/or per-asset lines once more than a couple of assets exist:
+#   /llm-top-10/        @lead-1
+#   /agentic-top-10/    @lead-2
+
+*   @sclintonowasp
