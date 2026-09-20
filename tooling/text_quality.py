@@ -22,6 +22,17 @@ different template/language/page count — Process 2's render_config.json
 adds real page numbers for the final layout, so the source shouldn't carry
 stale ones through translation.
 
+Footer-URL artifacts (is_footer_url_artifact): the same running-footer
+problem as page numbers, one line down in the real source — every page of
+the real PDF/docx repeats "genai.owasp.org" as its own standalone line
+directly below the page number, the site's own footer branding typed
+inline rather than living in a real header/footer region. It belongs in
+final layout (Process 2), not translated body content, for the same
+reason a stale page number does. Scoped to that one known literal domain,
+not a general bare-URL/domain regex — a broad pattern risks stripping a
+legitimate reference URL that happens to sit alone on its own line (e.g.
+in a References section), which a footer-branding line never is.
+
 Neither check is specific to PDFs — both apply wherever text gets pulled
 out of a source document, since any extractor (docx or pdf) can hit an
 analogous artifact.
@@ -36,6 +47,7 @@ MIN_LENGTH = 8  # below this, a lone bullet/arrow/dash marker ("-", "→", "•"
                 # sustained run of symbols indicates a broken font mapping
 
 _PAGE_NUMBER_RE = re.compile(r"^page\s+\d+$", re.IGNORECASE)
+_FOOTER_URL_RE = re.compile(r"^(https?://)?(www\.)?genai\.owasp\.org/?$", re.IGNORECASE)
 
 
 def is_garbled(text: str) -> bool:
@@ -52,3 +64,10 @@ def is_page_number_artifact(text: str) -> bool:
     (too easy to collide with a genuine numbered-list item rendered on its
     own line), only the unambiguous "Page <N>" form actually observed."""
     return bool(_PAGE_NUMBER_RE.match(text.strip()))
+
+
+def is_footer_url_artifact(text: str) -> bool:
+    """Matches a standalone "genai.owasp.org" running-footer line (with or
+    without a scheme/www prefix), and nothing looser — see module docstring
+    for why this is scoped to the one known literal domain."""
+    return bool(_FOOTER_URL_RE.match(text.strip()))
