@@ -105,6 +105,7 @@ class WorkflowStatusBar {
     this._shell(`
       <p class="status-bar-message">${summary}</p>
       <div class="status-bar-track"><div class="${barClass}" style="width:${pct}%"></div></div>
+      <p class="status-bar-actions-heading">Actions:</p>
       <ul class="status-bar-steps">${stepRows}</ul>
       <a class="status-bar-link" href="${RUN_URL(run.id)}" target="_blank">View this run on GitHub →</a>
     `);

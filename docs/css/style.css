@@ -221,6 +221,14 @@ button.secondary { background: transparent; color: var(--accent); border: 1px so
 .status-bar-fill-progress { background: var(--accent); }
 .status-bar-fill-success { background: var(--ok); }
 .status-bar-fill-failure { background: var(--error); }
+.status-bar-actions-heading {
+  margin: 12px 0 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
 .status-bar-steps {
   list-style: none;
   padding: 0;
