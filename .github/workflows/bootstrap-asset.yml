@@ -60,6 +60,39 @@ jobs:
       - name: Install tooling dependencies
         run: pip install -r tooling/requirements.txt
 
+      # Only the public upload form (component 6) reaches this workflow via
+      # repository_dispatch — anyone on the internet can hit that form now
+      # that the repo/Pages site are public. workflow_dispatch is left
+      # unchecked: firing it already requires write access to this repo,
+      # granted through GitHub itself, not something an authenticator code
+      # adds to. The shared TOTP secret lives only in this job's environment
+      # (a repo secret) — it never ships to the browser, unlike a client-side
+      # passphrase, which anyone could read straight out of the page's JS.
+      - name: Verify authenticator code
+        if: github.event_name == 'repository_dispatch'
+        env:
+          TOTP_SECRET: ${{ secrets.UPLOAD_TOTP_SECRET }}
+          TOTP_CODE: ${{ github.event.client_payload.totp_code }}
+        run: |
+          python - <<'PY'
+          import os, sys
+          import pyotp
+
+          secret = os.environ.get("TOTP_SECRET")
+          code = (os.environ.get("TOTP_CODE") or "").strip()
+          if not secret:
+              print("::error::UPLOAD_TOTP_SECRET is not configured on this repo")
+              sys.exit(1)
+          if not code:
+              print("::error::No authenticator code was submitted with this upload")
+              sys.exit(1)
+          # valid_window=1 tolerates the submitter's/runner's clocks being up
+          # to one 30s step off from each other in either direction.
+          if not pyotp.TOTP(secret).verify(code, valid_window=1):
+              print("::error::Authenticator code was incorrect or expired")
+              sys.exit(1)
+          PY
+
       - name: Run bootstrap_asset.py
         id: bootstrap
         env:
