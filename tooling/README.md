@@ -6,9 +6,10 @@ and Process 2 (Assemble & Publish: `render.sh`, `render/render.js`,
 `render_config_schema.py`, `check_render_override.py`, `check_signoff.py`,
 `verify_pdf.py`, plus `.github/workflows/publish.yml`,
 `publish-direct.yml`, `check-freshness.yml`). See **`tooling/docs/`**
-(`REQUIREMENTS.md`, `DESIGN.md`, `WORKFLOW.md`) for the full current-state
-writeup, reconciled against the original PRD/Build Spec — this file stays
-focused on the file-by-file schema reference below.
+(`REQUIREMENTS.md`, `DESIGN.md`, `WORKFLOW.md`, `OPEN_ITEMS.md`) for the full
+current-state writeup, reconciled against the original PRD/Build Spec, plus
+a running list of what's still outstanding — this file stays focused on the
+file-by-file schema reference below.
 
 ## registry.yaml (repo root)
 
