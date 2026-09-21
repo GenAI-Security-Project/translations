@@ -11,7 +11,11 @@ metadata. --templates-root is needed to recompute the checksum correctly
 whenever the asset's template has a sponsors.image_path configured -- see
 render.js, which excludes a sponsors-matched figure from the checksum
 since it's shared template content, not this asset's own; recomputing
-without knowing that would always mismatch for such an asset.
+without knowing that would always mismatch for such an asset. Also
+mirrors render.js's other two content exclusions unconditionally (no flag
+needed): a Table_of_Content section by name, and a figure that's an OCR'd
+scan of that same dead source table of contents -- both content, not
+template config, so there's no equivalent "without knowing that" case.
 """
 from __future__ import annotations
 
@@ -43,6 +47,18 @@ def parse_keywords(keywords: str) -> dict:
     return info
 
 
+_WHITESPACE_RE = re.compile(r"\s+")
+
+
+def _normalize_for_match(text: str) -> str:
+    return _WHITESPACE_RE.sub(" ", text).strip()
+
+
+_TOC_SECTION_NAME_RE = re.compile(r"^table_of_contents?$", re.IGNORECASE)
+_FIRST_SVG_TEXT_RE = re.compile(r"<text[^>]*>([^<]*)</text>")
+_MD_H1_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
+
+
 def recompute_checksum(root: Path, asset: str, locale: str, templates_root: "Path | None") -> str:
     order = read_manifest(root / asset / "_source")
     locale_dir = root / asset / locale
@@ -55,8 +71,20 @@ def recompute_checksum(root: Path, asset: str, locale: str, templates_root: "Pat
         if cfg.sponsors.image_path:
             sponsors_keywords = [kw.lower() for kw in cfg.sponsors.match_keywords]
 
+    # Mirrors render.js's two dead-source-TOC exclusions exactly (see its
+    # tocHeadingText comment) -- otherwise this always mismatches, since
+    # render.js's real checksum excludes both while this would include them.
+    toc_heading_text = None
+    toc_md_path = locale_dir / "Table_of_Content.md"
+    if toc_md_path.exists():
+        m = _MD_H1_RE.search(toc_md_path.read_text(encoding="utf-8"))
+        if m:
+            toc_heading_text = _normalize_for_match(m.group(1))
+
     parts = []
     for name in order:
+        if _TOC_SECTION_NAME_RE.match(name):
+            continue  # the source's own dead table of contents -- see render.js
         md_path = locale_dir / f"{name}.md"
         svg_path = locale_dir / f"{name}.svg"
         if svg_path.exists() and any(kw in name.lower() for kw in sponsors_keywords):
@@ -66,7 +94,15 @@ def recompute_checksum(root: Path, asset: str, locale: str, templates_root: "Pat
             raw = re.sub(r"^<!--\s*status:.*?-->\n?", "", raw)
             parts.append(raw)
         elif svg_path.exists():
-            parts.append(svg_path.read_text(encoding="utf-8"))
+            svg = svg_path.read_text(encoding="utf-8")
+            first_ocr_text = _FIRST_SVG_TEXT_RE.search(svg)
+            if (
+                toc_heading_text
+                and first_ocr_text
+                and _normalize_for_match(first_ocr_text.group(1)) == toc_heading_text
+            ):
+                continue  # OCR'd scan of the same dead table of contents -- see render.js
+            parts.append(svg)
     return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
 
 

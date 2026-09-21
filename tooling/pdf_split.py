@@ -24,6 +24,17 @@ ToC page becomes a slightly noisy section rather than phantom top-level
 sections — verified against the OWASP Agentic Top 10 PDF, where body=10.1pt,
 real headings cluster at 30pt (one outlier at 24pt) bold, subsection labels
 =15.1pt, and ToC entries=13.9pt in a different, non-bold font.
+
+Body text lines are joined back into real paragraphs, not kept one-per-line:
+pdfplumber hands back every visual line of the source PDF's own layout
+separately, and treating each of those as its own Markdown paragraph
+(blank-line-separated) produced a real bug caught in review -- roughly
+three-quarters of a real document's paragraph-like blocks were mid-sentence
+fragments, each getting its own paragraph margin when rendered, visibly
+choppy spacing throughout. See _typical_body_line_gap and the
+paragraph-continuation check in _split for how a wrapped line is told apart
+from a genuine new paragraph, using the document's own line-spacing rather
+than a fixed constant.
 """
 from __future__ import annotations
 
@@ -43,6 +54,21 @@ LARGE_RATIO = 1.8    # candidate "meaningfully bigger than body text" floor
 H1_SHRINK_TOLERANCE = 0.75  # a heading can be shrunk to 75% of the dominant heading size and still count
 H2_RATIO = 1.3
 IMAGE_RASTER_RESOLUTION = 200
+# Extra same-page vertical gap, on top of the document's own typical
+# body-line spacing (see _typical_body_line_gap), that marks a real
+# paragraph break rather than the source PDF's own mid-sentence line wrap.
+# An additive margin rather than a multiplicative ratio on that typical gap,
+# since the typical gap can legitimately come out small or slightly negative
+# (font descenders/ascenders overlapping adjacent lines' bounding boxes) --
+# a ratio on a near-zero or negative baseline doesn't scale sensibly.
+PARAGRAPH_BREAK_EXTRA = 0.6  # multiplied by body_size below
+_SENTENCE_END_RE = re.compile(r"[.:!?»\"')’]\s*$")  # ., :, !, ?, », ", ', ), '
+# A numbered/bulleted list item in this document's own source layout often
+# has no more vertical space before it than an ordinary mid-sentence line
+# wrap does -- the gap-based check above can't tell "1. Foo" from a wrapped
+# continuation of the previous line by spacing alone. Its own leading marker
+# is the real signal: it always starts a new block, wrap gap or not.
+_LIST_ITEM_RE = re.compile(r"^(\d{1,3}[.)]|[•●\-*])\s")
 
 
 def _slugify(heading: str) -> str:
@@ -50,9 +76,9 @@ def _slugify(heading: str) -> str:
     return slug or "Section"
 
 
-def _thresholds(lines: List[Tuple[str, float]]) -> Tuple[float, float]:
-    """Return (h1_min, h2_min) line-max-size thresholds, derived from this document's
-    own size distribution rather than fixed absolute points."""
+def _thresholds(lines: List[Tuple[str, float]]) -> Tuple[float, float, float]:
+    """Return (h1_min, h2_min, body_size) line-max-size thresholds, derived from
+    this document's own size distribution rather than fixed absolute points."""
     line_sizes = Counter(size for _, size in lines)
     body_size = line_sizes.most_common(1)[0][0] if line_sizes else 10.0
 
@@ -63,11 +89,14 @@ def _thresholds(lines: List[Tuple[str, float]]) -> Tuple[float, float]:
     else:
         h1_min = body_size * LARGE_RATIO  # no clear heading tier found; fall back to the floor itself
 
-    return h1_min, body_size * H2_RATIO
+    return h1_min, body_size * H2_RATIO, body_size
 
 
-def _line_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, str, float]]:
-    """[(page_index, top, text, max_word_size), ...] for every visual line, in document order."""
+def _line_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, float, str, float]]:
+    """[(page_index, top, bottom, text, max_word_size), ...] for every visual
+    line, in document order. `bottom` (added alongside the pre-existing `top`)
+    is what lets _typical_body_line_gap and the paragraph-continuation check
+    in _split measure the actual vertical gap between consecutive lines."""
     out = []
     for page_index, page in enumerate(pdf.pages):
         words = page.extract_words(extra_attrs=["size"])
@@ -78,8 +107,24 @@ def _line_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, str, float]]:
         for top in sorted(grouped):
             ws = grouped[top]
             text = " ".join(w["text"] for w in ws)
-            out.append((page_index, top, text, max(round(w["size"], 1) for w in ws)))
+            bottom = max(w["bottom"] for w in ws)
+            out.append((page_index, top, bottom, text, max(round(w["size"], 1) for w in ws)))
     return out
+
+
+def _typical_body_line_gap(lines: List[Tuple[int, float, float, str, float]], h2_min: float) -> float:
+    """The document's own most common same-page top-to-bottom gap between
+    two consecutive body-sized lines -- ordinary single-line spacing within
+    a paragraph, as this specific PDF actually laid it out (font, leading,
+    and pdfplumber's own bbox measurement all vary enough between documents
+    that a fixed point value would be wrong as often as right). A gap much
+    bigger than this (see PARAGRAPH_BREAK_EXTRA in _split) means a real
+    paragraph break, not just where the source happened to wrap a sentence."""
+    gaps = []
+    for (p1, _, bottom1, _, s1), (p2, top2, _, _, s2) in zip(lines, lines[1:]):
+        if p1 == p2 and s1 < h2_min and s2 < h2_min:
+            gaps.append(round(top2 - bottom1, 1))
+    return Counter(gaps).most_common(1)[0][0] if gaps else 0.0
 
 
 def _image_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, bytes]]:
@@ -112,7 +157,8 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
         lines = _line_events(pdf)
         images = _image_events(pdf)
 
-    h1_min, h2_min = _thresholds([(text, size) for _, _, text, size in lines])
+    h1_min, h2_min, body_size = _thresholds([(text, size) for _, _, _, text, size in lines])
+    paragraph_break_gap = _typical_body_line_gap(lines, h2_min) + body_size * PARAGRAPH_BREAK_EXTRA
 
     def level(size: float) -> str:
         if size >= h1_min:
@@ -122,8 +168,8 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
         return "body"
 
     events = sorted(
-        [(p, t, "line", text, size) for p, t, text, size in lines]
-        + [(p, t, "image", blob, None) for p, t, blob in images],
+        [(p, t, "line", text, size, bottom) for p, t, bottom, text, size in lines]
+        + [(p, t, "image", blob, None, None) for p, t, blob in images],
         key=lambda e: (e[0], e[1]),
     )
 
@@ -131,6 +177,11 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
     section_images: List[Tuple[str, bytes]] = []
     pending_heading: List[str] = []
     pending_level: Optional[str] = None
+    # (page_index, bottom) of the last body line appended -- None whenever a
+    # heading or image was the most recent thing seen, since text can never
+    # continue a paragraph across one of those. Drives the paragraph-
+    # continuation check below (see _typical_body_line_gap's docstring).
+    prev_body_end: Optional[Tuple[int, float]] = None
 
     def flush_heading():
         nonlocal pending_heading, pending_level
@@ -145,12 +196,13 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
             sections[-1][1].append(f"## {text}")
         pending_heading, pending_level = [], None
 
-    for _, _, kind, payload, size in events:
+    for page_index, top, kind, payload, size, bottom in events:
         if kind == "image":
             flush_heading()
             if not sections:
                 sections.append(("Preface", []))
             section_images.append((sections[-1][0], payload))
+            prev_body_end = None
             continue
 
         text = payload
@@ -176,11 +228,35 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
             else:
                 flush_heading()
                 pending_heading, pending_level = [text], lvl
+            prev_body_end = None  # a heading always ends any paragraph in progress
         else:
             flush_heading()
             if not sections:
                 sections.append(("Preface", []))
-            sections[-1][1].append(text)
+            body_lines = sections[-1][1]
+
+            # Is this line really a new paragraph, or just where the source
+            # PDF's own layout happened to wrap a sentence onto the next
+            # line? Same page: compare the vertical gap against this
+            # document's own typical single-line spacing (paragraph_break_gap
+            # -- see _typical_body_line_gap). Different page: no shared
+            # geometry to compare, so fall back to a text-only signal --
+            # a previous line that doesn't end in sentence-closing
+            # punctuation is almost certainly a paragraph that just happened
+            # to break across a page boundary, not a new one starting
+            # exactly at the top of the next page.
+            if prev_body_end is None or not body_lines or _LIST_ITEM_RE.match(text):
+                is_continuation = False
+            elif prev_body_end[0] == page_index:
+                is_continuation = (top - prev_body_end[1]) <= paragraph_break_gap
+            else:
+                is_continuation = not _SENTENCE_END_RE.search(body_lines[-1])
+
+            if is_continuation:
+                body_lines[-1] = f"{body_lines[-1]} {text}"
+            else:
+                body_lines.append(text)
+            prev_body_end = (page_index, bottom)
     flush_heading()
 
     # A section name can exist purely to anchor an image encountered before

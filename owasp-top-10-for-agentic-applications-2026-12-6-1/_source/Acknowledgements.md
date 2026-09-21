@@ -2,11 +2,7 @@
 
 ## Top 10 Leaders and Entry Leads
 
-The OWASP Top 10 for Agentic Applications was lead by John Sotiropoulos (Deep Cyber), Keren Katz
-
-(Tenable), and Ron F Del Rosario (SAP) with the criticial support of Entry Leads, without whom this would not
-
-have been possible.
+The OWASP Top 10 for Agentic Applications was lead by John Sotiropoulos (Deep Cyber), Keren Katz (Tenable), and Ron F Del Rosario (SAP) with the criticial support of Entry Leads, without whom this would not have been possible.
 
 Entry Lead(s)
 
@@ -32,11 +28,7 @@ ASI10 – Rogue Agents Tomer Elias, Mo Sadek, Priyadharhshini Parthasarathy
 
 ## Additional Contributors
 
-Almog Langleben,
-
-Sunbit
-
-Ron Bitton, Intuit
+Almog Langleben, Sunbit Ron Bitton, Intuit
 
 Amritha Lal Kanmani Rani
 
@@ -72,47 +64,10 @@ We are grateful to our reviewers for their insightful feedback and contributions
 
 ## ASI Expert Review Board
 
-Alejandro Saucedo - Chair of ML Security Project at Linux Foundation, UN AI Expert, AI Expert for Tech
-
-Policy, European Commission
-
-Apostol Vassilev - Adversarial AI Lead, NIST
-
-Chris Hughes - CEO, Aquia
-
-Hyrum Anderson - CTO, Robust Intelligence
-
-Steve Wilson - OWASP GenAI Security Project Co-chair, Founder Top 10 for LLM Applications, Chief Product
-
-Officer, Exabeam
-
-Scott Clinton - OWASP GenAI Security Project Board Co-chair and Co-founder
-
-Vasilios Mavroudis- Principal Research Scientist and Theme Lead, the Alan Turing Institute
-
-Josh Collyer, Principal Security Researcher, Theme Lead
-
-Egor Pushkin, Chief Architect, Data and AI at Oracle Cloud
-
-Peter Bryan, Principal AI Security Research Lead- AI Red Team, Microsoft
-
-Daniel Jones, AI Security Researcher, AI Red Team, Microsoft
-
-Michael Burgury, OWASP Low-Code/No-Code Lead, OWASP AIVSS Project Co-lead, Zenity
+Alejandro Saucedo - Chair of ML Security Project at Linux Foundation, UN AI Expert, AI Expert for Tech Policy, European Commission Apostol Vassilev - Adversarial AI Lead, NIST Chris Hughes - CEO, Aquia Hyrum Anderson - CTO, Robust Intelligence Steve Wilson - OWASP GenAI Security Project Co-chair, Founder Top 10 for LLM Applications, Chief Product Officer, Exabeam Scott Clinton - OWASP GenAI Security Project Board Co-chair and Co-founder Vasilios Mavroudis- Principal Research Scientist and Theme Lead, the Alan Turing Institute Josh Collyer, Principal Security Researcher, Theme Lead Egor Pushkin, Chief Architect, Data and AI at Oracle Cloud Peter Bryan, Principal AI Security Research Lead- AI Red Team, Microsoft Daniel Jones, AI Security Researcher, AI Red Team, Microsoft Michael Burgury, OWASP Low-Code/No-Code Lead, OWASP AIVSS Project Co-lead, Zenity
 
 ## Public Review
 
 Additional Organizations that took part in our public review:
 
-ABN AMARO BANK - Parker Cowan
-
-Airbus - Kachi Agu
-
-AWS, Mark Keating
-
-Cloud Security Alliance (CSA) – Ken Huang, Jim Reavis, John Yeon
-
-JPMorgan - Edward Lee
-
-Kainos - Kyle Davidson, Tom Fowler, Daragh McConvile, Greg Wright
-
+ABN AMARO BANK - Parker Cowan Airbus - Kachi Agu AWS, Mark Keating Cloud Security Alliance (CSA) – Ken Huang, Jim Reavis, John Yeon JPMorgan - Edward Lee Kainos - Kyle Davidson, Tom Fowler, Daragh McConvile, Greg Wright
