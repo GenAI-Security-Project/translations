@@ -127,4 +127,3 @@ References 38
 Exploits & Incidents Table 44
 
 ## Appendix E – Abbreviations 50 Acknowledgements 52 OWASP GenAI Security Project Sponsors 55 Project Supporters 56
-
