@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Publish — OWASP GenAI Translations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Barlow:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+      <p class="brand-tagline">OWASP GenAI Security Project</p>
+      <h1 class="brand-lockup"><a class="brand-lockup-link" href="https://GenAI.OWASP.org" target="_blank" rel="noopener"><span class="brand-genai">GenAI</span> <span class="brand-rest">Translations</span></a></h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="upload.html">Onboard / add locale</a>
+        <a href="status.html">Status</a>
+        <a href="publish.html">Publish</a>
+      </nav>
+  </div>
+</header>
+
+<div class="page">
+
+  <p class="hint">
+    Assemble and publish reviewed translations as a final PDF (Process 2 —
+    Assemble &amp; Publish). Normally publishing requires a three-way
+    sign-off on a "ready to publish" issue; this page is a direct,
+    CAPTCHA/authenticator-gated path for testing the rendering pipeline —
+    see <code>.github/workflows/publish-direct.yml</code>.
+  </p>
+
+  <div id="testing-mode-notice" class="duplicate-warning-soft" hidden>
+    <p>
+      <strong>Testing mode:</strong> every locale is listed below, including
+      ones not fully reviewed yet — normally only a fully-reviewed locale
+      would be publishable. Unchecking "Include watermark" on a locale
+      that isn't fully reviewed will still be refused server-side; only
+      the watermarked/preview path is expected to succeed right now.
+    </p>
+  </div>
+
+  <section>
+    <h2>1. GitHub access</h2>
+    <p class="hint">
+      Paste a fine-grained personal access token scoped to
+      <code>GenAI-Security-Project/translations</code> and
+      <code>GenAI-Security-Project/translations-templates</code>, with
+      <strong>Contents: Read and write</strong> permission. Generate one at
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a>.
+      The token is kept only in this browser tab's memory — it's never sent
+      anywhere but api.github.com, and it's gone when you close the tab.
+    </p>
+    <label for="gh-token">Personal access token</label>
+    <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_…" />
+    <button id="verify-token-button" type="button">Verify token</button>
+    <span id="token-status" class="token-status"></span>
+  </section>
+
+  <div id="form-body" hidden>
+    <form id="publish-form">
+      <section>
+        <h2>2. Select documents &amp; locales to publish</h2>
+        <p class="hint" id="table-message">Loading…</p>
+        <table id="publish-table" class="publish-table" hidden>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Asset</th>
+              <th>Locale</th>
+              <th>Review status</th>
+            </tr>
+          </thead>
+          <tbody id="publish-table-body"></tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>3. Watermark</h2>
+        <label>
+          <input type="checkbox" id="include-watermark-checkbox" checked />
+          Include watermark (unchecking requests a real final render — refused unless every section is reviewed)
+        </label>
+      </section>
+
+      <section>
+        <h2>4. Confirm</h2>
+        <p class="hint">
+          Enter the current 6-digit code from the shared authenticator —
+          ask a pipeline admin if you don't have it. Checked server-side
+          before anything is processed.
+        </p>
+        <label for="totp-input">Authenticator code</label>
+        <input type="text" id="totp-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="123456" />
+        <div id="captcha-container"></div>
+      </section>
+
+      <button id="publish-button" type="submit">Publish selected</button>
+      <div id="publish-result"></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/captcha.js"></script>
+<script src="js/publish.js"></script>
+</body>
+</html>

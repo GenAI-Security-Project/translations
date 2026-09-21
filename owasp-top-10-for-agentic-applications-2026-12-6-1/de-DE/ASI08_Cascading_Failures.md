@@ -13,10 +13,6 @@ Beobachtbare Symptome umfassen schnelle Verzweigung (Fan-out), bei der eine fehl
 
 Kaskadierende Ausfälle verstärken sich über vernetzte Agenten hinweg und verketten Risiken der OWASP LLM Top 10. LLM01:2025 Prompt Injection und LLM06:2025 Excessive Agency können autonome Tool-Ausführungen auslösen, die Fehler ohne menschliche Kontrollen verbreiten, während LLM04:2025 Data and Model Poisoning im persistenten Gedächtnis Entscheidungen über Sitzungen und Workflows hinweg verzerren kann. Agentic AI – Threats and Mitigations 1.1 behandelt diese Bedrohung in T5 – Cascading Hallucination Attacks, während T8 – Repudiation and Untraceability eine grundlegende Verteidigung hervorhebt: die Fähigkeit, kaskadierendes Verhalten durch belastbare Protokollierung und Nichtabstreitbarkeitsmechanismen (Non-Repudiation), die stille Ausbreitung verhindern, nachzuverfolgen, zuzuordnen und zu überprüfen. Diese sich aufsummierenden Bedrohungen verdeutlichen jedoch eine potenzielle Diskrepanz zwischen der Geschwindigkeit und dem Ausmaß der Fehlerausbreitung in einem Multi-Agenten-System und der Fähigkeit von Menschen, damit Schritt zu halten, um einen sicheren und effektiven Betrieb des Systems zu gewährleisten. Dies hinterlässt einige nicht gemilderte Risiken, die das Unternehmen sorgfältig bewerten muss, um sicherzustellen, dass sie innerhalb des gesamten Risikobudgets der Organisation liegen.
 
-Page 30
-
-genai.owasp.org
-
 ## Häufige Beispiele der Schwachstelle
 
 1. Kopplung von Planer und Ausführer: Ein halluzinierender oder kompromittierter Planer gibt unsichere Schritte aus, die der Ausführer automatisch ohne Validierung durchführt, wodurch sich die Auswirkung über Agenten hinweg vervielfacht.
@@ -49,10 +45,6 @@ genai.owasp.org
 
 7. Ein regionaler Ausfall des Cloud-DNS bei einem Hyperscaler kann gleichzeitig mehrere KI-Dienste beeinträchtigen, die davon abhängen, und so eine Kaskade von Agentenausfällen über viele Organisationen hinweg verursachen.
 
-Page 31
-
-genai.owasp.org
-
 8. Agentische Cyberabwehrsysteme und Firewalls: Die Ausbreitung einer Halluzination über einen bevorstehenden Angriff oder eine eingeschleuste Falschmeldung breitet sich in den zugrunde liegenden Multi-Agenten-Systemen aus und verursacht unnötige, aber katastrophale Verteidigungsmaßnahmen wie Abschaltungen, Verweigerungen und Netzwerktrennungen.
 
 ## Präventions- und Minderungsrichtlinien
@@ -84,7 +76,3 @@ genai.owasp.org
 2.
 
 https://cwe.mitre.org/data/definitions/400.html
-
-Page 32
-
-genai.owasp.org

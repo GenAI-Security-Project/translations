@@ -60,7 +60,3 @@ Zenity
 Coalfire IT University Copenhagen Prompt Security
 
 Liste des soutiens, à la date de publication. Retrouvez la liste complète des soutiens ici.
-
-Page 56
-
-genai.owasp.org

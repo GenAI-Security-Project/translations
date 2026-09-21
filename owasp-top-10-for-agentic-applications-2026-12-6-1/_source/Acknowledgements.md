@@ -30,10 +30,6 @@ ASI09 – Human-Agent Trust Exploitation Adam Morris
 
 ASI10 – Rogue Agents Tomer Elias, Mo Sadek, Priyadharhshini Parthasarathy
 
-Page 52
-
-genai.owasp.org
-
 ## Additional Contributors
 
 Almog Langleben,
@@ -71,10 +67,6 @@ Trent Holmes, Trend Micro Peter Boucher, abbView
 Emile Delcourt, Panorama Education Neeraj Nagpal
 
 Allie Howe, Growth Cyber
-
-Page 53
-
-genai.owasp.org
 
 We are grateful to our reviewers for their insightful feedback and contributions. These include:
 
@@ -124,6 +116,3 @@ JPMorgan - Edward Lee
 
 Kainos - Kyle Davidson, Tom Fowler, Daragh McConvile, Greg Wright
 
-Page 54
-
-genai.owasp.org

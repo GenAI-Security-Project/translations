@@ -21,10 +21,6 @@ Dieser Eintrag wird durch T12 – Agent Communication Poisoning & T16 – Insecu
 
 4. Protokoll-Downgrade und Descriptor-Fälschung, die zu Autoritätsverwirrung führt: Angreifer zwingen Agenten in schwächere Kommunikationsmodi oder fälschen Agenten-Deskriptoren, sodass bösartige Befehle als gültiger Austausch erscheinen.
 
-Page 27
-
-genai.owasp.org
-
 5. Nachrichten-Routing-Angriffe auf Discovery und Koordination: Fehlgeleiteter Discovery-Verkehr fälscht Beziehungen zu bösartigen Agenten oder nicht autorisierten Koordinatoren.
 
 6. Metadatenanalyse für Verhaltensprofilierung: Verkehrsmuster offenbaren Entscheidungszyklen und Beziehungen, was die Vorhersage und Manipulation des Agentenverhaltens ermöglicht.
@@ -53,10 +49,6 @@ genai.owasp.org
 
 3. Agentenbewusster Replay-Schutz: Schützen Sie alle Austauschvorgänge mit Nonces, Sitzungskennungen und Zeitstempeln, die an Aufgabenfenster gebunden sind. Führen Sie kurzfristige Nachrichten-Fingerabdrücke oder Zustands-Hashes, um kontextübergreifende Replays zu erkennen.
 
-Page 28
-
-genai.owasp.org
-
 4. Protokoll- und Fähigkeitssicherheit: Deaktivieren Sie schwache oder veraltete Kommunikationsmodi. Verlangen Sie agentenspezifische Vertrauensverhandlung und binden Sie die Protokollauthentifizierung an die Agentenidentität. Erzwingen Sie Versions- und Fähigkeitsrichtlinien an Gateways oder Middleware.
 
 5. Begrenzung metadatenbasierter Rückschlüsse: Reduzieren Sie die Angriffsfläche für Verkehrsanalysen, indem Sie – soweit machbar – Nachrichten mit fester Größe oder Padding verwenden, Kommunikationsraten glätten und deterministische Kommunikationspläne vermeiden. Diese leichtgewichtigen Maßnahmen erschweren es Angreifern, Agentenrollen oder Entscheidungszyklen allein aus Metadaten abzuleiten, ohne dass eine umfassende Protokoll-Neugestaltung erforderlich ist.
@@ -78,7 +70,3 @@ genai.owasp.org
 Learning - NDSS
 
 3. Resilient Consensus Control for Multi-Agent Systems - MDPI / PMC
-
-Page 29
-
-genai.owasp.org

@@ -17,10 +17,6 @@ Cette entrée correspond à T17 Supply Chain Compromise dans Agentic Threats and
 
 3. Usurpation d'identité et typosquatting : lorsqu'un agent découvre ou se connecte dynamiquement à des outils ou services externes, il peut être trompé de deux manières, soit par un point de terminaison victime de typosquatting (un nom ressemblant à un autre choisi pour tromper la résolution), soit par une attaque par symbole, où un service malveillant
 
-Page 18
-
-genai.owasp.org
-
 usurpe délibérément l'identité d'un outil ou d'un agent légitime, imitant son identité, son API et son comportement pour gagner la confiance et exécuter des actions malveillantes.
 
 4. Agent tiers vulnérable (Agent Agent). Un agent tiers présentant des vulnérabilités non corrigées
@@ -50,10 +46,6 @@ ou des paramètres par défaut non sécurisés est invité dans des flux de trav
 /.well-known/agent.json) ;
 
 provoquant l'acheminement de requêtes et de données sensibles à travers l'agent contrôlé par l'attaquant, qui exfiltre ou corrompt ensuite les réponses
-
-Page 19
-
-genai.owasp.org
 
 ## Directives de prévention et d'atténuation
 
@@ -94,7 +86,3 @@ abusing-agent-cards-in-the-agent-2-agent-protocol-to-win-all-the-tasks/
 5. How an AI Agent Vulnerability in LangSmith Could Lead to Stolen API Keys and Hijacked LLM
 
 Responses - Noma Security
-
-Page 20
-
-genai.owasp.org

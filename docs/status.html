@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Status — OWASP GenAI Translations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Barlow:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+      <p class="brand-tagline">OWASP GenAI Security Project</p>
+      <h1 class="brand-lockup"><a class="brand-lockup-link" href="https://GenAI.OWASP.org" target="_blank" rel="noopener"><span class="brand-genai">GenAI</span> <span class="brand-rest">Translations</span></a></h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="upload.html">Onboard / add locale</a>
+        <a href="status.html">Status</a>
+        <a href="publish.html">Publish</a>
+      </nav>
+  </div>
+</header>
+
+<div class="page">
+
+  <p class="hint">
+    Every onboarded document and its translations, read live from each
+    locale's <code>status.json</code>. A locale links to its actual
+    translated files on GitHub once at least one section has been drafted;
+    one registered with no draft yet shows "no sections yet" and isn't
+    linked, since there's nothing on <code>main</code> to link to.
+  </p>
+
+  <p id="status-message" class="hint"></p>
+
+  <div id="status-container"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/status.js"></script>
+</body>
+</html>

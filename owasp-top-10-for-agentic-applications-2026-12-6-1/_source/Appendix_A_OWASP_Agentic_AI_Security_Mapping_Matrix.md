@@ -60,10 +60,6 @@ Context Poisoning Injection · LLM04:2025 Memory Overload · T6 Contextual Aware
 
 Data & Model Poisoning ·
 
-Page 39
-
-genai.owasp.org
-
 LLM08:2025 Vector & Broken Goals · T12 Shared
 
 Embedding Weaknesses Memory Poisoning
@@ -146,6 +142,3 @@ Crossover insight: ASI entries often blend multiple LLM entries-e.g., ASI01 comb
 
 (prompt) with LLM06 (autonomy)-representing how agentic autonomy compounds model-level risks.
 
-Page 40
-
-genai.owasp.org

@@ -28,6 +28,3 @@ behavior, strengthening assurance across the AI lifecycle.
 
 We will also pursue a similar approach to the newly found AIBOM OWASP Project once it has developed
 
-Page 41
-
-genai.owasp.org

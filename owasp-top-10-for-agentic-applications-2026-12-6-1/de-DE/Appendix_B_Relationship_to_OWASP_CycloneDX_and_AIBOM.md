@@ -8,7 +8,3 @@ Die OWASP Agentic AI Top 10 baut auf dieser Grundlage auf, indem sie sich mit ve
 Gemeinsam bieten die beiden Initiativen eine einheitliche Sicht auf KI-Sicherheit: CycloneDX schafft Transparenz und Herkunftsnachweise in der Lieferkette, während die Agentic AI Top 10 Bedrohungsbewusstsein, Verhaltenssicherung und Mitigationszuordnung für agentische Systeme einführt. Die Integration von AIVSS-Bewertungen und agentischen Bedrohungsmodellen mit CycloneDX-SBOM-Daten ermöglicht eine kontinuierliche Risikobewertung - von der Komponentenvertrauenswürdigkeit bis zum agentischen Verhalten - und stärkt die Absicherung über den gesamten KI-Lebenszyklus hinweg.
 
 Wir werden einen ähnlichen Ansatz auch für das neu entstandene AIBOM OWASP-Projekt verfolgen, sobald dieses
-
-Page 41
-
-genai.owasp.org
