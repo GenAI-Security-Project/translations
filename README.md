@@ -68,6 +68,7 @@ reviewed for as long as needed before anyone decides it's time to publish.
 | Understand how the pipeline actually works, in technical detail | `tooling/docs/DESIGN.md` |
 | See what's implemented vs. still planned, against the original requirements | `tooling/docs/REQUIREMENTS.md` |
 | Walk through the full operational flow (including the publish sign-off) | `tooling/docs/WORKFLOW.md` |
+| See what's currently outstanding — blockers, unbuilt pieces, open PRs, decisions still needed | `tooling/docs/OPEN_ITEMS.md` |
 | Run any of this locally, or understand a specific script/schema | `tooling/README.md` |
 
 ## Status
