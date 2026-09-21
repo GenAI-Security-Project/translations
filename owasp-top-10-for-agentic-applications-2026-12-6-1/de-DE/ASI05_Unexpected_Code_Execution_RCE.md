@@ -31,10 +31,6 @@ Lieferkette hinaus eskalieren, wenn feindlicher Code während der Installation o
 
 ausgeführt wird.
 
-Page 21
-
-genai.owasp.org
-
 ## Beispielhafte Angriffsszenarien
 
 1. Replit „Vibe Coding“ Runaway Execution: Während automatisierter „Vibe-Coding“- oder
@@ -131,10 +127,6 @@ Containern mit strikten Einschränkungen aus, einschließlich Netzwerkzugriff; l
 
 Sie bekannte verwundbare Pakete und nutzen Sie Framework-
 
-Page 22
-
-genai.owasp.org
-
 Sandboxes wie . Beschränken Sie, wo möglich, den Dateisystemzugriff auf ein
 
 mcp-run-python
@@ -166,7 +158,3 @@ Generierungen und Ausführungen.
 2. GitHub Copilot: Remote Code Execution via Prompt Injection
 
 3. RCE + Container-Ausbruch (Positive Security / Auto-GPT) https://positive.security/blog/auto-gpt-rce
-
-Page 23
-
-genai.owasp.org

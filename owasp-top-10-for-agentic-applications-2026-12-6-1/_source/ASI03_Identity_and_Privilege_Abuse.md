@@ -52,10 +52,6 @@ default privileges, such as unrestricted Internet access, also inherit more auth
 
 retrieved data for context and reuse. If memory is not segmented or cleared between tasks or users,
 
-Page 15
-
-genai.owasp.org
-
 attackers can prompt the agent to reuse cached secrets, escalate privileges, or leak data from a
 
 prior secure session into a weaker one.
@@ -131,10 +127,6 @@ commands under assumed internal trust.
 7. Identity Sharing. An agent gains access to systems on behalf of a user, often their maker. It then
 
 allows other users to leverage that identity implicitly by invoking its tools as that identity.
-
-Page 16
-
-genai.owasp.org
 
 ## Prevention and Mitigation Guidelines
 
@@ -212,6 +204,3 @@ monitoring when agents request new scopes or reuse tokens outside their original
 
 5. NVD - cve-2025-31491
 
-Page 17
-
-genai.owasp.org

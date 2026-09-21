@@ -61,10 +61,6 @@ accès à du contenu non fiable.
 
 la chaîne d'approvisionnement lorsqu'un code hostile s'exécute pendant l'installation ou l'importation.
 
-Page 21
-
-genai.owasp.org
-
 ## Exemples de scénarios d'attaque
 
 1. Exécution incontrôlée par « Vibe Coding » sur Replit : Lors de tâches automatisées de « vibe
@@ -155,10 +151,6 @@ dans des conteneurs en bac à sable avec des limites strictes, y compris l'accè
 
 bloquer les paquets connus comme vulnérables et utiliser des bacs à sable de framework comme
 
-Page 22
-
-genai.owasp.org
-
 . Lorsque c'est possible, restreindre l'accès au système de fichiers à un
 
 mcp-run-python
@@ -190,7 +182,3 @@ les générations et exécutions.
 2. GitHub Copilot : Exécution de Code à Distance via Injection de Prompt
 
 3. RCE + évasion de conteneur (Positive Security / Auto-GPT) https://positive.security/blog/auto-gpt-rce
-
-Page 23
-
-genai.owasp.org

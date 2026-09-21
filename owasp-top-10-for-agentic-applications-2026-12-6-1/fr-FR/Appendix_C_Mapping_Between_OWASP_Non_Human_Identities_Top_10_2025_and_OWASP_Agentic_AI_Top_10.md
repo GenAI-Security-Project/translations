@@ -24,10 +24,6 @@ entraîne une
 surface d'attaque
 persistante.
 
-Page 42
-
-genai.owasp.org
-
 NHI2: Fuite de Exposition de clés ASI02 – T6 Manipulation Utilisation de la
 secrets API, jetons ou Utilisation abusive d'objectif · T1 mémoire &
 certificats utilisés et exploitation Empoisonnement sensibilisation
@@ -43,10 +39,6 @@ et exploitées. d'approvisionnement Agents renégats & les dépendances
 · ASI03 – Abus de l'agent
 d'identité et de
 privilèges
-
-Page 42
-
-genai.owasp.org
 
 NHI4: Mécanismes ASI03 – Abus T16 Abus de Violation du
 Authentification d'authentification d'identité et de protocole inter- contrôle d'accès
@@ -104,7 +96,3 @@ responsabilité et l'agent
 une utilisation
 abusive des
 privilèges.
-
-Page 43
-
-genai.owasp.org

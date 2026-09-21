@@ -56,10 +56,6 @@ unmitigated risks that the enterprise must evaluate carefully to ensure they are
 
 for the organization.
 
-Page 30
-
-genai.owasp.org
-
 ## Common Examples of the Vulnerability
 
 1. Planner–executor coupling: A hallucinating or compromised planner emits unsafe steps that the
@@ -132,10 +128,6 @@ blind spots across regions.
 
 depend on it, causing a cascade of agent failures across many organizations
 
-Page 31
-
-genai.owasp.org
-
 8. Agentic Cyber defense systems and firewalls: Propagation of hallucination about an imminent
 
 attack or injected false alert is propagated in the underlying multi-agent systems, causing
@@ -204,6 +196,3 @@ and accountability during cascades.
 
 https://cwe.mitre.org/data/definitions/400.html
 
-Page 32
-
-genai.owasp.org

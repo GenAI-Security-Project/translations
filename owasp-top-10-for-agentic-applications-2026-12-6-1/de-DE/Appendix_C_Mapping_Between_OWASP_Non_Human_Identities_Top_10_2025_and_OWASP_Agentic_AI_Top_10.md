@@ -53,10 +53,6 @@ ausgenutzt. ASI03 – Identity & Rogue Agents
 
 Privilege Abuse
 
-Seite 42
-
-genai.owasp.org
-
 NHI4: Unsichere Schwache oder ASI03 – Identity & T16 Insecure Inter- Agent Access
 
 Authentifizierung veraltete Privilege Abuse · Agent Protocol Control Violation
@@ -138,7 +134,3 @@ Rechenschaftspflicht
 und Missbrauch von
 
 Berechtigungen.
-
-Seite 43
-
-genai.owasp.org

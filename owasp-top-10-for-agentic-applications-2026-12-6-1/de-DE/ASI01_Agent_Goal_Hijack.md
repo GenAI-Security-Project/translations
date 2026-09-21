@@ -19,10 +19,6 @@ Agentenziel-Hijacking unterscheidet sich von ASI06 (Memory & Context Poisoning) 
 
 4. Indirect Prompt Injection überschreibt Agentenanweisungen und bringt ihn dazu, betrügerische Informationen zu erzeugen, die geschäftliche Entscheidungen beeinflussen.
 
-Page 9
-
-genai.owasp.org
-
 ## Beispielhafte Angriffsszenarien
 
 1. EchoLeak: Zero-Click Indirect Prompt Injection – Ein Angreifer sendet eine präparierte E-Mail-Nachricht, die unbemerkt Microsoft 365 Copilot dazu bringt, versteckte Anweisungen auszuführen, wodurch die KI vertrauliche E-Mails, Dateien und Chat-Protokolle ohne jegliche Benutzerinteraktion exfiltriert.
@@ -49,10 +45,6 @@ genai.owasp.org
 
 7. Führen Sie eine umfassende Protokollierung und kontinuierliche Überwachung der Agentenaktivität durch und etablieren Sie eine Verhaltensbasislinie, die den Zielzustand, Tool-Nutzungsmuster und invariante Eigenschaften (z. B. Schema, Zugriffsmuster) umfasst. Verfolgen Sie nach Möglichkeit einen stabilen Identifikator für das aktive Ziel und alarmieren Sie bei
 
-Page 10
-
-genai.owasp.org
-
 jeglichen Abweichungen – wie unerwarteten Zieländerungen, anomalen Tool-Sequenzen oder Verschiebungen gegenüber der etablierten Basislinie –, damit unautorisierte Zieldrift im Betrieb sofort sichtbar wird.
 
 8. Führen Sie regelmäßige Red-Team-Tests durch, die eine Zielüberschreibung simulieren, und überprüfen Sie die Wirksamkeit des Rollbacks.
@@ -68,7 +60,3 @@ jeglichen Abweichungen – wie unerwarteten Zieländerungen, anomalen Tool-Seque
 3. ChatGPT Plugin Exploit Explained: From Prompt Injection to Accessing Private Data.
 
 4. AgentFlayer: 0click inception attack on ChatGPT users.
-
-Page 11
-
-genai.owasp.org

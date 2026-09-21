@@ -31,10 +31,6 @@ ASI09 – Exploitation de la confiance humain-agent Adam Morris
 
 ASI10 – Agents renégats Tomer Elias, Mo Sadek, Priyadharhshini Parthasarathy
 
-Page 52
-
-genai.owasp.org
-
 ## Contributeurs additionnels
 
 Almog Langleben,
@@ -72,10 +68,6 @@ Trent Holmes, Trend Micro Peter Boucher, abbView
 Emile Delcourt, Panorama Education Neeraj Nagpal
 
 Allie Howe, Growth Cyber
-
-Page 53
-
-genai.owasp.org
 
 Nous sommes reconnaissants envers nos relecteurs pour leurs retours et contributions perspicaces. Ceux-ci
 
@@ -126,7 +118,3 @@ Cloud Security Alliance (CSA) – Ken Huang, Jim Reavis, John Yeon
 JPMorgan - Edward Lee
 
 Kainos - Kyle Davidson, Tom Fowler, Daragh McConvile, Greg Wright
-
-Page 54
-
-genai.owasp.org

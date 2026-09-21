@@ -73,10 +73,6 @@ vers le compte d'un attaquant.
 
 informations frauduleuses qui impactent des décisions commerciales.
 
-Page 9
-
-genai.owasp.org
-
 ## Exemples de scénarios d'attaque
 
 1. EchoLeak : Injection de prompt indirecte sans clic (Zero-Click) - Un attaquant envoie un e-mail
@@ -171,10 +167,6 @@ d'utilisation des outils et les propriétés invariantes (par exemple, le schém
 
 Suivre un identifiant stable pour l'objectif actif lorsque cela est possible, et alerter sur
 
-Page 10
-
-genai.owasp.org
-
 tout écart - tel que des changements d'objectifs inattendus, des séquences d'outils anormales, ou
 
 des déviations par rapport à la base de référence établie - afin que toute dérive d'objectif non
@@ -202,7 +194,3 @@ détaillant la vulnérabilité
 3. Exploitation d'un plugin ChatGPT expliquée : de l'injection de prompt à l'accès à des données privées.
 
 4. AgentFlayer : attaque par inception sans clic (0click) sur les utilisateurs de ChatGPT.
-
-Page 11
-
-genai.owasp.org

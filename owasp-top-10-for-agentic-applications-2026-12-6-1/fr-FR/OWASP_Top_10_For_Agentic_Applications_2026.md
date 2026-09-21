@@ -66,7 +66,3 @@ l'œuvre modifiée dans les mêmes conditions, c'est-à-dire avec la même licen
 l'œuvre originale a été diffusée.
 
 Lien vers le texte complet de la licence : https://creativecommons.org/licenses/by-sa/4.0/legalcode
-
-Page 1
-
-genai.owasp.org

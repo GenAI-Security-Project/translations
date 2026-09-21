@@ -76,10 +76,6 @@ AIVSS fields)
 
 DDOS / DDoS - Distributed Denial of Service
 
-Page 50
-
-genai.owasp.org
-
 NHI - Non-Human Identity SBOM - Software Bill of Materials
 
 NVD - National Vulnerability Database SDK - Software Development Kit (appears in
@@ -110,6 +106,3 @@ RAG - Retrieval-Augmented Generation WASM - WebAssembly (mentioned under RCE)
 
 RCE - Remote Code Execution
 
-Page 51
-
-genai.owasp.org

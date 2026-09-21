@@ -64,7 +64,3 @@ abusive et exploitation de la chaîne de la mémoire et du en cascade renégats
 d'outils d'approvisionnement contexte
 
 agentique
-
-Page 8
-
-genai.owasp.org
