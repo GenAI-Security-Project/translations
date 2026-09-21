@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OWASP GenAI Translations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Barlow:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+      <p class="brand-tagline">OWASP GenAI Security Project</p>
+      <h1 class="brand-lockup"><a class="brand-lockup-link" href="https://GenAI.OWASP.org" target="_blank" rel="noopener"><span class="brand-genai">GenAI</span> <span class="brand-rest">Translations</span></a></h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="upload.html">Onboard / add locale</a>
+        <a href="status.html">Status</a>
+        <a href="publish.html">Publish</a>
+      </nav>
+  </div>
+</header>
+
+<div class="page">
+
+  <p>
+    Self-service onboarding and status tracking for the OWASP GenAI Security
+    Project's translation pipeline. See
+    <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/README.md" target="_blank">tooling/README.md</a>
+    for how the underlying pipeline (registry, draft translation, human
+    review) works.
+  </p>
+
+  <h2><a href="upload.html">Onboard an asset, or add a locale</a></h2>
+  <p class="hint">
+    Upload a finished English document to start translating it — the same
+    form handles a brand-new asset or adding locales/a new version to one
+    that already exists.
+  </p>
+
+  <h2>Current translations</h2>
+  <p class="hint">
+    Every document onboarded so far and its locales, read live from GitHub.
+    A locale links straight to its translated files once it has one — see
+    <a href="status.html">the full status page</a> for section-by-section
+    draft/review counts.
+  </p>
+
+  <p id="status-message" class="hint"></p>
+
+  <div id="status-container"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+<script src="js/github-api.js"></script>
+<script src="js/status.js"></script>
+</body>
+</html>
