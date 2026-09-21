@@ -1,81 +1,95 @@
-# translations
+# OWASP GenAI Security Project — Translations
 
-The OWASP GenAI Security Project's self-service translation and publishing
-pipeline. Replaces the archived, single-asset, closed-source-dependent
-process from `www-project-top-10-for-large-language-model-applications`.
+![OWASP Project Type](https://img.shields.io/badge/OWASP%20Project-Incubator-orange)
 
-Full requirements: PRD "OWASP GenAI Translations Pipeline". Full design:
-its Build Spec tab (condensed into `tooling/README.md` in this repo).
+**Project status: Incubator.** This is an active OWASP GenAI Security Project
+initiative, still early in its lifecycle — the pipeline works end to end, but
+some of the operational scaffolding around it (named approvers, branch
+protection, a live translation budget) is still being put in place. See
+[Status](#status) below for exactly what that means today.
 
-**Visibility: private for now.** This repo is scoped to go **public** per
-the Build Spec once Process 1 is built and validated — it's kept private
-during this build-out phase only. `translations-templates` (the render
-templates repo) is private permanently, by design.
+## What this is
 
-## Two independently-triggered processes
+The OWASP GenAI Security Project publishes guidance — Top 10 lists, glossaries,
+mapping matrices — in English first. Most of the people who'd benefit from
+that guidance don't read English as their first language. This repository is
+the project's self-service pipeline for turning an English deliverable into
+reviewed, professionally laid-out translations, without needing a paid
+localization vendor or a manual, one-off process per document.
 
-This pipeline is deliberately split into two processes that don't run back
-to back:
+It replaces an earlier, archived approach
+(`www-project-top-10-for-large-language-model-applications`) that only
+handled a single document, one at a time, with closed-source tooling. This
+pipeline handles any number of documents and locales, and everything in it —
+the splitting, the machine drafting, the review workflow, the final PDF
+renderer — is open and auditable in this repo.
 
-- **Process 1 — Draft, Review & Finalize** (what's built here so far):
-  triggered by an asset/locale upload. Runs `bootstrap_asset.py`, then
-  `translate-draft.yml`, then loops through ordinary PR review until every
-  section in a locale is `reviewed`. Ends there — nothing downstream fires
-  automatically.
-- **Process 2 — Assemble & Publish** (not built yet): triggered separately,
-  gated by a three-way human sign-off, never by Process 1 finishing. Renders
-  the final PDF from `translations-templates`. See `tooling/README.md` for
-  why this repo doesn't have `publish.yml`, `check-freshness.yml`, or
-  `render.sh` yet.
+## How a translation happens, step by step
 
-## Layout
+1. **Request it.** An initiative lead uploads their source document (a
+   finished PDF, or a `.docx`) and picks which locales they want, using the
+   [upload page](https://genai-security-project.github.io/translations/upload.html).
+   That kicks off onboarding: the document gets a stable id, and its own
+   folder is created in this repo to hold every locale's work.
+2. **It gets machine-drafted.** The pipeline splits the source into its real
+   sections (matching the document's own headings) and drafts a translation
+   of every section, for every requested locale, using an LLM. Nothing here
+   is published yet — this is a first pass for a human to review, not a
+   finished translation.
+3. **A human reviews it.** Every drafted section becomes an ordinary GitHub
+   pull request. A reviewer reads it against the English original, edits
+   directly in the PR if something's off, and marks it ready. This is the
+   same review discipline as reviewing a code change — nothing is
+   auto-approved.
+4. **Progress is visible the whole time.** Anyone can check how far along a
+   locale is — how many sections are drafted vs. reviewed — on the
+   [status page](https://genai-security-project.github.io/translations/status.html).
+   No section's state changes without a real PR being opened, reviewed, or
+   merged.
+5. **It gets signed off and published.** Once every section in a locale is
+   reviewed, that locale is ready to publish. Publishing is a separate,
+   deliberately-gated step — it doesn't happen automatically just because
+   review finished — and produces the final, branded PDF (cover page, table
+   of contents with real page numbers, footer, the works), released as a
+   downloadable asset.
 
-```
-registry.yaml              # empty until the first asset is onboarded
-tooling/
-  registry_schema.py        # registry.yaml's schema + validation
-  translation-config.yaml   # names the translation LLM (never hardcoded elsewhere)
-  translation_config.py     # resolves it at runtime
-  bootstrap_asset.py         # component 1 — onboard an asset/locale
-  docx_split.py              # splits a heading_1 .docx into English sections + figures
-  pdf_split.py                # splits a pdf_heading PDF into English sections + figures (font-size heuristic)
-  image_svg.py                 # Tier 1: OCR + blank + SVG text overlay for images with embedded text
-  svg_localize.py               # translates a figure's SVG <text> nodes per locale
-  llm_client.py               # provider-agnostic translation call
-  text_quality.py              # detects garbled extraction artifacts before they reach translation
-  translation_log.py            # per-section start/finish/validation audit log (translation_log.jsonl)
-  translate_section.py        # component 2 — drafts sections for one locale
-  status_schema.py            # status.json schema + read/write helpers
-  review_transition.py        # Process 1B — the only writer of in_review/reviewed
-  README.md                   # full schema docs + how to run this locally
-.github/workflows/
-  bootstrap-asset.yml         # wraps bootstrap_asset.py, opens the onboarding PR
-  translate-draft.yml         # wraps translate_section.py, opens the draft PR
-  review-transitions.yml      # flips status.json on PR ready-for-review / merge
-CODEOWNERS                    # interim — see Outstanding decisions below
-```
+Steps 1–4 (**Draft, Review & Finalize**) and step 5 (**Assemble & Publish**)
+are two independently-triggered processes on purpose: a locale can sit fully
+reviewed for as long as needed before anyone decides it's time to publish.
 
-Per-asset content directories (e.g. `llm-top-10/`) don't exist yet — they're
-created the first time that asset is onboarded via `bootstrap_asset.py`,
-never by hand.
+## Where to go
+
+| I want to... | Go here |
+|---|---|
+| Request a translation of a new document | [Upload page](https://genai-security-project.github.io/translations/upload.html) |
+| Check how a translation is progressing | [Status page](https://genai-security-project.github.io/translations/status.html) |
+| Review a section that's been drafted | Open PRs in this repo (search for the locale/section name) |
+| Publish a fully-reviewed locale | [Publish page](https://genai-security-project.github.io/translations/publish.html) — requires sign-off; see `tooling/docs/WORKFLOW.md` |
+| Understand how the pipeline actually works, in technical detail | `tooling/docs/DESIGN.md` |
+| See what's implemented vs. still planned, against the original requirements | `tooling/docs/REQUIREMENTS.md` |
+| Walk through the full operational flow (including the publish sign-off) | `tooling/docs/WORKFLOW.md` |
+| Run any of this locally, or understand a specific script/schema | `tooling/README.md` |
 
 ## Status
 
-Process 1 is scaffolded and locally tested end-to-end (offline mode, no live
-LLM calls) for both `split_by` modes. Not yet done before this is genuinely
-self-service:
+The pipeline runs end to end against a real document today, in both of its
+processes. What's still outstanding before this is fully self-service,
+without someone from the build-out team involved:
 
-- Real named CODEOWNERS (currently a placeholder — see `tooling/README.md`).
-- Branch protection rules requiring the section's reviewer + CODEOWNERS.
-- `ANTHROPIC_API_KEY` (or whichever provider `translation-config.yaml`
-  names) as a repo secret, so `translate-draft.yml` can actually call an LLM
-  instead of running in `--offline` mode.
-- Per-locale GitHub Teams (Build Spec's long-term plan for who has Write
-  access) — not created yet.
-- The GitHub Pages upload form (component 6) and everything in Process 2.
+- Real named `CODEOWNERS` for review/sign-off — currently a placeholder.
+- A repo secret for the translation LLM (`ANTHROPIC_API_KEY`, or whichever
+  provider `tooling/translation-config.yaml` names) — without it, drafting
+  runs in an offline/simulated mode rather than calling a real model.
+- A deploy key letting the publish workflow check out `translations-templates`
+  (the render templates repo) in a real GitHub Actions run.
+- No document has been migrated from the archived repo yet — the migration
+  script doesn't exist. The one real document in this repo came in through
+  the normal upload path instead. See `tooling/docs/REQUIREMENTS.md` for the
+  full list of what's done, partial, or not started.
 
 ## Related repo
 
-`translations-templates` (private, admin-group-only) holds the shared
-render templates. It's stubbed with placeholder configs for now — its real
-content is Process 2 scope.
+`translations-templates` (private, admin-group-only) holds the shared render
+templates — the branded cover art, fonts, and layout config three named
+templates use. It's permanently private by design: it's the project's brand
+asset repo, not translated content, and has no reason to be public.
