@@ -199,6 +199,44 @@ button.secondary { background: transparent; color: var(--accent); border: 1px so
 .status-pill-progress { background: rgba(138, 90, 0, 0.15); color: var(--warn); }
 .status-pill-done { background: rgba(27, 122, 61, 0.15); color: var(--ok); }
 
+/* Live workflow-run status bars -- see js/workflow-status.js. */
+.status-bar-row { margin-top: 14px; }
+.status-bar {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: var(--field-bg);
+}
+.status-bar-label { font-weight: 600; margin-bottom: 6px; }
+.status-bar-message { margin: 0 0 8px; font-size: 0.92rem; }
+.status-bar-message-error { color: var(--error); }
+.status-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+.status-bar-track > div { height: 100%; transition: width 0.3s ease; }
+.status-bar-fill-progress { background: var(--accent); }
+.status-bar-fill-success { background: var(--ok); }
+.status-bar-fill-failure { background: var(--error); }
+.status-bar-steps {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.status-bar-step { padding: 2px 0; }
+.status-bar-step-icon { display: inline-block; width: 1.4em; text-align: center; }
+.status-bar-step-success .status-bar-step-icon { color: var(--ok); }
+.status-bar-step-failure .status-bar-step-icon, .status-bar-step-cancelled .status-bar-step-icon { color: var(--error); }
+.status-bar-step-in_progress { color: var(--fg); font-weight: 600; }
+.status-bar-step-in_progress .status-bar-step-icon { color: var(--accent); }
+.status-bar-link { display: inline-block; margin-top: 10px; font-size: 0.85rem; color: var(--accent); text-decoration: none; }
+.status-bar-link:hover { text-decoration: underline; }
+
 .duplicate-warning-soft, .duplicate-block {
   border-radius: 8px;
   padding: 10px 14px;

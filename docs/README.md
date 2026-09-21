@@ -124,6 +124,31 @@ the payload always leaves `asset` unset for a new upload, so
 `bootstrap_asset.py` derives the real, authoritative id server-side. Never
 trust the browser's copy as the source of truth.
 
+## Live status bars after submitting
+
+Both `upload.html` (after `bootstrap-asset.yml` fires) and `publish.html`
+(after each `publish-direct.yml` fire — one per checked asset/locale row)
+show a live status bar tracking the actual Actions run, instead of just
+pointing the user at the Actions tab: current step, a progress bar, and a
+link to the run once it's found. `js/workflow-status.js` implements this;
+`js/upload.js`/`js/publish.js` just create one `WorkflowStatusBar` per
+dispatch and call `.track(workflowFile, excludeIds)`.
+
+The one real wrinkle: `POST /dispatches` returns no run id (that's just how
+`repository_dispatch` works), so a bar can't be told "watch run #12345" —
+it has to find its own run by elimination. `excludeIds` is a snapshot of
+that workflow's existing run ids, taken *immediately before* the dispatch
+call; the bar then polls the run list until an id shows up that wasn't in
+that snapshot, and attributes that one to itself. This is unambiguous for
+`upload.html` (one dispatch per submit), but `publish.html` can fire several
+dispatches back to back — there, each request's bar must finish attributing
+its run (and add that id to the shared exclude set) *before* the next
+request's dispatch fires, or two requests started close together could both
+claim the same freshly-appeared run. Polling a run to completion still
+happens concurrently across requests after that — only the attribution step
+is serialized. See `workflow-status.js`'s header comment and `publish.js`'s
+`handlePublish` for exactly where that ordering matters.
+
 ## Duplicate-asset detection
 
 `bootstrap_asset.py`'s own "derived id already exists" refusal only catches

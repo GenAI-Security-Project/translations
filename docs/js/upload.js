@@ -344,9 +344,11 @@ async function handleSubmit(event) {
   }
 
   const submitButton = document.getElementById("submit-button");
+  const statusBarEl = document.getElementById("submit-status-bar");
   submitButton.disabled = true;
-  resultEl.textContent = "Uploading…";
+  resultEl.textContent = "";
   resultEl.className = "";
+  statusBarEl.innerHTML = "";
 
   try {
     if (mode === "new") {
@@ -360,16 +362,25 @@ async function handleSubmit(event) {
       payload.uploaded_path = incomingPath;
     }
 
+    // Snapshotted immediately before dispatching -- see workflow-status.js's
+    // header comment on why this has to happen before, not after.
+    const beforeRunIds = await snapshotRunIds("bootstrap-asset.yml");
     await dispatchBootstrapAsset(payload);
-    resultEl.innerHTML =
-      "✓ Submitted. <code>bootstrap-asset</code> is now running — check the " +
-      `<a href="https://github.com/GenAI-Security-Project/translations/actions" target="_blank">Actions tab</a> ` +
-      "for progress, and the repo's Pull Requests once it opens the onboarding PR.";
+    resultEl.innerHTML = "✓ Submitted.";
     resultEl.className = "result-ok";
+    submitButton.disabled = false; // re-enabled once dispatched -- tracking below can run for minutes and shouldn't block a second submission
+
+    const bar = new WorkflowStatusBar(statusBarEl, null);
+    const run = await bar.track("bootstrap-asset.yml", beforeRunIds);
+    if (run && run.conclusion === "success") {
+      resultEl.innerHTML =
+        "✓ Onboarding finished — check the repo's " +
+        `<a href="https://github.com/GenAI-Security-Project/translations/pulls" target="_blank">Pull Requests</a> ` +
+        "for the onboarding PR it opened. Merging that PR starts drafting the translation(s) for any newly added locale.";
+    }
   } catch (err) {
     resultEl.textContent = `✗ ${err.message}`;
     resultEl.className = "result-error";
-  } finally {
     submitButton.disabled = false;
   }
 }

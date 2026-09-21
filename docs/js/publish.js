@@ -139,27 +139,55 @@ async function handlePublish(event) {
   const includeWatermark = document.getElementById("include-watermark-checkbox").checked;
 
   const publishButton = document.getElementById("publish-button");
+  const barsContainer = document.getElementById("publish-status-bars");
   publishButton.disabled = true;
   resultEl.textContent = `Submitting ${checked.length} publish request(s)…`;
   resultEl.className = "";
+  barsContainer.innerHTML = "";
+
+  // Snapshotted once, before the first dispatch -- each request's status
+  // bar adds its own attributed run id as it's found, so the next
+  // request's attribution can't mistake an already-claimed run for its
+  // own. See workflow-status.js's header comment for why this can't just
+  // be done per-request after the fact.
+  let excludeIds;
+  try {
+    excludeIds = await snapshotRunIds("publish-direct.yml");
+  } catch (_) {
+    excludeIds = new Set(); // best effort -- attribution may then take a moment longer, not fail outright
+  }
 
   const successes = [];
   const failures = [];
+  const pending = [];
   for (const checkbox of checked) {
     const { asset, locale } = checkbox.dataset;
+    const label = `${asset} / ${locale}`;
+    const barEl = document.createElement("div");
+    barEl.className = "status-bar-row";
+    barsContainer.appendChild(barEl);
+    const bar = new WorkflowStatusBar(barEl, label);
+
     try {
       await dispatchPublishDirect({ asset, locale, watermark: includeWatermark, totp_code: totpCode });
-      successes.push(`${asset} / ${locale}`);
+      successes.push(label);
     } catch (err) {
-      failures.push(`${asset} / ${locale}: ${err.message}`);
+      failures.push(`${label}: ${err.message}`);
+      bar.renderError(err.message);
+      continue;
     }
+
+    // Attribute this request's run *before* the next dispatch fires (see
+    // above), then let it poll to completion in the background so waiting
+    // for one slow run doesn't hold up submitting the rest.
+    const runId = await bar.attributeRun("publish-direct.yml", excludeIds);
+    if (runId != null) excludeIds.add(runId);
+    pending.push(bar.pollUntilDone(runId));
   }
 
   let summary = "";
   if (successes.length) {
-    summary += `✓ Submitted: ${successes.join(", ")}. ` +
-      `Check the <a href="https://github.com/GenAI-Security-Project/translations/actions" target="_blank">Actions tab</a> for progress, ` +
-      `and each asset/locale's <code>release/</code> folder or the repo's Releases once done.`;
+    summary += `✓ Submitted: ${successes.join(", ")}. Progress for each is shown below.`;
   }
   if (failures.length) {
     summary += `${summary ? "<br>" : ""}✗ Failed to submit: ${failures.join("; ")}`;
@@ -167,6 +195,11 @@ async function handlePublish(event) {
   resultEl.innerHTML = summary;
   resultEl.className = failures.length ? "result-error" : "result-ok";
   publishButton.disabled = false;
+
+  // Not awaited -- the form handler is done; each bar renders its own
+  // outcome as its run progresses. Kept only so nothing here is treated as
+  // an unhandled/orphaned promise.
+  Promise.allSettled(pending);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
