@@ -36,7 +36,7 @@ from typing import List, Optional, Tuple
 import pdfplumber
 
 import image_svg
-from text_quality import is_garbled
+from text_quality import is_footer_url_artifact, is_garbled, is_page_number_artifact
 
 LARGE_RATIO = 1.8    # candidate "meaningfully bigger than body text" floor
 H1_SHRINK_TOLERANCE = 0.75  # a heading can be shrunk to 75% of the dominant heading size and still count
@@ -158,6 +158,15 @@ def _split(pdf_path: Path) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes
             # punctuation instead of the text they render as (observed: a
             # bolded scenario title came out as pure symbol soup). Treat it
             # as if the line never existed rather than pass it to translation.
+            continue
+        if is_page_number_artifact(text) or is_footer_url_artifact(text):
+            # A "Page N" or "genai.owasp.org" footer typed inline rather
+            # than living in a real PDF header/footer region extraction
+            # would skip. Pagination and footer branding from the English
+            # source's layout are meaningless — and wrong — once reflowed
+            # into a translated document with a different page count/
+            # template; Process 2's render_config.json adds real page
+            # numbers and footer branding for final layout.
             continue
         lvl = level(size)
         if lvl in ("h1", "h2"):
