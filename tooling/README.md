@@ -1,8 +1,14 @@
 # tooling/
 
-Scripts and config backing **Process 1 — Draft, Review & Finalize**. See the
-repo-root `README.md` for how Process 1 and Process 2 divide up, and the
-original PRD/Build Spec (OWASP GenAI Translations Pipeline) for full context.
+Scripts and config backing both processes — Process 1 (Draft, Review &
+Finalize: everything through `## Components in this repo (Process 1)` below)
+and Process 2 (Assemble & Publish: `render.sh`, `render/render.js`,
+`render_config_schema.py`, `check_render_override.py`, `check_signoff.py`,
+`verify_pdf.py`, plus `.github/workflows/publish.yml`,
+`publish-direct.yml`, `check-freshness.yml`). See **`tooling/docs/`**
+(`REQUIREMENTS.md`, `DESIGN.md`, `WORKFLOW.md`) for the full current-state
+writeup, reconciled against the original PRD/Build Spec — this file stays
+focused on the file-by-file schema reference below.
 
 ## registry.yaml (repo root)
 
@@ -179,16 +185,17 @@ section, not less:**
   with no good automated failure signal; revisit only if Tier 1's
   text-overlay approach proves insufficient in practice.
 
-Deliberately **not** in this repo yet (Process 2 / later phases — see
-repo-root README):
+Process 2 (components 3, 4, 5) and the GitHub Pages site (component 6) are
+now built — see `tooling/docs/DESIGN.md` for the render pipeline's internals
+(`render/render.js`) and `docs/README.md` for the site. `bootstrap-asset.yml`
+and `translate-draft.yml` fire via `repository_dispatch` from
+`docs/upload.html` (or `workflow_dispatch` for a manual run), gated by a
+TOTP authenticator code — see `tooling/docs/WORKFLOW.md`.
 
-- `publish.yml`, `check-freshness.yml`, `render.sh` (component 3, 4, 5)
-- `migrate_archive.py` (component 7)
-- The GitHub Pages upload/status site (component 6) — the Build Spec's own
-  suggested build order builds this last, "once the underlying CLI/Actions
-  pipeline works end-to-end." Until then, `bootstrap-asset.yml` and
-  `translate-draft.yml` are triggered via `workflow_dispatch` (or
-  `repository_dispatch`, once the form exists) instead of a web form.
+Still not built:
+
+- `migrate_archive.py` (component 7) — no archived-repo locale has been
+  migrated into this structure yet; see `tooling/docs/REQUIREMENTS.md`.
 
 ## Asset naming
 

@@ -274,15 +274,21 @@ function renderLegalNoticeHtml(cfg) {
   return `<section class="page legal-notice"><p>${cfg.legal_notice.text}</p></section>`;
 }
 
-function renderTocHtml(cfg, headings) {
+// tocHeadings: already filtered to cfg.toc.max_depth (see main()) and in
+// document order. pageNumbers: a parallel array of page numbers, or null on
+// the first measurement pass, when page numbers aren't known yet -- rendered
+// as an empty leader with nothing after the dots. The markup is identical
+// either way (same elements, same CSS) so filling in a short number on the
+// second pass doesn't reflow the front matter and invalidate the page
+// numbers just measured from the first pass.
+function renderTocHtml(cfg, tocHeadings, pageNumbers) {
   if (!cfg.toc.include) return "";
-  const items = headings
-    .filter((h) => h.level <= cfg.toc.max_depth)
-    .map((h) => `<li class="toc-level-${h.level}">${h.text}</li>`)
+  const items = tocHeadings
+    .map((h, i) => {
+      const num = pageNumbers ? pageNumbers[i] : null;
+      return `<li class="toc-level-${h.level}"><span class="toc-title">${h.text}</span><span class="toc-dots"></span><span class="toc-page">${num || ""}</span></li>`;
+    })
     .join("\n");
-  // No leader-dot page numbers yet -- an accurate TOC needs a two-pass
-  // render (measure page numbers, then re-render with them filled in).
-  // Titles-only is the honest v1 rather than fabricated/misleading numbers.
   return `
     <section class="page toc">
       <h2>${cfg.toc.label}</h2>
@@ -295,9 +301,76 @@ function extractHeadings(sectionsHtml) {
   const re = /<h([12])[^>]*>(.*?)<\/h\1>/gi;
   for (const html of sectionsHtml) {
     let m;
-    while ((m = re.exec(html))) headings.push({ level: Number(m[1]), text: m[2].replace(/<[^>]+>/g, "") });
+    while ((m = re.exec(html))) headings.push({ level: Number(m[1]), text: decodeHtmlEntities(m[2].replace(/<[^>]+>/g, "")) });
   }
   return headings;
+}
+
+const HTML_ENTITIES = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
+  mdash: "—", ndash: "–", hellip: "…",
+  lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”",
+};
+// Heading text is pulled from markdown-it's rendered HTML (still
+// entity-encoded, e.g. typographer output like &mdash; or &rsquo;), but the
+// PDF text layer we search it against (see computeHeadingPageNumbers) holds
+// the actual decoded characters a browser would display -- without this,
+// a heading containing any of these would never match and silently lose its
+// page number.
+function decodeHtmlEntities(text) {
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, code) => {
+    if (code[0] === "#") {
+      const codePoint = code[1].toLowerCase() === "x" ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isNaN(codePoint) ? whole : String.fromCodePoint(codePoint);
+    }
+    return HTML_ENTITIES[code.toLowerCase()] || whole;
+  });
+}
+
+function normalizeForMatch(text) {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+// Loads a PDF buffer and returns its text content one string per page, in
+// page order. pdfjs-dist ships ESM-only from v5 -- this file is CommonJS, so
+// the import has to be dynamic (top-level `require` can't load an ESM
+// package); dynamic import works fine from inside an async function.
+async function extractPageTexts(pdfBuffer) {
+  const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const doc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer), useSystemFonts: true }).promise;
+  const pageTexts = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    pageTexts.push(normalizeForMatch(content.items.map((item) => item.str).join(" ")));
+  }
+  return pageTexts;
+}
+
+// Matches each heading, in document order, to the first page (a 1-indexed
+// "rest" page number, exactly what the footer's own page-number counter
+// prints) its title text appears on, starting the search only after
+// frontMatterPageCount pages -- otherwise every heading would "match" on the
+// TOC's own page, which lists every title verbatim with no page number yet.
+// The pointer only ever moves forward, so a title that's also referenced
+// elsewhere (e.g. an appendix cross-reference table) can't steal an earlier
+// heading's slot, though it could in principle cause a later heading to
+// match a passing mention rather than its own section if that mention
+// contains the exact full title text -- not observed in practice, since
+// cross-references in this project's documents use short IDs, not full
+// titles, but noted here as this approach's one known limitation.
+function computeHeadingPageNumbers(pageTexts, headings, frontMatterPageCount) {
+  let pointer = frontMatterPageCount;
+  return headings.map((h) => {
+    const needle = normalizeForMatch(h.text);
+    for (let i = pointer; i < pageTexts.length; i++) {
+      if (pageTexts[i].includes(needle)) {
+        pointer = i;
+        return i + 1;
+      }
+    }
+    return null;
+  });
 }
 
 async function main() {
@@ -328,7 +401,39 @@ async function main() {
     ? path.join(args.templatesRoot, "assets", "images", cfg.sponsors.image_path)
     : null;
 
+  // The source PDF's own printed table of contents sometimes got captured
+  // *twice* at split time: once as running text (the "Table_of_Content"
+  // section, always skipped above) and once as a whole separate scanned
+  // figure with OCR text overlaid (name derived from its position, not its
+  // content -- e.g. "..._Figure_3" -- so it can't be caught by name like the
+  // text section can). Both are the source's own dead table of contents,
+  // now superseded by the accurate one this renderer generates, and both
+  // carry the source's own now-wrong page numbers baked into their text.
+  // Detected here by comparing a figure's first OCR'd line against
+  // Table_of_Content.md's own heading (in whatever language this locale
+  // uses) rather than a hardcoded phrase list, so it holds for any locale.
+  const tocMdPath = path.join(localeDir, "Table_of_Content.md");
+  let tocHeadingText = null;
+  if (fs.existsSync(tocMdPath)) {
+    const m = fs.readFileSync(tocMdPath, "utf-8").match(/^#\s+(.+)$/m);
+    if (m) tocHeadingText = normalizeForMatch(m[1]);
+  }
+
   for (const name of order) {
+    // The source PDF's own printed table of contents gets split out as an
+    // ordinary content section like any other (its manifest name comes from
+    // its English heading text at split time, before translation, so this
+    // matches regardless of locale) -- but it's a dead duplicate now that
+    // this renderer builds its own accurate one (see renderTocHtml): its
+    // text is literally the *source* document's own heading list with the
+    // *source* document's own page numbers baked in as plain text, both
+    // meaningless once retranslated and repaginated. Observed in practice
+    // producing exactly that: a garbled block of stale titles and wrong
+    // page numbers sitting between the real intro and the real first
+    // section. Always skipped, unconditionally -- there's no world where
+    // shipping the source's own dead TOC as body content is correct.
+    if (/^table_of_contents?$/i.test(name)) continue;
+
     const mdPath = path.join(localeDir, `${name}.md`);
     const svgPath = path.join(localeDir, `${name}.svg`);
     // A sponsors/supporters FIGURE changes on the org's own sponsor-roster
@@ -354,6 +459,9 @@ async function main() {
       sectionsHtml.push(`<section class="content-section">${md.render(raw)}</section>`);
     } else if (fs.existsSync(svgPath)) {
       const svg = fs.readFileSync(svgPath, "utf-8");
+      const firstOcrText = svg.match(/<text[^>]*>([^<]*)<\/text>/);
+      const isDuplicateTocScan = tocHeadingText && firstOcrText && normalizeForMatch(firstOcrText[1]) === tocHeadingText;
+      if (isDuplicateTocScan) continue; // see the tocHeadingText comment above
       rawContentParts.push(svg);
       sectionsHtml.push(`<section class="content-section figure">${resolveSvgImagePaths(svg, localeDir)}</section>`);
     }
@@ -399,7 +507,8 @@ async function main() {
       : null,
   });
   const legalHtml = renderLegalNoticeHtml(cfg);
-  const tocHtml = renderTocHtml(cfg, headings);
+  const tocHeadings = headings.filter((h) => h.level <= cfg.toc.max_depth);
+  const tocHtmlPass1 = renderTocHtml(cfg, tocHeadings, null);
 
   const googleLinkTags = googleHrefs.map((href) => `<link rel="stylesheet" href="${href}">`).join("\n");
 
@@ -445,8 +554,12 @@ body {
 .cover-subtitle { font-size: 18pt; margin: 0 0 24pt; }
 .cover-meta { font-size: 12pt; opacity: 0.8; margin: 0 0 8pt; }
 .toc ul { list-style: none; padding: 0; }
+.toc li { display: flex; align-items: baseline; }
 .toc-level-1 { font-weight: 600; margin-top: 8pt; }
 .toc-level-2 { margin-left: 16pt; }
+.toc-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toc-dots { flex: 1 1 auto; border-bottom: 1px dotted currentColor; margin: 0 4pt; position: relative; top: -3pt; }
+.toc-page { white-space: nowrap; }
 .content-section { margin-bottom: 18pt; page-break-inside: avoid; }
 .content-section.figure svg, .content-section.figure img { max-width: 100%; height: auto; }
 ${watermarkCss}
@@ -476,7 +589,11 @@ ${coverHtml}
 </body>
 </html>`;
 
-  const restHtml = `<!DOCTYPE html>
+  // Built twice: once with tocHtmlPass1 (titles only, to measure where each
+  // heading actually lands) and again with the real page numbers filled in
+  // (see the two-pass render below) -- a function instead of one string so
+  // both passes share the exact same wrapper.
+  const buildRestHtml = (tocHtml) => `<!DOCTYPE html>
 <html lang="${args.locale}" dir="${cfg.direction}">
 <head>${sharedHead}</head>
 <body${bodyAttrs}>
@@ -485,6 +602,21 @@ ${watermarkHtml}
 ${legalHtml}
 ${tocHtml}
 ${sectionsHtml.join("\n")}
+</body>
+</html>`;
+  // Front matter alone (legal notice + TOC, no content sections) -- rendered
+  // separately just to count how many pages it takes on its own. That count
+  // tells computeHeadingPageNumbers where the TOC's own page(s) end, so it
+  // doesn't match every heading's title against the TOC page that lists all
+  // of them verbatim with no page number yet. Same margins/CSS as the real
+  // render, so its page count matches how the front matter paginates inside
+  // the full document.
+  const frontOnlyHtml = `<!DOCTYPE html>
+<html lang="${args.locale}" dir="${cfg.direction}">
+<head>${sharedHead}</head>
+<body${bodyAttrs}>
+${legalHtml}
+${tocHtmlPass1}
 </body>
 </html>`;
 
@@ -508,15 +640,36 @@ ${sectionsHtml.join("\n")}
   // under which same-machine file:// resource loads work normally.
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "render-"));
   const coverHtmlPath = path.join(tmpDir, "cover.html");
-  const restHtmlPath = path.join(tmpDir, "rest.html");
   fs.writeFileSync(coverHtmlPath, coverOnlyHtml);
-  fs.writeFileSync(restHtmlPath, restHtml);
 
   const pdfMargin = {
     top: `${cfg.page.margins.top_mm}mm`,
     bottom: `${cfg.page.margins.bottom_mm}mm`,
     left: `${cfg.page.margins.left_mm}mm`,
     right: `${cfg.page.margins.right_mm}mm`,
+  };
+
+  const restPdfOptions = {
+    format: cfg.page.size,
+    margin: pdfMargin,
+    displayHeaderFooter: true,
+    headerTemplate: "<div></div>",
+    footerTemplate: pageNumberFooter,
+    printBackground: true,
+  };
+  // Writes html to its own file (see the file:// origin note above), loads
+  // it, and prints it -- used for the cover pass above and every "rest"
+  // pass below so each one gets a fresh file:// origin.
+  const renderHtmlFile = async (html, filename, pdfOptions) => {
+    const htmlPath = path.join(tmpDir, filename);
+    fs.writeFileSync(htmlPath, html);
+    const page = await browser.newPage();
+    try {
+      await page.goto("file://" + htmlPath, { waitUntil: "networkidle0" });
+      return await page.pdf(pdfOptions);
+    } finally {
+      await page.close();
+    }
   };
 
   const browser = await puppeteer.launch({
@@ -533,16 +686,27 @@ ${sectionsHtml.join("\n")}
       printBackground: true,
     });
 
-    const restPage = await browser.newPage();
-    await restPage.goto("file://" + restHtmlPath, { waitUntil: "networkidle0" });
-    const restPdfBuffer = await restPage.pdf({
-      format: cfg.page.size,
-      margin: pdfMargin,
-      displayHeaderFooter: true,
-      headerTemplate: "<div></div>",
-      footerTemplate: pageNumberFooter,
-      printBackground: true,
-    });
+    // Two-pass TOC page numbers: pass 1 measures where each heading actually
+    // lands (see computeHeadingPageNumbers), pass 2 (below, the real
+    // restHtmlPath render) fills those numbers in. Skipped entirely when
+    // there's no TOC to number.
+    let finalTocHtml = tocHtmlPass1;
+    if (cfg.toc.include && tocHeadings.length > 0) {
+      const frontPdfBuffer = await renderHtmlFile(frontOnlyHtml, "front-only.html", {
+        format: cfg.page.size,
+        margin: pdfMargin,
+        displayHeaderFooter: false,
+        printBackground: true,
+      });
+      const frontMatterPageCount = (await PDFDocument.load(frontPdfBuffer)).getPageCount();
+
+      const restPdfBufferPass1 = await renderHtmlFile(buildRestHtml(tocHtmlPass1), "rest-pass1.html", restPdfOptions);
+      const pageTexts = await extractPageTexts(restPdfBufferPass1);
+      const pageNumbers = computeHeadingPageNumbers(pageTexts, tocHeadings, frontMatterPageCount);
+      finalTocHtml = renderTocHtml(cfg, tocHeadings, pageNumbers);
+    }
+
+    const restPdfBuffer = await renderHtmlFile(buildRestHtml(finalTocHtml), "rest.html", restPdfOptions);
 
     // Merge: the cover's own single-page PDF (no footer) followed by every
     // page of the footer-enabled body PDF, whose own pageNumber counter
