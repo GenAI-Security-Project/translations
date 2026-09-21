@@ -1,0 +1,13 @@
+{
+  "name": "translations-render",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Process 2 (Assemble & Publish) PDF generator -- markdown-it + Puppeteer, extending the archived repo's Track A tool per the Build Spec.",
+  "type": "commonjs",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "markdown-it": "^14.1.0",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^25.11.0"
+  }
+}

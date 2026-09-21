@@ -18,6 +18,7 @@ from text_quality import is_footer_url_artifact, is_garbled, is_page_number_arti
 from docx.text.paragraph import Paragraph
 
 import image_svg
+from source_manifest import write_manifest
 
 
 def _slugify(heading: str) -> str:
@@ -121,6 +122,7 @@ def split_into_source(docx_path: Path, source_dir: Path) -> List[str]:
 
     images_dir = source_dir / "images"
     figure_counts: dict = {}
+    figures_by_section: dict = {}
     for section_name, blob in image_candidates:
         figure_counts[section_name] = figure_counts.get(section_name, 0) + 1
         suffix = "" if figure_counts[section_name] == 1 else f"_{figure_counts[section_name]}"
@@ -139,8 +141,28 @@ def split_into_source(docx_path: Path, source_dir: Path) -> List[str]:
         (images_dir / f"{figure.name}_original.png").write_bytes(figure.original_png)
         (source_dir / f"{figure.name}.svg").write_text(figure.svg)
         written.append(figure.name)
+        figures_by_section.setdefault(section_name, []).append(figure.name)
 
     raw_dir = source_dir / "_raw"
     raw_dir.mkdir(exist_ok=True)
     docx_path.rename(raw_dir / docx_path.name)
+
+    # `written`'s order (all text, then all figures) suits translation, which
+    # treats every name independently -- render.sh wants a figure where it
+    # actually sat in the document, right after its enclosing section.
+    manifest_order = []
+    text_section_names = {name for name, _ in text_sections}
+    # A section that anchored only an image and no text (a "Preface" opened
+    # purely by a cover image before the first real heading exists) never
+    # made it into text_sections -- filtered out as having no body -- but
+    # its figure is still a real file. It can only precede every real
+    # section (the auto-"Preface" only ever gets created before the first
+    # heading is found), so flush any such orphans first, in encounter order.
+    for orphan_section in list(figures_by_section):
+        if orphan_section not in text_section_names:
+            manifest_order.extend(figures_by_section.pop(orphan_section))
+    for name, _ in text_sections:
+        manifest_order.append(name)
+        manifest_order.extend(figures_by_section.pop(name, []))
+    write_manifest(source_dir, manifest_order)
     return written

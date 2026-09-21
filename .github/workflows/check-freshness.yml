@@ -1,0 +1,129 @@
+name: check-freshness
+
+# Component 4. Two jobs, both matrixed over every asset x locale in
+# registry.yaml:
+#   1. Diff each reviewed section's source_commit against the asset's
+#      current _source/ HEAD; flip a mismatch to stale (the only writer of
+#      that status -- see status_schema.py's docstring).
+#   2. When a locale has no draft/in_review/stale sections left (every
+#      section reviewed, total > 0) and no open "ready to publish" issue
+#      exists for it yet, open one with the three-way sign-off checklist
+#      publish.yml later reads (see check_signoff.py). This is Process 2's
+#      only automatic step -- everything after the issue opens requires a
+#      human action (FR4.1/NFR7).
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # nightly, off the hour to avoid GitHub's peak-time queueing
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: build
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, yaml
+          registry = yaml.safe_load(open("registry.yaml"))
+          pairs = [
+              {"asset": asset, "locale": locale}
+              for asset, entry in (registry.get("assets") or {}).items()
+              for locale in entry.get("locales", [])
+          ]
+          print("matrix=" + json.dumps({"include": pairs}))
+          PY
+
+  check-locale:
+    needs: build-matrix
+    if: needs.build-matrix.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need real _source/ history for the freshness diff
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tooling dependencies
+        run: pip install -r tooling/requirements.txt
+
+      - name: Flip stale sections and check for all-reviewed
+        id: freshness
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, subprocess, sys
+          sys.path.insert(0, "tooling")
+          from status_schema import StatusFile, SectionStatus
+
+          asset, locale = "${{ matrix.asset }}", "${{ matrix.locale }}"
+          status_path = f"{asset}/{locale}/status.json"
+
+          current_source_commit = subprocess.run(
+              ["git", "log", "-1", "--format=%h", "--", f"{asset}/_source"],
+              capture_output=True, text=True, check=True,
+          ).stdout.strip()
+
+          with open(status_path) as f:
+              status = StatusFile(**json.load(f))
+
+          changed = False
+          for name, section in status.sections.items():
+              if section.status == SectionStatus.reviewed and section.source_commit != current_source_commit:
+                  section.status = SectionStatus.stale
+                  section.current_source_commit = current_source_commit
+                  changed = True
+
+          if changed:
+              with open(status_path, "w") as f:
+                  f.write(status.model_dump_json(indent=2, exclude_none=True) + "\n")
+
+          summary = status.summary
+          all_reviewed = summary["total"] > 0 and summary["reviewed"] == summary["total"]
+          print(f"changed={'true' if changed else 'false'}")
+          print(f"all_reviewed={'true' if all_reviewed else 'false'}")
+          PY
+
+      - name: Commit stale flips
+        if: steps.freshness.outputs.changed == 'true'
+        run: |
+          git config user.name "check-freshness[bot]"
+          git config user.email "actions@github.com"
+          git add "${{ matrix.asset }}/${{ matrix.locale }}/status.json"
+          git commit -m "check-freshness: flip stale sections for ${{ matrix.asset }}/${{ matrix.locale }}"
+          git push
+
+      - name: Open a ready-to-publish issue, if one doesn't already exist
+        if: steps.freshness.outputs.all_reviewed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Ready to publish: ${{ matrix.asset }} / ${{ matrix.locale }}"
+          EXISTING=$(gh issue list --search "\"$TITLE\" in:title" --state open --label ready-to-publish --json number --jq 'length')
+          if [ "$EXISTING" != "0" ]; then
+            echo "Already open, skipping."
+            exit 0
+          fi
+          gh issue create --title "$TITLE" --label ready-to-publish --body "$(cat <<'BODY'
+          Every section of this asset/locale is now `reviewed`. Publishing
+          (assembly + render + release, Process 2) requires all three
+          sign-offs below -- check a box only once that role has actually
+          confirmed. publish.yml re-checks this list on every edit.
+
+          - [ ] Localization lead
+          - [ ] Technical/content reviewer
+          - [ ] Project/ops executive
+          BODY
+          )"

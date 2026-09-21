@@ -1,0 +1,128 @@
+name: publish-direct
+
+# TESTING-ONLY direct publish path from the GitHub Pages "Publish" page.
+# Bypasses the three-way sign-off gate that publish.yml enforces (FR4.2) --
+# gated instead by CAPTCHA + a TOTP authenticator code, the same pattern
+# bootstrap-asset.yml uses for the public upload form. Exists so the
+# rendering pipeline can be validated end-to-end against real content
+# without a live sign-off process in place yet. Revisit (fold into
+# publish.yml, or retire) once real sign-off practices exist.
+#
+# One dispatch per (asset, locale) the publish page's checkboxes selected.
+# client_payload.watermark controls render.sh's --final flag: "true" (the
+# page's default) renders a watermarked preview, always allowed regardless
+# of review status; "false" requests a real final render, which still
+# hard-requires every section reviewed -- render.sh's own --final check,
+# never relaxed here regardless of what the publish page chooses to list.
+
+on:
+  repository_dispatch:
+    types: [publish-direct]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: translations
+
+      - uses: actions/checkout@v4
+        with:
+          repository: GenAI-Security-Project/translations-templates
+          ssh-key: ${{ secrets.TEMPLATES_DEPLOY_KEY }}
+          path: translations-templates
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install tooling dependencies
+        working-directory: translations
+        run: pip install -r tooling/requirements.txt
+
+      # Same check as bootstrap-asset.yml's public-form path: the secret
+      # lives only in this job's environment, never shipped to the browser,
+      # unlike a client-side passphrase check would be.
+      - name: Verify authenticator code
+        env:
+          TOTP_SECRET: ${{ secrets.UPLOAD_TOTP_SECRET }}
+          TOTP_CODE: ${{ github.event.client_payload.totp_code }}
+        run: |
+          pip install --quiet pyotp
+          python3 - <<'PY'
+          import os, sys
+          import pyotp
+
+          secret = os.environ.get("TOTP_SECRET")
+          code = (os.environ.get("TOTP_CODE") or "").strip()
+          if not secret:
+              print("::error::UPLOAD_TOTP_SECRET is not configured on this repo")
+              sys.exit(1)
+          if not code:
+              print("::error::No authenticator code was submitted with this publish request")
+              sys.exit(1)
+          if not pyotp.TOTP(secret).verify(code, valid_window=1):
+              print("::error::Authenticator code was incorrect or expired")
+              sys.exit(1)
+          PY
+
+      - name: Resolve inputs
+        id: resolve
+        run: |
+          echo "asset=${{ github.event.client_payload.asset }}" >> "$GITHUB_OUTPUT"
+          echo "locale=${{ github.event.client_payload.locale }}" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event.client_payload.watermark }}" = "false" ]; then
+            echo "final_flag=--final" >> "$GITHUB_OUTPUT"
+          else
+            echo "final_flag=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Override-readiness check (FR5)
+        working-directory: translations
+        run: |
+          python3 tooling/check_render_override.py \
+            --asset "${{ steps.resolve.outputs.asset }}" \
+            --locale "${{ steps.resolve.outputs.locale }}" \
+            --templates-root "$GITHUB_WORKSPACE/translations-templates"
+
+      - name: Render the PDF
+        working-directory: translations
+        run: |
+          bash tooling/render.sh \
+            --asset "${{ steps.resolve.outputs.asset }}" \
+            --locale "${{ steps.resolve.outputs.locale }}" \
+            --templates-root "$GITHUB_WORKSPACE/translations-templates" \
+            ${{ steps.resolve.outputs.final_flag }}
+
+      - name: Commit the release PDF
+        working-directory: translations
+        run: |
+          git config user.name "publish-direct[bot]"
+          git config user.email "actions@github.com"
+          git add "${{ steps.resolve.outputs.asset }}/${{ steps.resolve.outputs.locale }}/release/"
+          git commit -m "publish (direct/testing): ${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }}"
+          git push
+
+      - name: Resolve the release filename
+        id: release_file
+        working-directory: translations
+        run: |
+          FILE=$(ls -t "${{ steps.resolve.outputs.asset }}/${{ steps.resolve.outputs.locale }}/release/"*.pdf | head -1)
+          echo "path=$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Cut a GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: translations
+        run: |
+          TAG="${{ steps.resolve.outputs.asset }}-${{ steps.resolve.outputs.locale }}-$(date +%Y%m%d%H%M%S)"
+          gh release create "$TAG" "${{ steps.release_file.outputs.path }}" \
+            --title "${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }} (direct/testing publish)" \
+            --notes "Published via the GitHub Pages Publish page's direct/testing path (CAPTCHA + authenticator code, no sign-off gate)."

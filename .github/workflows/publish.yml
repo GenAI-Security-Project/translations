@@ -1,0 +1,155 @@
+name: publish
+
+# Component 3 (Process 2 -- Assemble & Publish). Never runs from Process 1
+# completing on its own (NFR7) -- only from a human editing the sign-off
+# checklist on the "ready to publish" issue check-freshness.yml opened, or
+# a manual workflow_dispatch for testing.
+#
+# On a passing sign-off + override-readiness check: pulls the private
+# translations-templates repo, renders the final (non-watermarked) PDF via
+# render.sh --final, commits it to release/, and cuts a GitHub Release.
+
+on:
+  issues:
+    types: [edited]
+  workflow_dispatch:
+    inputs:
+      asset:
+        required: true
+      locale:
+        required: true
+      issue_number:
+        description: "Issue number carrying the three-way sign-off checklist"
+        required: true
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  publish:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (contains(github.event.issue.labels.*.name, 'ready-to-publish'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve asset/locale/issue from the trigger
+        id: resolve
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "asset=${{ inputs.asset }}" >> "$GITHUB_OUTPUT"
+            echo "locale=${{ inputs.locale }}" >> "$GITHUB_OUTPUT"
+            echo "issue_number=${{ inputs.issue_number }}" >> "$GITHUB_OUTPUT"
+          else
+            # Title convention check-freshness.yml writes: "Ready to publish: <asset> / <locale>"
+            ASSET=$(echo "$ISSUE_TITLE" | sed -n 's/^Ready to publish: \(.*\) \/ \(.*\)$/\1/p')
+            LOCALE=$(echo "$ISSUE_TITLE" | sed -n 's/^Ready to publish: \(.*\) \/ \(.*\)$/\2/p')
+            if [ -z "$ASSET" ] || [ -z "$LOCALE" ]; then
+              echo "::error::Issue title doesn't match 'Ready to publish: <asset> / <locale>': $ISSUE_TITLE"
+              exit 1
+            fi
+            echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+            echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
+            echo "issue_number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          path: translations
+
+      - uses: actions/checkout@v4
+        with:
+          repository: GenAI-Security-Project/translations-templates
+          ssh-key: ${{ secrets.TEMPLATES_DEPLOY_KEY }}
+          path: translations-templates
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install tooling dependencies
+        working-directory: translations
+        run: pip install -r tooling/requirements.txt
+
+      - name: Check three-way sign-off
+        id: signoff
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          gh issue view "${{ steps.resolve.outputs.issue_number }}" --json body --jq .body \
+            --repo "${{ github.repository }}" \
+            | python3 translations/tooling/check_signoff.py
+          code=$?
+          set -e
+          if [ "$code" = "2" ]; then
+            echo "Sign-off incomplete -- nothing to do yet, not a failure."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          elif [ "$code" = "0" ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            exit "$code"
+          fi
+
+      - name: Override-readiness check (FR5)
+        if: steps.signoff.outputs.proceed == 'true'
+        working-directory: translations
+        run: |
+          python3 tooling/check_render_override.py \
+            --asset "${{ steps.resolve.outputs.asset }}" \
+            --locale "${{ steps.resolve.outputs.locale }}" \
+            --templates-root "$GITHUB_WORKSPACE/translations-templates"
+
+      - name: Render the final PDF
+        if: steps.signoff.outputs.proceed == 'true'
+        working-directory: translations
+        run: |
+          bash tooling/render.sh \
+            --asset "${{ steps.resolve.outputs.asset }}" \
+            --locale "${{ steps.resolve.outputs.locale }}" \
+            --templates-root "$GITHUB_WORKSPACE/translations-templates" \
+            --final
+
+      - name: Commit the release PDF
+        if: steps.signoff.outputs.proceed == 'true'
+        working-directory: translations
+        run: |
+          git config user.name "publish[bot]"
+          git config user.email "actions@github.com"
+          git add "${{ steps.resolve.outputs.asset }}/${{ steps.resolve.outputs.locale }}/release/"
+          git commit -m "publish: ${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }}"
+          git push
+
+      - name: Resolve the release filename
+        if: steps.signoff.outputs.proceed == 'true'
+        id: release_file
+        working-directory: translations
+        run: |
+          FILE=$(ls "${{ steps.resolve.outputs.asset }}/${{ steps.resolve.outputs.locale }}/release/"*.pdf | tail -1)
+          echo "path=$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Cut a GitHub Release
+        if: steps.signoff.outputs.proceed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        working-directory: translations
+        run: |
+          TAG="${{ steps.resolve.outputs.asset }}-${{ steps.resolve.outputs.locale }}-$(date +%Y%m%d%H%M%S)"
+          gh release create "$TAG" "${{ steps.release_file.outputs.path }}" \
+            --title "${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }}" \
+            --notes "Published from issue #${{ steps.resolve.outputs.issue_number }} after three-way sign-off."
+
+      - name: Comment and close the issue
+        if: steps.signoff.outputs.proceed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ steps.resolve.outputs.issue_number }}" \
+            --repo "${{ github.repository }}" \
+            --body "Published: \`${{ steps.release_file.outputs.path }}\`. See the release for the final PDF."
+          gh issue close "${{ steps.resolve.outputs.issue_number }}" --repo "${{ github.repository }}"
