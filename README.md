@@ -88,9 +88,15 @@ without someone from the build-out team involved:
   the normal upload path instead. See `tooling/docs/REQUIREMENTS.md` for the
   full list of what's done, partial, or not started.
 
-## Related repo
+## Related repos
 
-`translations-templates` (private, admin-group-only) holds the shared render
-templates — the branded cover art, fonts, and layout config three named
-templates use. It's permanently private by design: it's the project's brand
-asset repo, not translated content, and has no reason to be public.
+- `translations-templates` (private, admin-group-only) holds the shared
+  render templates — the branded cover art, fonts, and layout config three
+  named templates use. It's permanently private by design: it's the
+  project's brand asset repo, not translated content, and has no reason to
+  be public.
+- `translations-tooling` (private) is a manually-synced backup of this
+  repo's `tooling/` directory — integrity protection to restore from if
+  `tooling/` here is ever tampered with or compromised, not live
+  infrastructure. No workflow reads from it; it has zero effect on this
+  repo unless someone deliberately restores from it.
