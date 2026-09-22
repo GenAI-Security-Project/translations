@@ -26,6 +26,17 @@ walkthrough; this file is just "what's left."
   in an offline/simulated mode rather than calling a real model — every
   translation onboarded so far was drafted this way, not with a live LLM.
 
+## Operational safeguards
+
+- [x] **`translations-tooling` (private) backup created** 2026-09-22 — a
+  manually-synced copy of `tooling/`, to restore from if this repo's
+  `tooling/` is ever tampered with or compromised. Not live infrastructure;
+  no workflow reads from it. See its own README for the restore procedure.
+- [ ] **Keep `translations-tooling` synced.** There's no automation or
+  schedule — it only protects against tampering that happened *after* its
+  last sync. Re-sync it whenever `tooling/` changes meaningfully (see that
+  repo's README for the exact steps), not just once at creation.
+
 ## Not built yet
 
 - [ ] **`migrate_archive.py` (component 7).** No archived-repo locale has
