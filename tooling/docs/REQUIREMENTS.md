@@ -71,8 +71,8 @@ deliberate, documented exception to FR4, not a replacement for it.
 
 | Req | Status | Notes |
 |---|---|---|
-| FR8.1 — All enumerated locales render correctly per script category | **Partial** | Only `de-DE` and `fr-FR` have real translated content and have been rendered/verified. `locale_script_categories.py` implements the category enumeration and gate; the render-correctness verification described in the Build Spec's 8 validation groups (RTL, CJK, Cyrillic, complex-shaping, etc.) has not been run — no font assets or locale overrides exist yet for those categories in `translations-templates`. |
-| FR8.2 — New locale in an existing category = config only, no new code | Done by construction | `render_config_schema.py`'s override mechanism; not yet exercised for a category beyond Latin |
+| FR8.1 — All enumerated locales render correctly per script category | **Partial** | `de-DE`, `fr-FR` (Latin) and `ru-RU` (Cyrillic, added 2026-09-24) have real translated content and have been rendered/verified. Onboarding `ru-RU` surfaced a real bug — neither bundled brand font (Poppins, Barlow) has any Cyrillic glyphs at all, fixed with a Cyrillic-range fallback face (see `tooling/docs/OPEN_ITEMS.md`). RTL, CJK, and complex-shaping remain unrun — no font assets or locale overrides exist yet for those categories in `translations-templates`, and the Cyrillic gap is a concrete reason not to assume they're fine untested. |
+| FR8.2 — New locale in an existing category = config only, no new code | Done by construction | `render_config_schema.py`'s override mechanism; exercised for Latin (`de-DE`/`fr-FR`) and now Cyrillic (`ru-RU`) — not yet for RTL, CJK, or complex-shaping |
 
 ### FR9 — Migration
 
