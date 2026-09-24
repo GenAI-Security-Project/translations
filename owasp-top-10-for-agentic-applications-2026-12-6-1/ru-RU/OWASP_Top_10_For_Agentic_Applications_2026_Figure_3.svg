@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1696" height="1846" viewBox="0 0 1696 1846">
+  <!-- OCR-extracted text overlay. Verify each line against the original image (see the sibling _original file) before trusting this as a translation source. -->
+  <image href="../_source/images/OWASP_Top_10_For_Agentic_Applications_2026_Figure_3.png" xlink:href="../_source/images/OWASP_Top_10_For_Agentic_Applications_2026_Figure_3.png" width="1696" height="1846"/>
+  <text id="t0" x="462" y="681" font-size="56" fill="rgb(0,0,0)" data-ocr-confidence="95">Оглавление</text>
+  <text id="t1" x="461" y="886" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="95">Письмо руководителей Agentic Top 10</text>
+  <text id="t2" x="459" y="961" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="95">Agentic Top 10 — обзор</text>
+  <text id="t3" x="459" y="1035" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="87">ASI01: Захват цели агента</text>
+  <text id="t4" x="501" y="1104" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Описание</text>
+  <text id="t5" x="500" y="1172" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="95">Типичные примеры уязвимости</text>
+  <text id="t6" x="501" y="1240" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Примеры сценариев атак</text>
+  <text id="t7" x="501" y="1307" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Рекомендации по предотвращению и снижению рисков</text>
+  <text id="t8" x="501" y="1369" font-size="20" fill="rgb(0,0,0)" data-ocr-confidence="96">Ссылки</text>
+  <text id="t9" x="459" y="1449" font-size="30" fill="rgb(0,0,0)" data-ocr-confidence="92">ASI02: Злоупотребление инструментами и их эксплуатация</text>
+  <text id="t10" x="501" y="1517" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Описание</text>
+  <text id="t11" x="500" y="1585" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="95">Типичные примеры уязвимости</text>
+  <text id="t12" x="501" y="1653" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Примеры сценариев атак</text>
+  <text id="t13" x="501" y="1721" font-size="26" fill="rgb(0,0,0)" data-ocr-confidence="96">Рекомендации по предотвращению и снижению рисков</text>
+  <text id="t14" x="501" y="1783" font-size="20" fill="rgb(0,0,0)" data-ocr-confidence="96">Ссылки</text>
+  <text id="t15" x="787" y="1844" font-size="12" fill="rgb(0,0,0)" data-ocr-confidence="69">Deis</text>
+</svg>
