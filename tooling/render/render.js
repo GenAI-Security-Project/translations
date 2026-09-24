@@ -137,6 +137,20 @@ function resolveSvgImagePaths(svgText, localeDir) {
   });
 }
 
+// Google Fonts' own "cyrillic" subset range (not "cyrillic-ext") -- standard
+// modern Russian, Ukrainian Ge/Ka variants, and the No. sign. Every bundled
+// font this project uses (Poppins, Barlow) has zero Cyrillic glyphs at all
+// -- confirmed directly against Google Fonts' own served CSS, not just this
+// project's bundled files, so it's a real gap in the typefaces themselves,
+// not a bundling oversight. Verified live against a real ru-RU translation:
+// without this, Chrome silently falls back to a generic system serif for
+// every Cyrillic character while Latin/digits stay in the real brand font,
+// producing a visibly mismatched two-font document with no error or warning
+// anywhere in the pipeline.
+const CYRILLIC_UNICODE_RANGE =
+  "U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116";
+const CYRILLIC_FALLBACK_FONT = "NotoSans-Variable.ttf";
+
 function fontFaceCss(fonts, templatesRoot) {
   const blocks = [];
   const googleHrefs = [];
@@ -148,9 +162,22 @@ function fontFaceCss(fonts, templatesRoot) {
     for (const file of spec.files || []) {
       const absPath = path.join(templatesRoot, "assets", "fonts", file.path);
       const url = "file://" + absPath;
+      const weight = file.weight || 400;
+      const style = file.style || "normal";
       blocks.push(
         `@font-face { font-family: "${spec.family}"; src: url("${url}"); ` +
-        `font-weight: ${file.weight || 400}; font-style: ${file.style || "normal"}; }`
+        `font-weight: ${weight}; font-style: ${style}; }`
+      );
+      // Same family name, same weight/style, but scoped to just the
+      // Cyrillic range via a variable font that actually has those glyphs
+      // -- Chrome picks whichever @font-face matching this family/weight
+      // covers the character being drawn, so Latin text still renders in
+      // the real brand font and only Cyrillic falls through to this one,
+      // with no per-locale config needed on the render_config.json side.
+      const cyrillicAbsPath = path.join(templatesRoot, "assets", "fonts", CYRILLIC_FALLBACK_FONT);
+      blocks.push(
+        `@font-face { font-family: "${spec.family}"; src: url("file://${cyrillicAbsPath}"); ` +
+        `font-weight: ${weight}; font-style: ${style}; unicode-range: ${CYRILLIC_UNICODE_RANGE}; }`
       );
     }
   }
