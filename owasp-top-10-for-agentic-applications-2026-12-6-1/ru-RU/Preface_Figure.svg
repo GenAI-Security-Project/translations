@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1696" height="2195" viewBox="0 0 1696 2195">
+  <!-- OCR-extracted text overlay. Verify each line against the original image (see the sibling _original file) before trusting this as a translation source. -->
+  <image href="../_source/images/Preface_Figure.png" xlink:href="../_source/images/Preface_Figure.png" width="1696" height="2195"/>
+  <text id="t0" x="370" y="324" font-size="93" fill="rgb(32,24,32)" data-ocr-confidence="82">| GenaAl GenAl БЕЗОПАСНОСТЬ</text>
+  <text id="t1" x="201" y="1464" font-size="82" fill="rgb(0,0,0)" data-ocr-confidence="92">OWASP Топ-10 для агентных</text>
+  <text id="t2" x="199" y="1570" font-size="81" fill="rgb(0,0,0)" data-ocr-confidence="96">приложений 2026</text>
+  <text id="t3" x="200" y="1710" font-size="41" fill="rgb(0,0,0)" data-ocr-confidence="92">OWASP Gen AI Security Project —</text>
+  <text id="t4" x="199" y="1768" font-size="42" fill="rgb(0,0,0)" data-ocr-confidence="95">Agentic Security Initiative</text>
+  <text id="t5" x="199" y="2026" font-size="22" fill="rgb(0,0,0)" data-ocr-confidence="96">Версия 2026</text>
+  <text id="t6" x="200" y="2078" font-size="15" fill="rgb(0,0,0)" data-ocr-confidence="96">Декабрь 2025</text>
+</svg>
