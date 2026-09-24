@@ -67,11 +67,21 @@ walkthrough; this file is just "what's left."
   text-matching approach in `computeHeadingPageNumbers` (see its comment) —
   never wrong, just occasionally missing. Revisit only if it turns out to
   affect more than a small minority of headings on a real document.
-- [ ] **Only Latin-script locales (`de-DE`, `fr-FR`) have been exercised
-  end-to-end.** The RTL/CJK/Cyrillic/complex-shaping render paths exist in
-  `render_config_schema.py` and `render.js` (direction, line-breaking,
-  font-loading) but are unvalidated against real fonts/content for any
-  locale that actually needs them.
+- [x] **Cyrillic validated end-to-end** 2026-09-24 — `ru-RU` onboarded and
+  drafted as a real Process 1 test (PR #15). Surfaced and fixed a real bug in
+  the process: neither Poppins nor Barlow has any Cyrillic glyphs at all, so
+  every Cyrillic character was silently falling back to a generic system
+  serif (PR #16 + `translations-templates`#3 add a Noto Sans Cyrillic-range
+  fallback under the same font-family name). RTL/CJK/complex-shaping are
+  still unvalidated — this only covers the Cyrillic path.
+- [ ] **RTL/CJK/complex-shaping locales still unexercised end-to-end.** The
+  render paths exist in `render_config_schema.py` and `render.js`
+  (direction, line-breaking, font-loading) but are unvalidated against real
+  fonts/content for any locale that actually needs them. Given the Cyrillic
+  gap just found (a brand font missing an entire script, silently, with no
+  error anywhere), assume RTL/CJK need the same kind of real end-to-end
+  check before trusting them — don't assume they're fine just because the
+  config fields exist.
 
 ## Design decisions made, not yet acted on
 
