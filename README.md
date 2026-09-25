@@ -1,6 +1,6 @@
 # OWASP GenAI Security Project — Translations
 
-![GenAI Initiative](https://img.shields.io/badge/GenAI-Initiative-green) [GenAI Project Type](https://img.shields.io/badge/GenAI-Incubator-orange) 
+![GenAI Initiative](https://img.shields.io/badge/GenAI_Project_Initiative-Translations-green) ![GenAI Project Type](https://img.shields.io/badge/Project_Type-Incubator-orange) 
 
 **Project status: Incubator.** This is an active OWASP GenAI Security Project
 initiative, still early in its lifecycle — the pipeline works end to end, but
