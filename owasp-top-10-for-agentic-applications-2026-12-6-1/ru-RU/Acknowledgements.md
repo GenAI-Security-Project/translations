@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviwed -->
 # Благодарности
 
 ## Руководители Top 10 и руководители разделов
@@ -7,11 +7,11 @@ OWASP Top 10 for Agentic Applications был подготовлен под ру�
 
 Руководитель(и) раздела
 
-ASI01 – Захват цели агента: Kayla Underkoffler, Rakshith Aralimatti
+ASI01 – Подмена цели агента: Kayla Underkoffler, Rakshith Aralimatti
 
 ASI02 – Злоупотребление инструментами и их эксплуатация: Riggs Goodman, Gaurav Mukherjee
 
-ASI03 – Злоупотребление идентификацией и привилегиями: Kellen Carl, Ken Huang
+ASI03 – Злоупотребление идентичностью и привилегиями: Kellen Carl, Ken Huang
 
 ASI04 – Уязвимости цепочки поставок агентных систем: Evgeniy Kokuykin, Aamiruddin Syed
 
@@ -23,7 +23,7 @@ ASI07 – Небезопасное взаимодействие между аг�
 
 ASI08 – Каскадные сбои: Diana Henderson
 
-ASI09 – Эксплуатация доверия между человеком и агентом: Adam Morris
+ASI09 – Злоупотребление доверием человека к агенту: Adam Morris
 
 ASI10 – Агенты, вышедшие из-под контроля: Tomer Elias, Mo Sadek, Priyadharhshini Parthasarathy
 
@@ -65,7 +65,7 @@ Allie Howe, Growth Cyber
 
 ## Экспертный совет по рецензированию ASI
 
-Alejandro Saucedo — председатель ML Security Project при Linux Foundation, эксперт ООН по ИИ, эксперт по технологической политике Европейской комиссии Apostol Vassilev — руководитель направления состязательного ИИ, NIST Chris Hughes — генеральный директор, Aquia Hyrum Anderson — технический директор, Robust Intelligence Steve Wilson — сопредседатель OWASP GenAI Security Project, основатель Top 10 for LLM Applications, директор по продукту, Exabeam Scott Clinton — сопредседатель и соучредитель совета OWASP GenAI Security Project Vasilios Mavroudis — главный научный сотрудник и руководитель направления, the Alan Turing Institute Josh Collyer — главный исследователь по безопасности, руководитель направления Egor Pushkin — главный архитектор направления Data and AI, Oracle Cloud Peter Bryan — главный руководитель исследований в области безопасности ИИ, AI Red Team, Microsoft Daniel Jones — исследователь безопасности ИИ, AI Red Team, Microsoft Michael Burgury — руководитель направления OWASP Low-Code/No-Code, со-руководитель проекта OWASP AIVSS, Zenity
+Alejandro Saucedo — председатель ML Security Project при Linux Foundation, эксперт ООН по ИИ, эксперт по технологической политике Европейской комиссии Apostol Vassilev — руководитель направления состязательного ИИ, NIST Chris Hughes — генеральный директор, Aquia Hyrum Anderson — технический директор, Robust Intelligence Steve Wilson — сопредседатель OWASP GenAI Security Project, основатель Top 10 for LLM Applications, директор по продукту, Exabeam Scott Clinton — сопредседатель и соучредитель совета OWASP GenAI Security Project Vasilios Mavroudis — главный научный сотрудник и руководитель направления, the Alan Turing Institute Josh Collyer — главный исследователь по безопасности, руководитель направления Egor Pushkin — главный архитектор направления Data and AI, Oracle Cloud Peter Bryan — главный руководитель исследований в области безопасности ИИ, AI Red Team, Microsoft Daniel Jones — исследователь безопасности ИИ, AI Red Team, Microsoft Michael Burgury — руководитель направления OWASP Low-Code/No-Code, соруководитель проекта OWASP AIVSS, Zenity
 
 ## Публичное рецензирование
 
