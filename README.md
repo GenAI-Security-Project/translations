@@ -64,6 +64,7 @@ reviewed for as long as needed before anyone decides it's time to publish.
 | Request a translation of a new document | [Upload page](https://genai-security-project.github.io/translations/upload.html) |
 | Check how a translation is progressing | [Status page](https://genai-security-project.github.io/translations/status.html) |
 | Review a section that's been drafted | Open PRs in this repo (search for the locale/section name) |
+| Fix or improve a specific translated entry | [`translation-contribution-guide.md`](translation-contribution-guide.md) |
 | Publish a fully-reviewed locale | [Publish page](https://genai-security-project.github.io/translations/publish.html) — requires sign-off; see `tooling/docs/WORKFLOW.md` |
 | Understand how the pipeline actually works, in technical detail | `tooling/docs/DESIGN.md` |
 | See what's implemented vs. still planned, against the original requirements | `tooling/docs/REQUIREMENTS.md` |
