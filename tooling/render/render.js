@@ -1463,8 +1463,7 @@ ${sectionsHtml.join("\n")}
     console.log(`sha256=${contentChecksum}`);
   } finally {
     await browser.close();
-    if (!process.env.DEBUG_KEEP_TMP) fs.rmSync(tmpDir, { recursive: true, force: true });
-    else console.error(`DEBUG tmpDir kept: ${tmpDir}`);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }
 
