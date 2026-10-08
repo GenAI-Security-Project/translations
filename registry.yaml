@@ -9,7 +9,7 @@ assets:
     source_repo: GenAI-Security-Project/Agentic-Top-10
     source_path: _source/
     split_by: pdf_heading
-    template: blue-template
+    template: green-template
     owners:
     - sclintonowasp
     locales:

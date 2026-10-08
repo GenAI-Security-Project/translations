@@ -1,27 +1,93 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1359" height="406" viewBox="0 0 1359 406">
-  <!-- OCR-extracted text overlay. Verify each line against the original image (see the sibling _original file) before trusting this as a translation source. -->
-  <image href="../_source/images/Agentic_Top_10_At_A_Glance_Figure_2.png" xlink:href="../_source/images/Agentic_Top_10_At_A_Glance_Figure_2.png" width="1359" height="406"/>
-  <text id="t0" x="226" y="38" font-size="13" fill="rgb(0,0,0)" data-ocr-confidence="93">**API**</text>
-  <text id="t1" x="1006" y="50" font-size="49" fill="rgb(0,0,0)" data-ocr-confidence="89">Outils</text>
-  <text id="t2" x="1185" y="39" font-size="13" fill="rgb(0,0,0)" data-ocr-confidence="82">Il semble que votre message soit incomplet. Vous avez écrit « Re sources » sans contexte supplémentaire ni contenu à traduire.
-
-Pourriez-vous me fournir :
-
-1. Le texte complet de la section à traduire (probablement intitulée « Resources » ou « Ressources »)
-2. Le glossaire ou les sections précédentes mentionnés, si disponibles
-
-Je pourrai alors procéder à la traduction fidèle en français en respectant :
-- La structure Markdown
-- Les identifiants comme « LLM01 » non traduits
-- La terminologie cohérente avec le glossaire fourni
-
-N'hésitez pas à coller le contenu complet de la section.</text>
-  <text id="t3" x="567" y="57" font-size="30" fill="rgb(16,40,56)" data-ocr-confidence="94">Agent</text>
-  <text id="t4" x="697" y="46" font-size="15" fill="rgb(16,40,56)" data-ocr-confidence="96">**Agent**</text>
-  <text id="t5" x="205" y="197" font-size="13" fill="rgb(0,0,0)" data-ocr-confidence="96">External</text>
-  <text id="t6" x="1096" y="197" font-size="13" fill="rgb(0,0,0)" data-ocr-confidence="96">Externe</text>
-  <text id="t7" x="210" y="225" font-size="17" fill="rgb(0,0,0)" data-ocr-confidence="96">Agents</text>
-  <text id="t8" x="1101" y="225" font-size="17" fill="rgb(0,0,0)" data-ocr-confidence="96">Agents</text>
-  <text id="t9" x="402" y="262" font-size="13" fill="rgb(0,0,0)" data-ocr-confidence="96">Connecté</text>
-  <text id="t10" x="626" y="286" font-size="17" fill="rgb(0,0,0)" data-ocr-confidence="96">Mémoire</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="790" height="692" viewBox="100 310 790 692" font-family="Arial, 'Liberation Sans', 'Helvetica Neue', Helvetica, sans-serif">
+<!-- status: draft -->
+<!-- FR 'Agentic Top 10 At A Glance' diagram and legend, redrawn as vectors matching ru-RU/Agentic_Top_10_At_A_Glance_Figure_2.svg's own reconstruction -- the original per-locale image-localization split cropped this page's figure to viewBox "0 0 1359 406", losing the entire top row and the legend entirely (confirmed identical in _source's own copy, so this is a Process 1 defect, not specific to this locale); every label here is this locale's own already-translated text, carried over verbatim from the flat OCR figure split and this asset's own Agentic_Top_10_At_A_Glance.md (whose text extraction wasn't affected by the image crop), not re-translated. -->
+<defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="#222"/></marker></defs>
+<rect x="100" y="310" width="790" height="720" fill="#fff"/>
+<rect x="128" y="340" width="235" height="408" rx="20" fill="none" stroke="#2b2b2b" stroke-width="1"/>
+<rect x="374" y="340" width="235" height="408" rx="20" fill="none" stroke="#2b2b2b" stroke-width="1"/>
+<rect x="630" y="340" width="235" height="408" rx="20" fill="none" stroke="#2b2b2b" stroke-width="1"/>
+<rect x="180.7" y="328" width="132.6" height="28" rx="14" fill="#1c2b3a"/>
+<text x="247" y="346.5" font-size="12.5" fill="#fff" text-anchor="middle">Entrées</text>
+<rect x="409.2" y="327" width="165.5" height="28" rx="14" fill="#1c2b3a"/>
+<text x="492" y="345.5" font-size="12.5" fill="#fff" text-anchor="middle">Intégration/Traitement</text>
+<rect x="681.1" y="329" width="141.7" height="28" rx="14" fill="#1c2b3a"/>
+<text x="752" y="347.5" font-size="12.5" fill="#fff" text-anchor="middle">Sorties</text>
+<rect x="200" y="400" width="96" height="66" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><circle cx="245.0" cy="414" r="5"/><path d="M236.0,430 q9,-10 18,0"/><path d="M250.0,408 h11 v8 h-6 l-3,3 v-3 h-2 z"/></g>
+<text x="248.0" y="448" font-size="9.5" fill="#222" text-anchor="middle">Utilisateur</text>
+<text x="248.0" y="460" font-size="9.5" fill="#222" text-anchor="middle">Prompts</text>
+<rect x="210" y="500" width="78" height="67" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><circle cx="249.0" cy="520" r="12"/><ellipse cx="249.0" cy="520" rx="5" ry="12"/><path d="M237.0,520 h24 M239.0,514 h20 M239.0,526 h20"/></g>
+<text x="249.0" y="561" font-size="10.5" fill="#222" text-anchor="middle">API</text>
+<rect x="210" y="602" width="78" height="67" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><path d="M249.0,610 v4"/><rect x="242.0" y="614" width="14" height="9" rx="2"/><circle cx="246.0" cy="618.5" r="0.8"/><circle cx="252.0" cy="618.5" r="0.8"/><path d="M243.0,631 v-5 h12 v5 M249.0,623 v3"/></g>
+<text x="249.0" y="651" font-size="10.5" fill="#222" text-anchor="middle">Agents</text>
+<text x="249.0" y="663" font-size="10.5" fill="#222" text-anchor="middle">externes</text>
+<rect x="306" y="447" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="330" y="460.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI01</text>
+<rect x="306" y="475" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="330" y="488.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI03</text>
+<rect x="306" y="501" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="330" y="514.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI09</text>
+<rect x="397" y="398" width="86" height="70" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><path d="M429.0,406 l6,6 M435.0,406 l-6,6 M444.0,415 l8,-8 M447.0,407 h5 v5"/><circle cx="433.0" cy="422" r="4"/><path d="M444.0,419 l6,6 M450.0,419 l-6,6"/></g>
+<text x="440.0" y="450" font-size="9.8" fill="#222" text-anchor="middle">Politique et</text>
+<text x="440.0" y="462" font-size="9.8" fill="#222" text-anchor="middle">Gouvernance</text>
+<rect x="500" y="398" width="90" height="70" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><circle cx="545.0" cy="413" r="6"/><path d="M534.0,428 q11,-14 22,0 M538.0,413 h-2 v4 h2"/></g>
+<text x="545.0" y="450" font-size="9.3" fill="#222" text-anchor="middle">Humain dans</text>
+<text x="545.0" y="462" font-size="9.3" fill="#222" text-anchor="middle">la boucle</text>
+<rect x="401" y="502" width="171" height="117" rx="10" fill="#fff" stroke="#2b2b2b"/>
+<rect x="423" y="520" width="48" height="48" rx="6" fill="#ececec" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><path d="M447.0,528 v4"/><rect x="440.0" y="532" width="14" height="9" rx="2"/><circle cx="444.0" cy="536.5" r="0.8"/><circle cx="450.0" cy="536.5" r="0.8"/><path d="M441.0,549 v-5 h12 v5 M447.0,541 v3"/></g>
+<text x="447.0" y="562" font-size="9.5" fill="#222" text-anchor="middle">Agent</text>
+<rect x="494" y="518" width="50" height="52" rx="6" fill="#ececec" stroke="#e0301e" stroke-width="2" stroke-dasharray="4 3"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><path d="M519.0,526 v4"/><rect x="512.0" y="530" width="14" height="9" rx="2"/><circle cx="516.0" cy="534.5" r="0.8"/><circle cx="522.0" cy="534.5" r="0.8"/><path d="M513.0,547 v-5 h12 v5 M519.0,539 v3"/></g>
+<text x="519.0" y="564" font-size="9.5" fill="#222" text-anchor="middle">Agent</text>
+<path d="M450,572 q35,26 70,0" fill="none" stroke="#222" stroke-dasharray="3 3" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<rect x="535" y="526" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="559" y="539.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI10</text>
+<rect x="460" y="597" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="484" y="610.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI07</text>
+<rect x="326" y="640" width="86" height="66" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><rect x="358.0" y="648" width="22" height="5" rx="1"/><rect x="358.0" y="656" width="22" height="5" rx="1"/><rect x="358.0" y="664" width="22" height="5" rx="1"/></g>
+<text x="369.0" y="688" font-size="9.5" fill="#222" text-anchor="middle">Connectées</text>
+<text x="369.0" y="700" font-size="9.5" fill="#222" text-anchor="middle">données/RAG</text>
+<rect x="446" y="640" width="78" height="66" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><ellipse cx="485.0" cy="651" rx="10" ry="3"/><path d="M475.0,651 v16 q10,6 20,0 v-16 M475.0,657 q10,6 20,0 M475.0,662 q10,6 20,0"/></g>
+<text x="485.0" y="700" font-size="10.5" fill="#222" text-anchor="middle">Mémoire</text>
+<rect x="391" y="700" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="415" y="713.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI06</text>
+<rect x="648" y="500" width="86" height="67" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><path d="M679.0,530 h14 v-16 h-8 l-6,8 z"/><circle cx="684.0" cy="530" r="2.5"/><rect x="696.0" y="510" width="3" height="3"/><rect x="696.0" y="517" width="3" height="3"/><rect x="701.0" y="510" width="3" height="3"/></g>
+<text x="691.0" y="561" font-size="9.5" fill="#222" text-anchor="middle">Outils API</text>
+<rect x="766" y="500" width="78" height="67" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><rect x="793.0" y="508" width="24" height="20" rx="2"/><path d="M793.0,513 h24 M802.0,517 v7 l-3,-3 M802.0,524 l3,-3"/></g>
+<text x="805.0" y="549" font-size="10.5" fill="#222" text-anchor="middle">APIs/</text>
+<text x="805.0" y="561" font-size="10.5" fill="#222" text-anchor="middle">Ressources</text>
+<rect x="709" y="603" width="78" height="66" rx="6" fill="#fff" stroke="#2b2b2b" stroke-width="1"/>
+<g fill="none" stroke="#2b2b2b" stroke-width="1.3" stroke-linecap="round"><path d="M748.0,611 v4"/><rect x="741.0" y="615" width="14" height="9" rx="2"/><circle cx="745.0" cy="619.5" r="0.8"/><circle cx="751.0" cy="619.5" r="0.8"/><path d="M742.0,632 v-5 h12 v5 M748.0,624 v3"/></g>
+<text x="748.0" y="651" font-size="10.5" fill="#222" text-anchor="middle">Agents</text>
+<text x="748.0" y="663" font-size="10.5" fill="#222" text-anchor="middle">externes</text>
+<rect x="711" y="562" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="735" y="575.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI02</text>
+<line x1="296" y1="433" x2="393" y2="433" stroke="#222" stroke-width="1" marker-end="url(#ar)"/>
+<line x1="288" y1="540" x2="393" y2="540" stroke="#222" stroke-width="1" marker-end="url(#ar)"/>
+<line x1="572" y1="540" x2="644" y2="540" stroke="#222" stroke-width="1" marker-end="url(#ar)"/>
+<line x1="734" y1="533" x2="762" y2="533" stroke="#222" stroke-width="1" marker-end="url(#ar)"/>
+<line x1="594" y1="637" x2="650" y2="637" stroke="#222" stroke-width="1" marker-end="url(#ar)"/>
+<line x1="483" y1="433" x2="500" y2="433" stroke="#222" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<line x1="440" y1="468" x2="440" y2="502" stroke="#222" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<line x1="545" y1="468" x2="545" y2="502" stroke="#222" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<line x1="484" y1="619" x2="484" y2="640" stroke="#222" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<line x1="412" y1="673" x2="446" y2="673" stroke="#222" stroke-width="1" marker-start="url(#ar)" marker-end="url(#ar)"/>
+<path d="M116,742 q0,24 22,24 h715 q22,0 22,-24" fill="none" stroke="#b7bfc6" stroke-width="2"/>
+<rect x="414" y="759" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="438" y="772.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI04</text>
+<rect x="471" y="759" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="495" y="772.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI05</text>
+<rect x="527" y="759" width="48" height="19" rx="6" fill="#1c2b3a"/><text x="551" y="772.5" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">ASI08</text>
+<g id="legend">
+<text x="116" y="830" font-size="11.5" fill="#111"><tspan font-weight="700">ASI01 : </tspan>Détournement<tspan x="116" dy="17">d'objectif de</tspan><tspan x="116" dy="17">l'agent</tspan></text>
+<text x="269" y="830" font-size="11.5" fill="#111"><tspan font-weight="700">ASI03 : </tspan>Abus d'identité<tspan x="269" dy="17">et de privilège</tspan></text>
+<text x="422" y="830" font-size="11.5" fill="#111"><tspan font-weight="700">ASI05 : </tspan>Exécution de<tspan x="422" dy="17">code inattendue</tspan><tspan x="422" dy="17">(RCE)</tspan></text>
+<text x="575" y="830" font-size="11.5" fill="#111"><tspan font-weight="700">ASI07 : </tspan>Communication<tspan x="575" dy="17">inter-agents non</tspan><tspan x="575" dy="17">sécurisée</tspan></text>
+<text x="728" y="830" font-size="11.5" fill="#111"><tspan font-weight="700">ASI09 : </tspan>Exploitation de<tspan x="728" dy="17">l'humain dans</tspan><tspan x="728" dy="17">la boucle</tspan></text>
+<text x="116" y="920" font-size="11.5" fill="#111"><tspan font-weight="700">ASI02 : </tspan>Utilisation<tspan x="116" dy="17">abusive et</tspan><tspan x="116" dy="17">exploitation</tspan><tspan x="116" dy="17">d'outils</tspan></text>
+<text x="269" y="920" font-size="11.5" fill="#111"><tspan font-weight="700">ASI04 : </tspan>Vulnérabilités de<tspan x="269" dy="17">la chaîne</tspan><tspan x="269" dy="17">d'approvisionnement</tspan><tspan x="269" dy="17">agentique</tspan></text>
+<text x="422" y="920" font-size="11.5" fill="#111"><tspan font-weight="700">ASI06 : </tspan>Empoisonnement<tspan x="422" dy="17">de la mémoire et</tspan><tspan x="422" dy="17">du contexte</tspan></text>
+<text x="575" y="920" font-size="11.5" fill="#111"><tspan font-weight="700">ASI08 : </tspan>Défaillances en<tspan x="575" dy="17">cascade</tspan></text>
+<text x="728" y="920" font-size="11.5" fill="#111"><tspan font-weight="700">ASI10 : </tspan>Agents renégats</text>
+</g>
 </svg>
