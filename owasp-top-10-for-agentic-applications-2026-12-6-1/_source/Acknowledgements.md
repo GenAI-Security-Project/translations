@@ -28,35 +28,65 @@ ASI10 – Rogue Agents Tomer Elias, Mo Sadek, Priyadharhshini Parthasarathy
 
 ## Additional Contributors
 
-Almog Langleben, Sunbit Ron Bitton, Intuit
+Almog Langleben, Sunbit
 
-Amritha Lal Kanmani Rani
+Ron Bitton, Intuit
 
-Sumeet Jeswani, Google Helen Oakley, SAP
+Amritha Lal
 
-Nayan Goel, Upgrade Inc Rock Lambros, RockCyber
+Kanmani Rani
 
-Eva Benn, Microsoft Security Subaru Ueno
+Sumeet Jeswani, Google
 
-John Cotter, Bentley Systems Josh Devon
+Helen Oakley, SAP
 
-Mark de Rijk, Agentics Foundation Manish Kumar Yadav, SAP
+Nayan Goel, Upgrade Inc
 
-Sumit Ranjan, Protect Neuron Mohsin Khan
+Rock Lambros, RockCyber
 
-Rico Komenda, Adesso SE Edward Bolles
+Eva Benn, Microsoft Security
 
-Cole Murray Venkata Sai Kishore Modalavalasa
+Subaru Ueno
 
-Uday Bhaskar Seelamantula, Autodesk Michael Marien
+John Cotter, Bentley Systems
 
-Abhishek Mishra, OneTrust Kaustubh Phatak
+Josh Devon
 
-Hariprasad Holla, CrowdStrike Mohsin Khan
+Mark de Rijk, Agentics Foundation
 
-Trent Holmes, Trend Micro Peter Boucher, abbView
+Manish Kumar Yadav, SAP
 
-Emile Delcourt, Panorama Education Neeraj Nagpal
+Sumit Ranjan, Protect Neuron
+
+Mohsin Khan
+
+Rico Komenda, Adesso SE
+
+Edward Bolles
+
+Cole Murray
+
+Venkata Sai Kishore Modalavalasa
+
+Uday Bhaskar Seelamantula, Autodesk
+
+Michael Marien
+
+Abhishek Mishra, OneTrust
+
+Kaustubh Phatak
+
+Hariprasad Holla, CrowdStrike
+
+Mohsin Khan
+
+Trent Holmes, Trend Micro
+
+Peter Boucher, abbView
+
+Emile Delcourt, Panorama Education
+
+Neeraj Nagpal
 
 Allie Howe, Growth Cyber
 

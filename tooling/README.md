@@ -1,11 +1,21 @@
 # tooling/
 
-Scripts and config backing both processes — Process 1 (Draft, Review &
-Finalize: everything through `## Components in this repo (Process 1)` below)
-and Process 2 (Assemble & Publish: `render.sh`, `render/render.js`,
+Scripts and config backing all three processes — Process 1 (Draft, Review &
+Finalize: everything through `## Components in this repo (Process 1)` below),
+Process 2 (Assemble & Publish, PDF: `render.sh`, `render/render.js`,
 `render_config_schema.py`, `check_render_override.py`, `check_signoff.py`,
 `verify_pdf.py`, plus `.github/workflows/publish.yml`,
-`publish-direct.yml`, `check-freshness.yml`). See **`tooling/docs/`**
+`publish-direct.yml`, `check-freshness.yml`), and Process 3 (Assemble &
+Publish, DOCX: `render-docx.sh`, `render/render_docx.js` — same asset,
+locale, section order, and `translations-templates` config as Process 2, a
+different output format. Not yet wired into `publish.yml`/`publish-direct.yml`
+— today it's a standalone local/manual command, same invocation shape as
+`render.sh`. **Its output is never committed to this public repo** —
+`.gitignore` backstops this (`**/release/*.docx`) — because a `.docx`
+embeds `translations-templates`' real brand images (cover art, sponsors
+grid) verbatim and recoverably in `word/media/`; per explicit policy, the
+rendered `.pdf` is the only sanctioned form those assets reach this public
+repo in. Treat the DOCX as a local/reviewer artifact only). See **`tooling/docs/`**
 (`REQUIREMENTS.md`, `DESIGN.md`, `WORKFLOW.md`, `OPEN_ITEMS.md`) for the full
 current-state writeup, reconciled against the original PRD/Build Spec, plus
 a running list of what's still outstanding — this file stays focused on the
@@ -245,7 +255,24 @@ python tooling/bootstrap_asset.py \
 # Draft-translate one locale (--offline skips the real LLM call, for testing)
 export ANTHROPIC_API_KEY=sk-...
 python tooling/translate_section.py --asset my-asset --locale es-ES
+
+# Process 2 -- render a preview PDF (add --final once every section is reviewed)
+bash tooling/render.sh --asset my-asset --locale es-ES \
+  --templates-root /path/to/translations-templates
+
+# Process 3 -- render a preview DOCX of the exact same content/template
+bash tooling/render-docx.sh --asset my-asset --locale es-ES \
+  --templates-root /path/to/translations-templates
 ```
+
+Both `render.sh` and `render-docx.sh` default `--templates-root` to a
+`translations-templates` checkout sitting next to this repo (`../translations-templates`)
+when omitted, and both install `tooling/render/`'s npm dependencies
+(including a headless Chrome for Puppeteer — `npx puppeteer browsers install
+chrome` if that hasn't happened yet in this environment) on first run.
+Process 3 additionally requires every SVG figure to render through that same
+headless Chrome (to rasterize it into the DOCX), so the same browser install
+covers both.
 
 In GitHub Actions, both scripts run behind `bootstrap-asset.yml` and
 `translate-draft.yml` via `workflow_dispatch` today (Actions tab → run

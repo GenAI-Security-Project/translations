@@ -166,6 +166,14 @@ def main(argv: Optional[List[str]] = None) -> None:
             action = f"added locale(s) to '{args.asset}' @ {entry.version} (no version change)"
         if args.source_path:
             entry.source_path = args.source_path
+        # A template correction (e.g. the asset was onboarded against the
+        # wrong one) -- doesn't touch folders, just the registry field. Real
+        # renders always resolve the template from registry.yaml at render
+        # time, so nothing else needs to change for this to take effect.
+        if args.template and args.template != entry.template.value:
+            old_template = entry.template.value
+            entry.template = Template(args.template)
+            action += f"; template corrected {old_template} -> {args.template}"
         entry.locales = sorted(set(entry.locales) | set(new_locales))
 
     if args.dry_run:

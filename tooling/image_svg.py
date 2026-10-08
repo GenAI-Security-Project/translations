@@ -182,10 +182,25 @@ def _sample_text_color(image: Image.Image, box: Tuple[int, int, int, int], backg
     return _dominant_color(ink_pixels)
 
 
-def is_text_heavy(image: Image.Image) -> bool:
+def confident_cluster_count(image: Image.Image) -> int:
+    """Number of confidently-recognized text clusters in the image -- the
+    same count is_text_heavy() gates on at MIN_CLUSTERS_TO_CONVERT, exposed
+    separately for callers that need a stricter bar. pdf_split.py's own
+    image-cropping is the reason this exists: whether to expand an embedded
+    image's raw crop to absorb nearby vector-drawn shapes (see that
+    module's _image_events) needs a higher bar than "worth converting at
+    all" -- a crop that just barely clears MIN_CLUSTERS_TO_CONVERT is as
+    likely to be a few words bleeding in from genuinely unrelated page
+    content sitting close by (a table's own first row, say) as it is to be
+    a real figure, and expanding on that reading risks absorbing the
+    unrelated content along with it."""
     if image.width < MIN_IMAGE_DIMENSION or image.height < MIN_IMAGE_DIMENSION:
-        return False
-    return len(_overlay_regions(image)) >= MIN_CLUSTERS_TO_CONVERT
+        return 0
+    return len(_overlay_regions(image))
+
+
+def is_text_heavy(image: Image.Image) -> bool:
+    return confident_cluster_count(image) >= MIN_CLUSTERS_TO_CONVERT
 
 
 def blank_regions(image: Image.Image, blank_boxes: List[Tuple[int, int, int, int]]) -> Image.Image:
