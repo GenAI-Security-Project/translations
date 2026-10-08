@@ -2,3 +2,11 @@
 __pycache__/
 *.pyc
 .claude/
+
+# Process 3's DOCX output embeds the private translations-templates repo's
+# actual brand images (cover-band.png, sponsors.png) verbatim in word/media/
+# -- unlike the PDF, which is the one sanctioned public-distribution format
+# per explicit policy, a .docx must never be committed to this PUBLIC repo.
+# This is a structural backstop for that policy, not the only enforcement of
+# it -- see tooling/README.md's Process 3 section.
+**/release/*.docx

@@ -61,6 +61,33 @@ class PageMargins(BaseModel):
 class PageConfig(BaseModel):
     size: str = "A4"  # A4 | Letter
     margins: PageMargins = Field(default_factory=PageMargins)
+    # relative to this template's own folder (translations-templates/<template>/)
+    # -- a light corner decoration shown on every page EXCEPT the cover
+    # (which uses CoverConfig.background_image_path instead) and the TOC
+    # (which uses TocConfig.background_image_path instead). Confirmed
+    # against the real .docx: cover vs. every-other-page are two genuinely
+    # different images, applied via different header types ("first" vs
+    # "default"), not the same band at two sizes.
+    decoration_image_path: Optional[str] = None
+    # Relative to this template's own folder. Reserved for a page role not
+    # yet assigned -- as of 2026-10-01 this is provided (green-special-page-
+    # background.png) but byte-identical to the TOC background and not yet
+    # wired to any specific page; kept as its own field rather than reusing
+    # toc.background_image_path because the two are expected to diverge
+    # (different pages, changing independently) even though they currently
+    # happen to match. Do not assume it means "same as TOC" going forward.
+    special_background_image_path: Optional[str] = None
+
+
+class HeadingUnderline(BaseModel):
+    """A drawn-line rule under a heading -- not a paragraph border. The real
+    template's Heading 1 rule is a fixed 193.5pt x 4.5pt line in accent3
+    (#9FAEB5), independent of the heading text's own length; it never spans
+    the full page width."""
+
+    color: str
+    width_pt: float = 193.5
+    thickness_pt: float = 4.5
 
 
 class HeadingStyle(BaseModel):
@@ -68,12 +95,20 @@ class HeadingStyle(BaseModel):
     size_pt: float
     color: str = "#000000"
     numbering: bool = False  # "1.", "1.1" auto-numbering prefix
+    underline: Optional[HeadingUnderline] = None
 
 
 class CoverConfig(BaseModel):
     logo_path: Optional[str] = None  # relative to assets/images/
-    background_image_path: Optional[str] = None  # relative to assets/images/; a decorative band/pattern, not a solid fill
+    background_image_path: Optional[str] = None  # relative to this template's own folder (translations-templates/<template>/); a decorative band/pattern, not a solid fill
     background_image_position: str = "top"  # top | full -- top: a band across the top portion only, like the real OWASP cover art
+    # A short line above the title (e.g. "GENAI SECURITY PROJECT") -- the
+    # publishing project's own name, confirmed as a real, separate text run
+    # in the real .docx (not baked into the cover image). Not translated
+    # per locale -- it's the project's own name, not this asset's content,
+    # the same way the logo wordmark baked into the cover image isn't
+    # translated either. None: omitted entirely.
+    kicker_text: Optional[str] = None
     title_font: str = "heading"
     subtitle_font: str = "body"
     background_color: str = "#FFFFFF"
@@ -86,6 +121,22 @@ class TocConfig(BaseModel):
     include: bool = True
     label: str = "Table of Contents"  # translated per locale
     max_depth: int = 2
+    # Relative to this template's own folder. A real, distinct background
+    # from both the cover's and every other page's -- confirmed against the
+    # real template's own provided assets (green-toc-background.png differs
+    # from green-cover-background.jpg, and is applied only to the TOC
+    # page(s), not every content page). Rendering this means the TOC can no
+    # longer share a single HTML->PDF pass with the legal notice and body
+    # sections -- see render.js's main() for the resulting cover/legal/toc/
+    # body four-way split. Rendered as flowing content (real document-flow
+    # space, like the cover's own image), not a position:fixed overlay --
+    # a fixed element can't be made to clear content only on a TOC's later
+    # pages without also clearing it by the same amount everywhere else
+    # (confirmed empirically: Chrome anchors position:fixed to the content
+    # viewport, the same box a PDF margin also moves, so inflating the
+    # margin to "make room" moves both by the same amount and never
+    # separates them) -- see render.js's renderTocHtml for the actual fix.
+    background_image_path: Optional[str] = None
 
 
 class LegalNoticeConfig(BaseModel):
@@ -123,7 +174,7 @@ class SponsorsConfig(BaseModel):
     simplicity -- appropriate for content that's substantially brand
     logos anyway, not prose that needs translating."""
 
-    image_path: Optional[str] = None  # relative to assets/images/; None: no substitution, render each asset's own figure
+    image_path: Optional[str] = None  # relative to sponsorlogo/ (uploaded directly to translations-templates's main, supersedes any asset's own sponsors figure for all published translations); None: no substitution, render each asset's own figure
     match_keywords: List[str] = Field(default_factory=lambda: ["sponsor", "supporter", "acknowledgement"])
 
 
