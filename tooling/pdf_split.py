@@ -127,25 +127,150 @@ def _typical_body_line_gap(lines: List[Tuple[int, float, float, str, float]], h2
     return Counter(gaps).most_common(1)[0][0] if gaps else 0.0
 
 
+# How close a vector shape (rect/line/curve) has to sit to the growing crop
+# box to count as part of the same figure -- see _expand_to_connected_shapes.
+# Tuned against a real document: the figure's own shapes sit 0-tens of pts
+# apart (touching or nearly so), while genuinely unrelated page content
+# measured 37-57pt away on the one real page checked. 12pt sits well inside
+# that gap -- comfortably bridges real adjacent diagram elements without
+# reaching across to unrelated content elsewhere on the page.
+SHAPE_PROXIMITY_PT = 12.0
+# After expansion, two embedded images that both belong to the same
+# vector-drawn figure (e.g. a couple of small icons inside one diagram, as
+# opposed to two genuinely separate figures on the same page) converge on
+# the same -- or near-identical -- expanded box. If a newly expanded box's
+# own area is this much contained within one already emitted for the page,
+# it's treated as the same figure and skipped rather than emitted twice.
+DUPLICATE_CONTAINMENT_RATIO = 0.8
+# A separate, stricter bar than image_svg.MIN_CLUSTERS_TO_CONVERT (3) for
+# deciding whether an embedded image's RAW crop looks enough like a real
+# figure to expand its bounds -- see _image_events' own docstring for the
+# real case this is calibrated against: a plain decorative image's crop
+# that happened to catch the first row of an unrelated table sitting close
+# by read as exactly 3 clusters (a few real words bleeding in from that
+# table, not an OCR hallucination), while a real diagram's own raw crop,
+# checked on an actual document, came back with 11. 5 sits well clear of
+# both, on the side that treats "barely clears the bar" as more likely
+# bleed-through than a genuine figure.
+MIN_CLUSTERS_TO_EXPAND = 5
+
+
+def _expand_to_connected_shapes(page: "pdfplumber.page.Page", bbox: Tuple[float, float, float, float]) -> Tuple[float, float, float, float]:
+    """Grow bbox to the union of every vector-drawn rect/line/curve that
+    touches it (directly, or transitively through another shape already
+    absorbed), stopping only once nothing more is within SHAPE_PROXIMITY_PT.
+
+    Real-world cause this exists for: a figure built mostly from vector-
+    drawn shapes (box outlines, arrows, pill-shaped headers) around one or
+    more small embedded raster images (icons, a textured panel) was
+    getting cropped to just the smallest embedded image's own narrow
+    bounds, truncating most of the actual figure -- observed in practice
+    on a real document: a diagram's true extent was roughly square, but
+    the embedded-image-only crop came out short and wide, missing the
+    entire top row and everything below the one raster panel it happened
+    to key off of. Vector shapes (page.rects/.lines/.curves) have no
+    raster representation on their own, so page.images alone can never
+    see them -- this is what actually pulls them into the crop."""
+    shapes = list(page.rects) + list(page.lines) + list(page.curves)
+    x0, top, x1, bottom = bbox
+    changed = True
+    while changed:
+        changed = False
+        for s in shapes:
+            sx0, stop, sx1, sbottom = s["x0"], s["top"], s["x1"], s["bottom"]
+            if (sx1 < x0 - SHAPE_PROXIMITY_PT or sx0 > x1 + SHAPE_PROXIMITY_PT
+                    or sbottom < top - SHAPE_PROXIMITY_PT or stop > bottom + SHAPE_PROXIMITY_PT):
+                continue
+            nx0, ntop, nx1, nbottom = min(x0, sx0), min(top, stop), max(x1, sx1), max(bottom, sbottom)
+            if (nx0, ntop, nx1, nbottom) != (x0, top, x1, bottom):
+                x0, top, x1, bottom = nx0, ntop, nx1, nbottom
+                changed = True
+    return (x0, top, x1, bottom)
+
+
+def _containment_ratio(a: Tuple[float, float, float, float], b: Tuple[float, float, float, float]) -> float:
+    """Fraction of a's own area that overlaps b."""
+    ax0, atop, ax1, abottom = a
+    bx0, btop, bx1, bbottom = b
+    ix0, itop = max(ax0, bx0), max(atop, btop)
+    ix1, ibottom = min(ax1, bx1), min(abottom, bbottom)
+    if ix1 <= ix0 or ibottom <= itop:
+        return 0.0
+    area_a = (ax1 - ax0) * (abottom - atop)
+    if area_a <= 0:
+        return 0.0
+    return ((ix1 - ix0) * (ibottom - itop)) / area_a
+
+
 def _image_events(pdf: "pdfplumber.PDF") -> List[Tuple[int, float, bytes]]:
     """[(page_index, top, png_bytes), ...] for every embedded image, rasterized
-    at a fixed resolution so image_svg's OCR has enough pixels to work with."""
+    at a fixed resolution so image_svg's OCR has enough pixels to work with.
+    An image whose own raw crop already shows MIN_CLUSTERS_TO_EXPAND or
+    more confidently-recognized text clusters has its bounds first grown
+    to absorb any vector-drawn shape connected to it (see
+    _expand_to_connected_shapes) -- a figure is often a mix of vector
+    graphics and one or more small embedded rasters, and page.images alone
+    only ever sees the latter, so a figure built mostly from vector shapes
+    around one small raster was getting cropped to just that raster's own
+    narrow bounds, truncating most of the actual figure.
+
+    That gate, checked against the RAW crop before any expansion, isn't
+    optional: a purely decorative element repeated on every page (a corner
+    logo, a background band) sits on the SAME page as, and can be
+    geometrically close enough to chain into, completely unrelated
+    vector-drawn content -- a data table's own cell borders, say.
+    Expanding every embedded image indiscriminately was checked against a
+    real multi-page document and found to inflate a plain decorative image
+    up to ~80% of the page's own area on pages that happened to also hold
+    a large table, which is exactly the kind of bug this is trying to fix,
+    just relocated rather than removed: besides being pure waste,
+    downstream OCR over the absorbed table text would likely still pass
+    image_svg's own conversion bar and get written out as a second,
+    non-editable, untranslatable copy of content the text extraction above
+    already captured correctly as real paragraphs. A plain
+    MIN_CLUSTERS_TO_CONVERT check turned out not to be a strict enough
+    gate on its own, either -- a decorative crop that happens to catch a
+    table's own first row sitting close by can clear that same bar on a
+    few real (not hallucinated) bleed-through words; MIN_CLUSTERS_TO_EXPAND
+    sits higher, clear of that case on a real document while a genuine
+    figure's own raw cluster count sat well above it. Both are
+    content-driven checks, not a size or page-position rule, so this holds
+    for any future document regardless of that document's own page layout
+    or image dimensions."""
     out = []
     for page_index, page in enumerate(pdf.pages):
+        emitted_boxes: List[Tuple[float, float, float, float]] = []
         for img in page.images:
-            bbox = (
+            raw_bbox = (
                 max(img["x0"], 0), max(img["top"], 0),
                 min(img["x1"], page.width), min(img["bottom"], page.height),
             )
-            if bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
+            if raw_bbox[2] <= raw_bbox[0] or raw_bbox[3] <= raw_bbox[1]:
                 continue
+            bbox = raw_bbox
             try:
-                pil_image = page.crop(bbox).to_image(resolution=IMAGE_RASTER_RESOLUTION).original
+                raw_pil_image = page.crop(raw_bbox).to_image(resolution=IMAGE_RASTER_RESOLUTION).original.convert("RGB")
             except Exception:
                 continue
+            if image_svg.confident_cluster_count(raw_pil_image) >= MIN_CLUSTERS_TO_EXPAND:
+                expanded = _expand_to_connected_shapes(page, raw_bbox)
+                bbox = (
+                    max(expanded[0], 0), max(expanded[1], 0),
+                    min(expanded[2], page.width), min(expanded[3], page.height),
+                )
+            if any(_containment_ratio(bbox, seen) >= DUPLICATE_CONTAINMENT_RATIO for seen in emitted_boxes):
+                continue  # same figure as one already emitted for this page -- a second small icon inside it, say
+            emitted_boxes.append(bbox)
+            if bbox is raw_bbox:
+                pil_image = raw_pil_image
+            else:
+                try:
+                    pil_image = page.crop(bbox).to_image(resolution=IMAGE_RASTER_RESOLUTION).original.convert("RGB")
+                except Exception:
+                    continue
             buf = io.BytesIO()
-            pil_image.convert("RGB").save(buf, format="PNG")
-            out.append((page_index, img["top"], buf.getvalue()))
+            pil_image.save(buf, format="PNG")
+            out.append((page_index, bbox[1], buf.getvalue()))
     return out
 
 
