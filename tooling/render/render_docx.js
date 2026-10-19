@@ -92,7 +92,7 @@ function gatherSections({ root, asset, locale, cfg, templatesRoot }) {
   const localeDir = path.join(root, asset, locale);
   const sponsorsImageAbsPath = cfg.sponsors.image_path
     // See render.js's identical comment -- kept in sync by hand.
-    ? path.join(templatesRoot, "sponsors", cfg.sponsors.image_path)
+    ? path.join(templatesRoot, "sponsorlogo", cfg.sponsors.image_path)
     : null;
 
   const tocMdPath = path.join(localeDir, "Table_of_Content.md");
@@ -426,7 +426,9 @@ async function main() {
     // computes for its cropped band, just without the crop -- the full
     // image at that height, not a slice of it.
     if (cfg.cover.background_image_path) {
-      const bgBuf = fs.readFileSync(path.join(args.templatesRoot, "assets", "images", cfg.cover.background_image_path));
+      // Per-template directory, not the shared assets/images/ -- see
+      // render.js's identical templateDir resolution. Kept in sync by hand.
+      const bgBuf = fs.readFileSync(path.join(args.templatesRoot, assetEntry.template, cfg.cover.background_image_path));
       const dims = await probeImageDims(browser, tmpDir, bgBuf, "png", { width: CONTENT_WIDTH_PX, height: CONTENT_WIDTH_PX });
       const targetWidth = cfg.cover.background_image_position === "full"
         ? CONTENT_WIDTH_PX
@@ -491,7 +493,9 @@ async function main() {
     // how this was told apart from the cover's own, different band image.
     let pageDecorationHeader;
     if (cfg.page.decoration_image_path) {
-      const decoBuf = fs.readFileSync(path.join(args.templatesRoot, "assets", "images", cfg.page.decoration_image_path));
+      // Per-template directory, not the shared assets/images/ -- see
+      // render.js's identical templateDir resolution. Kept in sync by hand.
+      const decoBuf = fs.readFileSync(path.join(args.templatesRoot, assetEntry.template, cfg.page.decoration_image_path));
       const dims = await probeImageDims(browser, tmpDir, decoBuf, "png", { width: 440, height: 200 });
       pageDecorationHeader = new Header({
         children: [new Paragraph({
