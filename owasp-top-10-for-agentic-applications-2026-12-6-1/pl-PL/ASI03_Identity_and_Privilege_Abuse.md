@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # ASI03: Nadużycie tożsamości i uprawnień
 
 ## Opis

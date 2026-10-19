@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # ASI05: Nieoczekiwane wykonanie kodu (RCE)
 
 ## Opis

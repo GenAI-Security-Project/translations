@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # Spis treści
 
 ## List od Liderów Agentic Top 10 6 Agentic Top 10 w skrócie 8 ASI01: Przejęcie celu agenta 9

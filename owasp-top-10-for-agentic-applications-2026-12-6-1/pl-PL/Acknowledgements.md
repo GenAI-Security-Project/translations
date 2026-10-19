@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # Podziękowania
 
 ## Liderzy Top 10 i liderzy wpisów

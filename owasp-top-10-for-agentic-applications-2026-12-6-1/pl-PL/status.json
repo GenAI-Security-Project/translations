@@ -3,141 +3,193 @@
   "locale": "pl-PL",
   "sections": {
     "OWASP_Top_10_For_Agentic_Applications_2026": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Preface_Figure": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "OWASP_Top_10_For_Agentic_Applications_2026_Figure_3": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Table_of_Content": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Letter_from_The_Agentic_Top_10_Leaders": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Agentic_Top_10_At_A_Glance": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Agentic_Top_10_At_A_Glance_Figure_2": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI01_Agent_Goal_Hijack": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI02_Tool_Misuse_and_Exploitation": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI03_Identity_and_Privilege_Abuse": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI04_Agentic_Supply_Chain_Vulnerabilities": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI05_Unexpected_Code_Execution_RCE": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI06_Memory_Context_Poisoning": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI07_Insecure_Inter_Agent_Communication": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI08_Cascading_Failures": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI09_Human_Agent_Trust_Exploitation": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "ASI10_Rogue_Agents": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Appendix_A_OWASP_Agentic_AI_Security_Mapping_Matrix": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Appendix_B_Relationship_to_OWASP_CycloneDX_and_AIBOM": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10_Figure": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Appendix_D_ASI_Agentic_Exploits_Incidents_Tracker": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Appendix_E_Abbreviations": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Acknowledgements": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Acknowledgements_Figure_3": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     },
     "Project_Supporters": {
-      "status": "draft",
+      "status": "reviewed",
       "source_commit": "a05b19b",
-      "translator": "claude-code-session:claude-sonnet-5"
+      "translator": "claude-code-session:claude-sonnet-5",
+      "reviewer": "sclintonowasp",
+      "reviewed_at": "2026-10-18"
     }
   },
   "summary": {
     "total": 26,
-    "draft": 26,
+    "draft": 0,
     "in_review": 0,
-    "reviewed": 0,
+    "reviewed": 26,
     "stale": 0,
     "migrated": 0
   }

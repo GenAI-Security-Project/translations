@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # OWASP Top 10 dla Aplikacji Agentowych 2026
 
 ## OWASP GenAI Security Project - Agentic Security Initiative

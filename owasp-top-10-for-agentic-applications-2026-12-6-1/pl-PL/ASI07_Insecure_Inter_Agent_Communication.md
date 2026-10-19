@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # ASI07: Niebezpieczna komunikacja między agentami
 
 ## Opis

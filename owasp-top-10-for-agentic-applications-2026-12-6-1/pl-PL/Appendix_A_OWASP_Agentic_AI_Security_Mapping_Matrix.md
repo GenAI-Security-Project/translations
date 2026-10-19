@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # Załącznik A - Macierz mapowania bezpieczeństwa OWASP Agentic AI
 
 Krzyżowe mapowanie ASI Top 10, LLM Top 10, Agentic AI Threats & Mitigations oraz AIVSS Core Risks

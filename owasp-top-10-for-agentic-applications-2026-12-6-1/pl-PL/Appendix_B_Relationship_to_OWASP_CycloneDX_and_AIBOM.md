@@ -1,4 +1,4 @@
-<!-- status: draft -->
+<!-- status: reviewed -->
 # Załącznik B - Relacja do OWASP CycloneDX i AIBOM
 
 Projekt OWASP CycloneDX dostarcza globalnie przyjęty standard wykazu materiałów (Bill of Materials, BOM), który zapewnia widoczność i pochodzenie dla komponentów oprogramowania, sprzętu i uczenia maszynowego w całym łańcuchu dostaw. Definiuje on sposób identyfikacji i wymiany danych o komponentach — w tym zależności, wersji i pochodzenia — poprzez ustrukturyzowane formaty SBOM, ML-BOM i AI-BOM.
