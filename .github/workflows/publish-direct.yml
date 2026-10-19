@@ -26,11 +26,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out translations
+        uses: actions/checkout@v4
         with:
           path: translations
 
-      - uses: actions/checkout@v4
+      - name: Check out translations-templates
+        uses: actions/checkout@v4
         with:
           repository: GenAI-Security-Project/translations-templates
           ssh-key: ${{ secrets.TEMPLATES_DEPLOY_KEY }}

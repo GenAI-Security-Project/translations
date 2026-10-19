@@ -143,3 +143,22 @@ async function dispatchPublishDirect(clientPayload) {
     body: JSON.stringify({ event_type: "publish-direct", client_payload: clientPayload }),
   });
 }
+
+// Most recent runs of one workflow file, newest first -- used by
+// workflow-status.js to find the run a dispatch just created (the
+// dispatches API itself returns no run id, see its call sites above) and
+// then to poll that run's own progress. Never cached: the whole point is
+// watching it change.
+async function listWorkflowRuns(workflowFile, perPage = 10) {
+  const data = await ghFetch(`/repos/${ORG}/${CONTENT_REPO}/actions/workflows/${workflowFile}/runs?per_page=${perPage}`);
+  return data.workflow_runs || [];
+}
+
+// One run's jobs, each with its own steps[] (name/status/conclusion) --
+// the real, step-by-step progress a status bar renders. A run usually has
+// exactly one job here (every workflow this pipeline fires does), but the
+// API always returns a list.
+async function getWorkflowRunJobs(runId) {
+  const data = await ghFetch(`/repos/${ORG}/${CONTENT_REPO}/actions/runs/${runId}/jobs`);
+  return data.jobs || [];
+}
