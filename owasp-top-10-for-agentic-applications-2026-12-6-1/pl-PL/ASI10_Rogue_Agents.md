@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # ASI10: Nieuczciwe agenty
 
 ## Opis

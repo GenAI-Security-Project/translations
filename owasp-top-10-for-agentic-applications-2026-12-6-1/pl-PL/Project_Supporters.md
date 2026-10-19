@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # Wspierający projekt
 
 Wspierający projekt udostępniają swoje zasoby i wiedzę ekspercką, wspomagając cele projektu.

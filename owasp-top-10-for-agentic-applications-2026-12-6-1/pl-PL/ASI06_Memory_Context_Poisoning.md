@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # ASI06: Zatrucie pamięci i kontekstu
 
 ## Opis

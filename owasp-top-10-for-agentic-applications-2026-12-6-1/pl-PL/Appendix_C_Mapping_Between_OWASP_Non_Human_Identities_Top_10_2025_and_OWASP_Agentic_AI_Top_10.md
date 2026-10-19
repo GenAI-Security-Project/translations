@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # Załącznik C - Mapowanie między OWASP Non-Human Identities Top 10 (2025) a OWASP Agentic AI Top 10
 
 Poniższa tabela mapuje ryzyka OWASP Non-Human Identities (NHI) Top 10 (2025) na OWASP Agentic AI Top 10 (ASI), Agentic-AI Threats & Mitigations (kody T) oraz kategorie AIVSS Core Risk, aby pokazać dopasowanie między ryzykami skoncentrowanymi na tożsamości a ryzykami skoncentrowanymi na zachowaniu agentowym.

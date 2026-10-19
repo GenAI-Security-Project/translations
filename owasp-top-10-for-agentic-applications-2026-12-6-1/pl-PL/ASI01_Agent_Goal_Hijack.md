@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # ASI01: Przejęcie celu agenta
 
 ## Opis

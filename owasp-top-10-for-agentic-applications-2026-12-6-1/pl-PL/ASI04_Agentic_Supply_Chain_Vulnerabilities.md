@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # ASI04: Podatności łańcucha dostaw agentów
 
 ## Opis

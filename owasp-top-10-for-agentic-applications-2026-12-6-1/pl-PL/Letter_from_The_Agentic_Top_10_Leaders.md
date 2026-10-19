@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # List od Liderów Agentic Top 10
 
 Systemy AI oparte na agentach szybko przechodzą od pilotaży do produkcji w finansach, ochronie zdrowia, obronności, infrastrukturze krytycznej i sektorze publicznym. W przeciwieństwie do automatyzacji zadaniowych, agenci planują, podejmują decyzje i działają w wielu krokach i systemach, często w imieniu użytkowników i zespołów. Agentic Security Initiative rozpoczęła już definiowanie zabezpieczeń dla aplikacji agentowych, publikując zestaw wytycznych obejmujący cały cykl życia.

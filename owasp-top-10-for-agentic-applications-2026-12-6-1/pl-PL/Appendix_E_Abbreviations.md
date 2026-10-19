@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # Załącznik E – Skróty
 
 A2A — Agent-to-Agent (protokół/katalog/komunikacja)

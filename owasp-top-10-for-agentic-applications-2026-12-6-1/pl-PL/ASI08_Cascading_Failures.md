@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # ASI08: Awarie kaskadowe
 
 ## Opis

@@ -1,4 +1,4 @@
-<!-- status: reviewed -->
+<!-- status: draft -->
 # Agentic Top 10 w skrócie
 
 Integracja/Przetwarzanie Wejścia Wyjścia
