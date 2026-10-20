@@ -1,21 +1,24 @@
 # tooling/
 
-Scripts and config backing all three processes — Process 1 (Draft, Review &
-Finalize: everything through `## Components in this repo (Process 1)` below),
-Process 2 (Assemble & Publish, PDF: `render.sh`, `render/render.js`,
+Scripts and config backing all three processes — the generate process
+(Process 1: Draft, Review & Finalize — everything through `## Components in
+this repo (Process 1)` below), the publish process (Process 2: Assemble &
+Publish, PDF + DOCX: `render.sh`, `render/render.js`, `render/render_docx.js`,
 `render_config_schema.py`, `check_render_override.py`, `check_signoff.py`,
 `verify_pdf.py`, plus `.github/workflows/publish.yml`,
 `publish-direct.yml`, `check-freshness.yml`), and Process 3 (Assemble &
-Publish, DOCX: `render-docx.sh`, `render/render_docx.js` — same asset,
-locale, section order, and `translations-templates` config as Process 2, a
-different output format. Not yet wired into `publish.yml`/`publish-direct.yml`
-— today it's a standalone local/manual command, same invocation shape as
-`render.sh`. **Its output is never committed to this public repo** —
+Publish, DOCX-only: `render-docx.sh`, `render/render_docx.js` — same asset,
+locale, section order, and `translations-templates` config as the publish
+process, a different output format). `render.sh` (the publish process) now
+renders **both** a `.pdf` and a `.docx` by default for every asset/locale —
+`render-docx.sh` is Process 3 only in the sense that it stays around as a
+standalone DOCX-only entry point (`--pdf-only` on `render.sh` is the
+opposite case). **Neither workflow commits or releases the `.docx`** —
 `.gitignore` backstops this (`**/release/*.docx`) — because a `.docx`
 embeds `translations-templates`' real brand images (cover art, sponsors
 grid) verbatim and recoverably in `word/media/`; per explicit policy, the
 rendered `.pdf` is the only sanctioned form those assets reach this public
-repo in. Treat the DOCX as a local/reviewer artifact only). See **`tooling/docs/`**
+repo in. Treat the DOCX as a local/reviewer artifact only. See **`tooling/docs/`**
 (`REQUIREMENTS.md`, `DESIGN.md`, `WORKFLOW.md`, `OPEN_ITEMS.md`) for the full
 current-state writeup, reconciled against the original PRD/Build Spec, plus
 a running list of what's still outstanding — this file stays focused on the
@@ -256,11 +259,12 @@ python tooling/bootstrap_asset.py \
 export ANTHROPIC_API_KEY=sk-...
 python tooling/translate_section.py --asset my-asset --locale es-ES
 
-# Process 2 -- render a preview PDF (add --final once every section is reviewed)
+# Publish process (Process 2) -- render a preview PDF + DOCX (add --final
+# once every section is reviewed; add --pdf-only to skip the DOCX)
 bash tooling/render.sh --asset my-asset --locale es-ES \
   --templates-root /path/to/translations-templates
 
-# Process 3 -- render a preview DOCX of the exact same content/template
+# Process 3 -- render a preview DOCX only, without also rendering the PDF
 bash tooling/render-docx.sh --asset my-asset --locale es-ES \
   --templates-root /path/to/translations-templates
 ```

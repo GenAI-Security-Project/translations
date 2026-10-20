@@ -3,10 +3,13 @@
 # DOCX generator. Thin wrapper over render/render_docx.js (markdown-it + the
 # `docx` package + a headless-Chrome pass to rasterize SVG figures) -- see
 # that file and render_config_schema.py for the actual implementation/schema.
-# Same asset/locale/config inputs as render.sh (Process 2) -- same
-# registry.yaml, same _manifest.json order, same status.json readiness gate,
-# same translations-templates render_config.json -- just a .docx output
-# instead of a .pdf.
+# Same asset/locale/config inputs as render.sh (the publish process, Process
+# 2) -- same registry.yaml, same _manifest.json order, same status.json
+# readiness gate, same translations-templates render_config.json -- just a
+# .docx output instead of a .pdf. render.sh itself now also runs this by
+# default (producing both outputs from one call); reach for render-docx.sh
+# directly only for a DOCX-only run (e.g. --pdf-only wasn't wanted the other
+# way around).
 #
 # Usage:
 #   render-docx.sh --asset <id> --locale <code> [--out <path>] [--final] \
