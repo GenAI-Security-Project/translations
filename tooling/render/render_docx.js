@@ -386,11 +386,40 @@ function fitWidth(naturalWidth, naturalHeight, maxWidth) {
 }
 
 const MAX_IMAGE_WIDTH = 600; // px, comfortable inside a US Letter/A4 content area at default margins
-const CONTENT_WIDTH_PX = 624; // ~6.5in at 96dpi -- US Letter minus 1in margins each side
 // Same COVER_TOP_BAND_RATIO render.js's cover uses for background_image_position:
 // "top" (see that file's own comment for how this figure was measured against
 // the real cover-band.png asset).
 const COVER_TOP_BAND_RATIO = 0.205;
+
+// Same PAGE_WIDTH_MM/PAGE_HEIGHT_MM render.js feeds to Puppeteer's page.pdf()
+// `format` -- kept in sync by hand. render_docx.js previously never read
+// cfg.page.size/margins at all, so Word/LibreOffice fell back to whatever
+// page size ships in docx-js's own built-in default (observed to come out
+// close to A4) regardless of the template's configured "Letter" -- wrong
+// page dimensions, which is also why nothing could be sized to genuinely
+// span the full page: there was no reliable "full page" to span.
+const PAGE_HEIGHT_MM = { A4: 297, Letter: 279.4 };
+const PAGE_WIDTH_MM = { A4: 210, Letter: 215.9 };
+const MM_TO_TWIPS = 1440 / 25.4;
+const MM_TO_PX = 96 / 25.4;
+function mmToTwips(mm) { return Math.round(mm * MM_TO_TWIPS); }
+function mmToPx(mm) { return Math.round(mm * MM_TO_PX); }
+
+function docxPageProperties(cfg) {
+  const widthMm = PAGE_WIDTH_MM[cfg.page.size] || PAGE_WIDTH_MM.A4;
+  const heightMm = PAGE_HEIGHT_MM[cfg.page.size] || PAGE_HEIGHT_MM.A4;
+  return {
+    page: {
+      size: { width: mmToTwips(widthMm), height: mmToTwips(heightMm) },
+      margin: {
+        top: mmToTwips(cfg.page.margins.top_mm),
+        bottom: mmToTwips(cfg.page.margins.bottom_mm),
+        left: mmToTwips(cfg.page.margins.left_mm),
+        right: mmToTwips(cfg.page.margins.right_mm),
+      },
+    },
+  };
+}
 
 // data: URLs, not file://, for loading image bytes into a headless page --
 // confirmed by direct testing that this Chrome build's Image.decode() throws
@@ -561,22 +590,69 @@ async function main() {
     }
     // Cropped to just the navy band (object-fit:cover's effective result --
     // see cropImageTopBand's comment) instead of showing the whole tall
-    // source image, most of which is plain white below the band and was
-    // previously leaving a large dead-space gap before the cover text.
+    // source image, most of which is plain white below the band -- that
+    // white matches cfg.cover.background_color exactly, which is why
+    // cropping it away is visually equivalent to render.js's full-image
+    // object-fit:cover (same math: this source image's aspect ratio equals
+    // the page's, so object-fit:cover never actually crops anything off
+    // the image itself -- it only ever shows the band against a white page
+    // underneath it, which is exactly what the crop reproduces directly).
+    //
+    // Floating and page-anchored (behindDocument, relative: PAGE, align
+    // LEFT/TOP), not an inline centered image -- an inline image is always
+    // constrained to the content column width and pushed down by the page's
+    // top margin, so it can never reach the true page edge the way render.js's
+    // zero-Puppeteer-margin cover pass does. Sized to the full page width
+    // (not CONTENT_WIDTH_PX) for the same reason. See pageDecorationHeader
+    // below for the same floating mechanism already used for page 2+.
+    let coverBandBottomMm = 0;
     if (cfg.cover.background_image_path) {
       // Per-template directory, not the shared assets/images/ -- see
       // render.js's identical templateDir resolution. Kept in sync by hand.
       const bgBuf = fs.readFileSync(path.join(args.templatesRoot, assetEntry.template, cfg.cover.background_image_path));
-      const bandFraction = cfg.cover.background_image_position === "full" ? COVER_FULL_BG_BAND_FRACTION : COVER_TOP_BAND_RATIO;
+      const pageWidthMm = PAGE_WIDTH_MM[cfg.page.size] || PAGE_WIDTH_MM.A4;
+      const pageHeightMm = PAGE_HEIGHT_MM[cfg.page.size] || PAGE_HEIGHT_MM.A4;
+      const isFull = cfg.cover.background_image_position === "full";
+      const bandFraction = isFull ? COVER_FULL_BG_BAND_FRACTION : COVER_TOP_BAND_RATIO;
+      // Same two formulas render.js's renderCoverHtml uses for bandBottomMm,
+      // kept in sync by hand: "full" measures the fraction against the page
+      // HEIGHT (the whole image is scaled to fill page height); "top"
+      // measures it against the page WIDTH (the band is only ever as tall
+      // as render.js's own CSS sizes it, independent of page height).
+      coverBandBottomMm = isFull ? pageHeightMm * bandFraction : pageWidthMm * bandFraction;
       const bgExt = path.extname(cfg.cover.background_image_path).slice(1) || "png";
       const cropped = await cropImageTopBand(browser, tmpDir, bgBuf, bgExt, bandFraction);
-      const fitted = fitWidth(cropped.width, cropped.height, CONTENT_WIDTH_PX);
+      const fullPageWidthPx = mmToPx(pageWidthMm);
+      const fitted = fitWidth(cropped.width, cropped.height, fullPageWidthPx);
       coverChildren.push(new Paragraph({
-        alignment: AlignmentType.CENTER,
-        children: [new ImageRun({ data: cropped.buffer, type: "png", transformation: fitted })],
-        spacing: { after: 300 },
+        children: [new ImageRun({
+          data: cropped.buffer,
+          type: "png",
+          transformation: fitted,
+          floating: {
+            horizontalPosition: { relative: HorizontalPositionRelativeFrom.PAGE, align: HorizontalPositionAlign.LEFT },
+            verticalPosition: { relative: VerticalPositionRelativeFrom.PAGE, align: VerticalPositionAlign.TOP },
+            behindDocument: true,
+            wrap: { type: "none" },
+          },
+        })],
       }));
     }
+    // The floating band image no longer pushes the text column down the way
+    // an inline image did, so that clearance has to be added back explicitly
+    // -- same bandBottomMm + bandClearanceGapMm clearance render.js's
+    // topClearanceMm (plus its own coverContentPaddingTopMm, folded in here
+    // via the page's own top margin) positions the title block below, so
+    // the text never sits on top of the band.
+    const COVER_CONTENT_PADDING_MM = 20;
+    const COVER_BAND_CLEARANCE_GAP_MM = 6;
+    const marginTopMm = cfg.page.margins.top_mm;
+    const coverContentTopMm = Math.max(
+      COVER_CONTENT_PADDING_MM + marginTopMm,
+      coverBandBottomMm + COVER_BAND_CLEARANCE_GAP_MM
+    );
+    const coverSpacingBeforeTwips = Math.max(0, mmToTwips(coverContentTopMm - marginTopMm));
+    coverChildren.push(new Paragraph({ children: [], spacing: { after: coverSpacingBeforeTwips } }));
     if (!args.final) {
       coverChildren.push(new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -701,11 +777,11 @@ async function main() {
       fonts: loadEmbeddedFonts(args.templatesRoot, cfg.fonts),
       sections: [
         {
-          properties: {},
+          properties: docxPageProperties(cfg),
           children: coverChildren,
         },
         {
-          properties: {},
+          properties: docxPageProperties(cfg),
           headers: pageDecorationHeader ? { default: pageDecorationHeader } : undefined,
           footers: { default: footer },
           children: [...legalChildren, ...tocChildren, ...bodyChildren],
