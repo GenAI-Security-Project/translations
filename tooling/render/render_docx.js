@@ -14,20 +14,23 @@
 // in sync by hand today.
 //
 // Known simplifications vs. the PDF (documented, not oversights):
-//   - Cover background image is shown at its own real aspect ratio (sized to
-//     approximate render.js's "full" or "top" treatment -- see the cover
-//     section below) rather than cropped -- render.js's CSS object-fit:cover
-//     band-crop has no equivalent in docx-js without a pixel-manipulation
-//     dependency this project doesn't otherwise need, and stretching a
-//     tall/narrow source image to an arbitrary box would distort it, which
-//     is worse than just not cropping.
-//   - Real font FILES (Poppins/Barlow) are not embedded -- docx-js (v9.8.1)
-//     has no font-embedding API. Runs reference the real font family names,
-//     so they render correctly on any machine that has those fonts
-//     installed (free Google Fonts, the same .ttf files bundled in
-//     translations-templates/assets/fonts/); otherwise Word silently
-//     substitutes its own default, same as any docx referencing a font the
-//     reader doesn't have.
+//   - Cover background image IS cropped to just the navy band now (see
+//     cropImageTopBand), matching render.js's CSS object-fit:cover result --
+//     via an offscreen canvas in the same headless Chrome instance already
+//     used for SVG rasterization, not a new dependency.
+//   - Real font FILES (Poppins/Barlow/the Cyrillic fallback) ARE embedded now
+//     (see loadEmbeddedFonts) -- docx-js v9's Document({fonts}) option
+//     supports this; an earlier version of this comment, written against an
+//     older assumption, said it didn't. Only one weight per family is
+//     embedded (Regular/SemiBold/Medium, whichever each role uses) -- Word
+//     synthesizes bold/italic from that single weight rather than switching
+//     to a different weight file.
+//   - Poppins and Barlow have zero Cyrillic glyphs (same gap render.js's
+//     CYRILLIC_FALLBACK_FONT comment documents) -- every TextRun built from
+//     translated content goes through makeTextRuns, which splits on script
+//     boundaries and swaps in the embedded Cyrillic fallback font per
+//     segment, since Word's rFonts has no unicode-range equivalent to do
+//     this automatically the way CSS @font-face does for the PDF.
 //   - Heading 1's underline rule is a full-width paragraph border, not the
 //     real template's short, fixed-width (193.5pt) drawn line -- docx-js has
 //     no simple "draw a line shape" component, and a paragraph border always
@@ -154,7 +157,7 @@ function inlineChildrenToRuns(children, runDefaults) {
   let italics = false;
   for (const tok of children || []) {
     if (tok.type === "text") {
-      if (tok.content) runs.push(new TextRun({ text: tok.content, bold, italics, ...runDefaults }));
+      if (tok.content) runs.push(...makeTextRuns(tok.content, { bold, italics, ...runDefaults }));
     } else if (tok.type === "strong_open") bold = true;
     else if (tok.type === "strong_close") bold = false;
     else if (tok.type === "em_open") italics = true;
@@ -176,6 +179,89 @@ function inlineChildrenToRuns(children, runDefaults) {
 function docxFontFamily(key, fonts) {
   const spec = fonts && fonts[key];
   return spec ? spec.family : undefined;
+}
+
+// See render.js's identical CYRILLIC_UNICODE_RANGE/CYRILLIC_FALLBACK_FONT
+// comment -- Poppins and Barlow (every bundled brand font) have zero
+// Cyrillic glyphs, confirmed against Google Fonts' own served CSS, not a
+// bundling oversight. render.js solves this with a CSS unicode-range
+// @font-face scoped to just the Cyrillic block, so Chrome silently falls
+// through per-character. Word's rFonts has no per-character/per-script
+// override that maps onto an arbitrary Unicode range the way CSS does
+// (eastAsia/cs cover different script categories, not this one) -- the
+// only way to reproduce the same visual result is to pre-split each run's
+// text into Latin/Cyrillic segments ourselves and emit one TextRun per
+// segment with the right font, which is what CYRILLIC_RANGE_RE and
+// splitByScript below do. Without this, every Cyrillic character in a run
+// whose font is Poppins/Barlow renders in whatever generic serif Word
+// substitutes -- verified directly: this was the actual cause of ru-RU's
+// DOCX output rendering in a visibly different (serif) font from its PDF.
+const CYRILLIC_RANGE_RE = /[́Ѐ-џҐ-ґҰ-ұ№]/;
+const CYRILLIC_FALLBACK_FONT_FILE = "NotoSans-Variable.ttf";
+const CYRILLIC_FALLBACK_FAMILY = "Noto Sans";
+
+function splitByScript(text) {
+  const segments = [];
+  let current = "";
+  let currentIsCyrillic = null;
+  for (const ch of text) {
+    const isCyr = CYRILLIC_RANGE_RE.test(ch);
+    if (currentIsCyrillic === null) currentIsCyrillic = isCyr;
+    if (isCyr !== currentIsCyrillic) {
+      segments.push({ text: current, cyrillic: currentIsCyrillic });
+      current = "";
+      currentIsCyrillic = isCyr;
+    }
+    current += ch;
+  }
+  if (current) segments.push({ text: current, cyrillic: currentIsCyrillic });
+  return segments;
+}
+
+// Builds one or more TextRun objects for a single logical piece of text,
+// splitting on script boundaries and swapping in CYRILLIC_FALLBACK_FAMILY
+// for the Cyrillic segments -- see splitByScript's comment. Every TextRun
+// construction site in this file that carries translated content (not
+// literal ASCII like locale codes or URLs) should go through this instead
+// of calling `new TextRun(...)` directly, so Cyrillic locales don't
+// silently fall back to Word's generic serif.
+function makeTextRuns(text, opts) {
+  if (!text) return [];
+  if (!opts.font) return [new TextRun({ text, ...opts })];
+  return splitByScript(text).map((seg) => new TextRun({
+    ...opts,
+    text: seg.text,
+    font: seg.cyrillic ? CYRILLIC_FALLBACK_FAMILY : opts.font,
+  }));
+}
+
+// Loads the real font files (same ones render.js embeds via @font-face) so
+// Word renders the actual brand typefaces regardless of what's installed on
+// the machine opening the file, instead of silently substituting its own
+// default the way any .docx referencing an unavailable font does. docx-js
+// v9's Document({fonts}) option supports this (FontOptions: {name, data});
+// only one weight per family is embedded (Regular for body, SemiBold for
+// heading, Medium for subhead) -- Word synthesizes bold/italic from that
+// single weight algorithmically rather than switching to a different weight
+// file, a smaller and more acceptable gap than not embedding fonts at all.
+function loadEmbeddedFonts(templatesRoot, fonts) {
+  const embedded = [];
+  const seen = new Set();
+  for (const spec of Object.values(fonts || {})) {
+    if (!spec || spec.source === "google" || !spec.family || seen.has(spec.family)) continue;
+    const file = (spec.files || [])[0];
+    if (!file) continue;
+    seen.add(spec.family);
+    embedded.push({
+      name: spec.family,
+      data: fs.readFileSync(path.join(templatesRoot, "assets", "fonts", file.path)),
+    });
+  }
+  embedded.push({
+    name: CYRILLIC_FALLBACK_FAMILY,
+    data: fs.readFileSync(path.join(templatesRoot, "assets", "fonts", CYRILLIC_FALLBACK_FONT_FILE)),
+  });
+  return embedded;
 }
 
 // cfg.headings[h1/h2/...] -> {font, size (half-points), color} ready to
@@ -306,13 +392,30 @@ const CONTENT_WIDTH_PX = 624; // ~6.5in at 96dpi -- US Letter minus 1in margins 
 // the real cover-band.png asset).
 const COVER_TOP_BAND_RATIO = 0.205;
 
+// data: URLs, not file://, for loading image bytes into a headless page --
+// confirmed by direct testing that this Chrome build's Image.decode() throws
+// "EncodingError: The source image cannot be decoded" for every file:// src
+// regardless of format, even though the same bytes decode fine as a data:
+// URL. (This previously made probeImageDims silently fall back to its
+// hardcoded placeholder dims every time, since it swallows decode errors --
+// real dimensions are needed to scale images without distorting them, since
+// docx-js has no CSS-style object-fit.)
+function extToMime(ext) {
+  const e = ext.toLowerCase();
+  if (e === "jpg" || e === "jpeg") return "image/jpeg";
+  if (e === "svg") return "image/svg+xml";
+  return "image/png";
+}
+
+function toDataUrl(buf, ext) {
+  return `data:${extToMime(ext)};base64,${buf.toString("base64")}`;
+}
+
 // Probes a raster image's real pixel dimensions via a throwaway headless
 // page rather than adding an image-metadata parsing dependency this project
 // doesn't otherwise need -- ImageRun needs real dimensions to scale sensibly
 // without distorting the image (docx-js has no CSS-style object-fit).
 async function probeImageDims(browser, tmpDir, buf, ext, fallback) {
-  const probePath = path.join(tmpDir, `probe-${crypto.randomUUID()}.${ext}`);
-  fs.writeFileSync(probePath, buf);
   const page = await browser.newPage();
   try {
     return await page.evaluate(async (src) => {
@@ -320,12 +423,46 @@ async function probeImageDims(browser, tmpDir, buf, ext, fallback) {
       img.src = src;
       await img.decode();
       return { width: img.naturalWidth, height: img.naturalHeight };
-    }, "file://" + probePath);
+    }, toDataUrl(buf, ext));
   } catch {
     return fallback;
   } finally {
     await page.close();
-    fs.rmSync(probePath, { force: true });
+  }
+}
+
+// Same measured fraction as render.js's COVER_FULL_BG_BAND_FRACTION for
+// green-cover-background.jpg -- see that constant's comment for how it was
+// derived. Crops the source image down to just the navy band (object-fit:
+// cover's effective result) via an offscreen canvas, instead of inserting
+// the whole tall image (mostly plain white below the band) at full width,
+// which left a large dead-space gap before the cover text -- the PDF never
+// has this gap because CSS crops the image itself rather than showing it in
+// full.
+const COVER_FULL_BG_BAND_FRACTION = 0.4704;
+
+async function cropImageTopBand(browser, tmpDir, buf, ext, bandFraction) {
+  const page = await browser.newPage();
+  try {
+    const result = await page.evaluate(async (src, frac) => {
+      const img = new Image();
+      img.src = src;
+      await img.decode();
+      const cropHeight = Math.round(img.naturalHeight * frac);
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = cropHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, img.naturalWidth, cropHeight, 0, 0, img.naturalWidth, cropHeight);
+      return { dataUrl: canvas.toDataURL("image/png"), width: img.naturalWidth, height: cropHeight };
+    }, toDataUrl(buf, ext), bandFraction);
+    return {
+      buffer: Buffer.from(result.dataUrl.split(",")[1], "base64"),
+      width: result.width,
+      height: result.height,
+    };
+  } finally {
+    await page.close();
   }
 }
 
@@ -401,6 +538,10 @@ async function main() {
     const today = new Date().toISOString().slice(0, 10);
 
     // -- Cover page --
+    // Left-aligned text block below a full-width cropped band image, kicker
+    // label, and a divider rule under the title -- matching render.js's
+    // actual cover layout (see that file's renderCoverHtml) rather than the
+    // earlier centered, kicker-less, divider-less, uncropped approximation.
     const coverChildren = [];
     const titleFont = docxFontFamily(cfg.cover.title_font, cfg.fonts);
     const subtitleFont = docxFontFamily(cfg.cover.subtitle_font, cfg.fonts);
@@ -418,25 +559,21 @@ async function main() {
         spacing: { after: 300 },
       }));
     }
-    // Shown at its own real aspect ratio (never stretched/distorted) rather
-    // than attempting render.js's CSS object-fit crop-to-band or fill --
-    // see the file-header note. "full" gets sized to occupy most of the
-    // page (mirroring the intent of render.js's ~82%-of-height full-bleed
-    // treatment); "top" gets sized to the same band-height ratio render.js
-    // computes for its cropped band, just without the crop -- the full
-    // image at that height, not a slice of it.
+    // Cropped to just the navy band (object-fit:cover's effective result --
+    // see cropImageTopBand's comment) instead of showing the whole tall
+    // source image, most of which is plain white below the band and was
+    // previously leaving a large dead-space gap before the cover text.
     if (cfg.cover.background_image_path) {
       // Per-template directory, not the shared assets/images/ -- see
       // render.js's identical templateDir resolution. Kept in sync by hand.
       const bgBuf = fs.readFileSync(path.join(args.templatesRoot, assetEntry.template, cfg.cover.background_image_path));
-      const dims = await probeImageDims(browser, tmpDir, bgBuf, "png", { width: CONTENT_WIDTH_PX, height: CONTENT_WIDTH_PX });
-      const targetWidth = cfg.cover.background_image_position === "full"
-        ? CONTENT_WIDTH_PX
-        : Math.round(dims.width * ((CONTENT_WIDTH_PX * COVER_TOP_BAND_RATIO) / dims.height));
-      const fitted = fitWidth(dims.width, dims.height, Math.min(targetWidth, CONTENT_WIDTH_PX));
+      const bandFraction = cfg.cover.background_image_position === "full" ? COVER_FULL_BG_BAND_FRACTION : COVER_TOP_BAND_RATIO;
+      const bgExt = path.extname(cfg.cover.background_image_path).slice(1) || "png";
+      const cropped = await cropImageTopBand(browser, tmpDir, bgBuf, bgExt, bandFraction);
+      const fitted = fitWidth(cropped.width, cropped.height, CONTENT_WIDTH_PX);
       coverChildren.push(new Paragraph({
         alignment: AlignmentType.CENTER,
-        children: [new ImageRun({ data: bgBuf, type: "png", transformation: fitted })],
+        children: [new ImageRun({ data: cropped.buffer, type: "png", transformation: fitted })],
         spacing: { after: 300 },
       }));
     }
@@ -447,12 +584,34 @@ async function main() {
         spacing: { after: 400 },
       }));
     }
+    // The real template's own cover text box: a small kicker label directly
+    // above the title, left-aligned, not centered -- see render.js's
+    // identical kickerHtml comment (not locale-specific, so not translated
+    // per locale any more than the logo wordmark baked into the cover image
+    // itself is).
+    if (cfg.cover.kicker_text) {
+      coverChildren.push(new Paragraph({
+        alignment: AlignmentType.LEFT,
+        children: [new TextRun({ text: cfg.cover.kicker_text, font: titleFont, color: cfg.cover.text_color, size: 20 })],
+        spacing: { after: 80 },
+      }));
+    }
+    // h1Underline border on the title paragraph itself -- same full-width-
+    // border-instead-of-short-rule simplification headingBorder() already
+    // documents for body H1s, applied here for the same reason (docx-js has
+    // no "draw a short line" primitive) rather than inventing a different
+    // cover-only compromise.
     coverChildren.push(
-      new Paragraph({ alignment: AlignmentType.CENTER, heading: HeadingLevel.TITLE, children: [new TextRun({ text: title, font: titleFont, color: cfg.cover.text_color, size: coverTitleSize })], spacing: { after: 160 } }),
-      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: args.locale, font: subtitleFont, color: cfg.cover.text_color, size: 28 })], spacing: { after: 240 } }),
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        children: makeTextRuns(title, { font: titleFont, color: cfg.cover.text_color, size: coverTitleSize }),
+        spacing: { after: 160 },
+        border: headingBorder("h1", cfg),
+      }),
+      new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: args.locale, font: subtitleFont, color: cfg.cover.text_color, size: 28 })], spacing: { after: 240 } }),
     );
-    if (cfg.cover.show_version) coverChildren.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: assetEntry.version, font: subtitleFont, color: cfg.cover.text_color })] }));
-    if (cfg.cover.show_date) coverChildren.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: today, font: subtitleFont, color: cfg.cover.text_color })] }));
+    if (cfg.cover.show_version) coverChildren.push(new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: assetEntry.version, font: subtitleFont, color: cfg.cover.text_color })] }));
+    if (cfg.cover.show_date) coverChildren.push(new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: today, font: subtitleFont, color: cfg.cover.text_color })] }));
     coverChildren.push(new Paragraph({ children: [], pageBreakBefore: false }));
 
     // -- Legal notice (its own page, right after the cover -- same
@@ -462,14 +621,19 @@ async function main() {
     if (cfg.legal_notice && cfg.legal_notice.text) {
       legalChildren.push(new Paragraph({
         pageBreakBefore: true,
-        children: [new TextRun({ text: cfg.legal_notice.text, font: bodyFont })],
+        children: makeTextRuns(cfg.legal_notice.text, { font: bodyFont }),
       }));
     }
 
     // -- Table of contents (real, native Word field -- see file header) --
     const tocChildren = [];
     if (cfg.toc.include) {
-      tocChildren.push(new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(tocHeadingText || cfg.toc.label)], pageBreakBefore: true }));
+      tocChildren.push(new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        pageBreakBefore: true,
+        children: makeTextRuns(tocHeadingText || cfg.toc.label, headingRunDefaults("h1", cfg)),
+        border: headingBorder("h1", cfg),
+      }));
       tocChildren.push(new TableOfContents("toc", { hyperlink: true, headingStyleRange: "1-2" }));
     }
 
@@ -534,6 +698,7 @@ async function main() {
       subject: "OWASP GenAI Security Project translations pipeline output",
       description: trackingText,
       numbering: numberingConfig,
+      fonts: loadEmbeddedFonts(args.templatesRoot, cfg.fonts),
       sections: [
         {
           properties: {},
