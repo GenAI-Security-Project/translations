@@ -13,15 +13,16 @@ FR/NFR list, and `WORKFLOW.md` for the operational walkthrough.
 Unchanged from the original design: this pipeline is deliberately split into
 two processes that never chain automatically into each other (NFR7).
 
-- **Process 1 — Draft, Review & Finalize.** Triggered by an asset/locale
-  upload. Runs `bootstrap_asset.py`, then `translate-draft.yml`, then loops
-  through ordinary PR review until every section in a locale is `reviewed`.
-  Ends there.
-- **Process 2 — Assemble & Publish.** Triggered separately — `check-freshness.yml`
-  notices an all-`reviewed` locale and opens a "ready to publish" issue;
-  `publish.yml` only runs once three-way sign-off is recorded on that issue.
-  Renders the final PDF from `translations-templates`. No translation happens
-  here.
+- **The generate process (Process 1) — Draft, Review & Finalize.** Triggered
+  by an asset/locale upload. Runs `bootstrap_asset.py`, then
+  `translate-draft.yml`, then loops through ordinary PR review until every
+  section in a locale is `reviewed`. Ends there.
+- **The publish process (Process 2) — Assemble & Publish.** Triggered
+  separately — `check-freshness.yml` notices an all-`reviewed` locale and
+  opens a "ready to publish" issue; `publish.yml` only runs once three-way
+  sign-off is recorded on that issue. Renders the final PDF and DOCX from
+  `translations-templates` (`render.sh` now renders both by default — see
+  `tooling/README.md`). No translation happens here.
 
 Both processes are now fully built and merged to `main`. The stale framing in
 earlier revisions of the root `README.md` ("Process 2 — not built yet") no
@@ -45,7 +46,7 @@ Two components not in the original seven, added during this build-out:
 | Addition | Implements | Why |
 |---|---|---|
 | TOTP gate on public-triggered Actions | `UPLOAD_TOTP_SECRET` repo secret, checked in `bootstrap-asset.yml` and `publish-direct.yml` | The PRD assumed a GitHub App/OAuth-gated form; the actual site is a public static Pages site with no backend, so anyone can POST a `repository_dispatch`. A server-side-only shared secret (never shipped to the browser) closes that gap without standing up an auth proxy. |
-| `publish-direct.yml` + `publish.html` | Testing-only publish path, CAPTCHA + TOTP gated, bypasses the three-way sign-off | Exists so Process 2's rendering pipeline can be validated end-to-end against real content before a live sign-off process (named roles, an actual "ready to publish" issue habit) exists. **Not a substitute for `publish.yml`** — see `WORKFLOW.md` for exactly what it does and doesn't guarantee. |
+| `publish-direct.yml` + `publish.html` | Testing-only publish path, CAPTCHA + TOTP gated, bypasses the three-way sign-off | Exists so the publish process's (Process 2's) rendering pipeline can be validated end-to-end against real content before a live sign-off process (named roles, an actual "ready to publish" issue habit) exists. **Not a substitute for `publish.yml`** — see `WORKFLOW.md` for exactly what it does and doesn't guarantee. |
 
 ## The renderer (`tooling/render/render.js`)
 

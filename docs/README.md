@@ -2,8 +2,8 @@
 
 Static site (no backend, no build step) implementing the Build Spec's
 "GitHub Pages upload/status site" — the last of the seven components, built
-now that the underlying CLI/Actions pipeline (components 1–5, Process 1B)
-works end-to-end.
+now that the underlying CLI/Actions pipeline (components 1–5, the generate
+process's Process 1B step) works end-to-end.
 
 ## Pages
 
@@ -12,8 +12,8 @@ works end-to-end.
   `bootstrap-asset.yml` via `repository_dispatch`.
 - **`status.html`** — read-only dashboard over every asset/locale's
   `status.json`, live from the repo (NFR6).
-- **`publish.html`** — Process 2 (Assemble & Publish)'s direct/testing
-  publish trigger. Lists every asset/locale (see "Publish page" below),
+- **`publish.html`** — the publish process (Process 2: Assemble & Publish)'s
+  direct/testing publish trigger. Lists every asset/locale (see "Publish page" below),
   fires `publish-direct.yml` via `repository_dispatch` once per checked row.
 - **`index.html`** — landing page linking the rest.
 

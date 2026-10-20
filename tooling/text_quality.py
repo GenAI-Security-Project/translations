@@ -18,17 +18,17 @@ tested against this pipeline — page numbers are typed inline as running
 footer text rather than living in a real header/footer that extraction
 would naturally skip. These are pagination from the *English source's*
 layout, meaningless (and wrong) once translated and reflowed into a
-different template/language/page count — Process 2's render_config.json
-adds real page numbers for the final layout, so the source shouldn't carry
-stale ones through translation.
+different template/language/page count — the publish process's (Process
+2's) render_config.json adds real page numbers for the final layout, so the
+source shouldn't carry stale ones through translation.
 
 Footer-URL artifacts (is_footer_url_artifact): the same running-footer
 problem as page numbers, one line down in the real source — every page of
 the real PDF/docx repeats "genai.owasp.org" as its own standalone line
 directly below the page number, the site's own footer branding typed
 inline rather than living in a real header/footer region. It belongs in
-final layout (Process 2), not translated body content, for the same
-reason a stale page number does. Scoped to that one known literal domain,
+final layout (the publish process, Process 2), not translated body content,
+for the same reason a stale page number does. Scoped to that one known literal domain,
 not a general bare-URL/domain regex — a broad pattern risks stripping a
 legitimate reference URL that happens to sit alone on its own line (e.g.
 in a References section), which a footer-branding line never is.

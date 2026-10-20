@@ -56,9 +56,9 @@ config PR.
 
 The single source of truth for section-level progress. States:
 `draft` (machine-translated, unreviewed) → `in_review` (PR marked ready) →
-`reviewed` (PR merged). `stale` and `migrated` are reserved for Process 2 /
-the one-time migration script and aren't produced by anything in this repo
-yet. Schema + read/write helpers: `status_schema.py`.
+`reviewed` (PR merged). `stale` and `migrated` are reserved for the publish
+process (Process 2) / the one-time migration script and aren't produced by
+anything in this repo yet. Schema + read/write helpers: `status_schema.py`.
 
 Writer discipline — each state transition has exactly one writer:
 
@@ -128,20 +128,21 @@ each draft was produced. Written by `translation_log.py`, called from
 Never rewritten — accumulates across every run for that locale, so it
 survives re-runs, added locales, and retried failures.
 
-## Components in this repo (Process 1)
+## Components in this repo (the generate process, Process 1)
 
 | File | Component | Does |
 |---|---|---|
 | `bootstrap_asset.py`, `asset_naming.py` + `.github/workflows/bootstrap-asset.yml` | 1 | Validates a new asset/version, opens a PR with the `registry.yaml` entry + scaffolded folder tree. Never touches an already-registered locale. |
 | `translation-config.yaml`, `translation_config.py`, `llm_client.py`, `docx_split.py`, `pdf_split.py`, `image_svg.py`, `svg_localize.py`, `text_quality.py`, `translation_log.py`, `translate_section.py` + `.github/workflows/translate-draft.yml` | 2 | Splits a `heading_1` asset's `.docx` (or a `pdf_heading` asset's finished PDF, by detected heading font size — see `pdf_split.py`'s module docstring for the heuristic) into English sections and figures once per release, machine-translates every section/figure a locale doesn't already have a status for, logs each attempt, opens a draft PR. |
-| `review_transition.py` + `.github/workflows/review-transitions.yml` | Process 1B | The only place `status.json`'s human-review states change, triggered by PR "ready for review" and PR merge. |
+| `review_transition.py` + `.github/workflows/review-transitions.yml` | Process 1B (generate process) | The only place `status.json`'s human-review states change, triggered by PR "ready for review" and PR merge. |
 
 ## Figures (images with embedded text)
 
 Both real test documents turned out to contain diagrams with text baked into
 a flattened image (an architecture diagram, a risk-mapping graphic) — the
-Build Spec didn't anticipate this, so it's handled as an addition to
-Process 1, not a Process 2 rendering concern:
+Build Spec didn't anticipate this, so it's handled as an addition to the
+generate process (Process 1), not a publish process (Process 2) rendering
+concern:
 
 - **Tier 1 only** (what's implemented): `image_svg.py` OCRs each embedded
   image, blanks out whatever text it found (even text too garbled to
@@ -199,8 +200,8 @@ section, not less:**
   with no good automated failure signal; revisit only if Tier 1's
   text-overlay approach proves insufficient in practice.
 
-Process 2 (components 3, 4, 5) and the GitHub Pages site (component 6) are
-now built — see `tooling/docs/DESIGN.md` for the render pipeline's internals
+The publish process (Process 2, components 3, 4, 5) and the GitHub Pages
+site (component 6) are now built — see `tooling/docs/DESIGN.md` for the render pipeline's internals
 (`render/render.js`) and `docs/README.md` for the site. `bootstrap-asset.yml`
 and `translate-draft.yml` fire via `repository_dispatch` from
 `docs/upload.html` (or `workflow_dispatch` for a manual run), gated by a
@@ -291,4 +292,5 @@ Two named-people gaps block real permission grants (not scaffolding —
    `translations`?
 2. Does the GenAI ops executive personally approve every `publish.yml` run,
    or delegate standing approval once the asset count grows? (This affects
-   Process 2, not Process 1, but is worth deciding before that build starts.)
+   the publish process (Process 2), not the generate process (Process 1),
+   but is worth deciding before that build starts.)

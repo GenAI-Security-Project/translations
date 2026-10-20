@@ -1,6 +1,6 @@
 name: review-transitions
 
-# Process 1, part B. The only workflow allowed to move status.json sections
+# The generate process (Process 1), part B. The only workflow allowed to move status.json sections
 # between the human-review states (draft -> in_review -> reviewed). Both
 # transitions require an explicit human action in the PR — there is no path
 # from draft straight to reviewed without a human either marking the PR

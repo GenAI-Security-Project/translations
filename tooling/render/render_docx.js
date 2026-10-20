@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Process 3 (Assemble & Publish, DOCX variant), component 5b --
 // render-docx.sh's Node backend. Assembles the same locale/asset/template
-// combination as render.js (Process 2) -- same registry.yaml, same
-// _manifest.json section order, same status.json readiness gate, same
-// translations-templates render_config.json -- into a .docx instead of a
-// .pdf. Shares render.js's registry/config loaders (see the exports at the
+// combination as render.js (the publish process, Process 2) -- same
+// registry.yaml, same _manifest.json section order, same status.json
+// readiness gate, same translations-templates render_config.json -- into a
+// .docx instead of a .pdf. Shares render.js's registry/config loaders (see the exports at the
 // bottom of that file) rather than a second, drifting copy of them; only
 // the section-gathering skip rules below (table_of_contents, sponsors-figure
 // swap, dead-TOC-scan detection) are duplicated from render.js's main()

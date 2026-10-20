@@ -1,7 +1,8 @@
 """_source/_manifest.json: the one record of canonical section order.
 
-Process 2's render.sh assembles a locale's sections "in canonical (English
-source) order" (Build Spec, component 3) -- but nothing before this recorded
+The publish process's (Process 2's) render.sh assembles a locale's sections
+"in canonical (English source) order" (Build Spec, component 3) -- but
+nothing before this recorded
 that order anywhere. docx_split.py/pdf_split.py already discover it (they
 walk the source document top to bottom), they just never wrote it down
 before returning. This is that missing record: written once per release by

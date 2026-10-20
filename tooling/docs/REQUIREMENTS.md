@@ -18,7 +18,7 @@ been built). See `DESIGN.md` for the technical detail behind each pointer.
 | FR1.4 — Add-locale-later without a new version | Done | Same form, existing-asset mode |
 | FR1.5 — Override-readiness heads-up at submit time, blocks only that locale later | Done | `js/upload.js`'s live `translations-templates` lookup at submit time; `check_render_override.py` is what actually blocks at publish time, per-locale |
 
-### FR2 — Draft translation (Process 1, part A)
+### FR2 — Draft translation (the generate process, Process 1, part A)
 
 | Req | Status | Notes |
 |---|---|---|
@@ -26,19 +26,19 @@ been built). See `DESIGN.md` for the technical detail behind each pointer.
 | FR2.2 — LLM read from `translation-config.yaml` at runtime, never hardcoded | Done | `translation_config.py` |
 | FR2.3 — `status.json` records status + `translator` (provider:model) | Done | `status_schema.py` |
 
-### FR3 — Human review (Process 1, part B)
+### FR3 — Human review (the generate process, Process 1, part B)
 
 | Req | Status | Notes |
 |---|---|---|
 | FR3.1 — Review through normal PR review | Done | No custom review UI built or needed |
 | FR3.2 — `reviewed` only via explicit human action | Done | `review_transition.py`, the only writer |
-| FR3.3 — Process 1 ends at all-reviewed, no auto-continuation | Done | Confirmed by design — `check-freshness.yml` (Process 2) is a separate, later-triggered workflow |
+| FR3.3 — The generate process (Process 1) ends at all-reviewed, no auto-continuation | Done | Confirmed by design — `check-freshness.yml` (the publish process, Process 2) is a separate, later-triggered workflow |
 
-### FR4 — Publish trigger & sign-off (Process 2, part A)
+### FR4 — Publish trigger & sign-off (the publish process, Process 2, part A)
 
 | Req | Status | Notes |
 |---|---|---|
-| FR4.1 — Separate explicit trigger, never automatic from Process 1 | Done | `check-freshness.yml` opens the issue; a human still has to sign off before `publish.yml` acts |
+| FR4.1 — Separate explicit trigger, never automatic from the generate process (Process 1) | Done | `check-freshness.yml` opens the issue; a human still has to sign off before `publish.yml` acts |
 | FR4.2 — Three-way sign-off required | Done | `check_signoff.py`'s checklist-structure check |
 
 **Addition beyond FR4:** `publish-direct.yml` + `publish.html`, a
@@ -46,14 +46,14 @@ CAPTCHA+TOTP-gated path that **bypasses** FR4.2 entirely — see `WORKFLOW.md`
 for the exact scope. This exists for pipeline validation only and is a
 deliberate, documented exception to FR4, not a replacement for it.
 
-### FR5 — Override-readiness check (Process 2, part B)
+### FR5 — Override-readiness check (the publish process, Process 2, part B)
 
 | Req | Status | Notes |
 |---|---|---|
 | FR5.1 — Verify required script override present before rendering | Done | `check_render_override.py` + `locale_script_categories.py` |
 | FR5.2 — Missing override = hard fail, never silent fallback | Done | Non-zero exit, `::error::` to the admin group |
 
-### FR6 — Assemble & publish (Process 2, part C)
+### FR6 — Assemble & publish (the publish process, Process 2, part C)
 
 | Req | Status | Notes |
 |---|---|---|

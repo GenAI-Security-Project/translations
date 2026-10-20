@@ -72,8 +72,9 @@ def _split(doc: Document) -> Tuple[List[Tuple[str, str]], List[Tuple[str, bytes]
             # (observed in the real LLM Top 10 docx). Pagination and footer
             # branding from the English source's layout are meaningless —
             # and wrong — once reflowed into a translated document with a
-            # different page count/template; Process 2's render_config.json
-            # adds real page numbers and footer branding for final layout.
+            # different page count/template; the publish process's
+            # (Process 2's) render_config.json adds real page numbers and
+            # footer branding for final layout.
             continue
         style_name = para.style.name or ""
         if style_name == "Heading 1":

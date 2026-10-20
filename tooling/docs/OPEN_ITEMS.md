@@ -68,7 +68,7 @@ walkthrough; this file is just "what's left."
   never wrong, just occasionally missing. Revisit only if it turns out to
   affect more than a small minority of headings on a real document.
 - [x] **Cyrillic validated end-to-end** 2026-09-24 — `ru-RU` onboarded and
-  drafted as a real Process 1 test (PR #15). Surfaced and fixed a real bug in
+  drafted as a real generate-process (Process 1) test (PR #15). Surfaced and fixed a real bug in
   the process: neither Poppins nor Barlow has any Cyrillic glyphs at all, so
   every Cyrillic character was silently falling back to a generic system
   serif (PR #16 + `translations-templates`#3 add a Noto Sans Cyrillic-range

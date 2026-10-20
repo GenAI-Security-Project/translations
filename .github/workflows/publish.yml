@@ -1,13 +1,16 @@
 name: publish
 
-# Component 3 (Process 2 -- Assemble & Publish). Never runs from Process 1
-# completing on its own (NFR7) -- only from a human editing the sign-off
-# checklist on the "ready to publish" issue check-freshness.yml opened, or
-# a manual workflow_dispatch for testing.
+# Component 3 (the publish process, Process 2 -- Assemble & Publish). Never
+# runs from the generate process (Process 1) completing on its own (NFR7) --
+# only from a human editing the sign-off checklist on the "ready to publish"
+# issue check-freshness.yml opened, or a manual workflow_dispatch for
+# testing.
 #
 # On a passing sign-off + override-readiness check: pulls the private
-# translations-templates repo, renders the final (non-watermarked) PDF via
-# render.sh --final, commits it to release/, and cuts a GitHub Release.
+# translations-templates repo, renders the final (non-watermarked) PDF (and,
+# since render.sh now renders both by default, a DOCX alongside it -- only
+# the PDF is committed/released, see tooling/README.md) via render.sh
+# --final, commits the PDF to release/, and cuts a GitHub Release.
 
 on:
   issues:

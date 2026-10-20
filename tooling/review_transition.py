@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process 1, part B — the only place status.json's human-review states change.
+"""The generate process (Process 1), part B — the only place status.json's human-review states change.
 
 Called by .github/workflows/review-transitions.yml at two points in a PR's
 life, never by hand:

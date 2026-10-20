@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Process 2 (Assemble & Publish), component 5 -- render.sh's Node backend.
+// The publish process (Process 2: Assemble & Publish), component 5 --
+// render.sh's Node backend.
 // Assembles a locale's reviewed sections into one PDF via markdown-it +
 // Puppeteer. See tooling/render_config_schema.py for the config field
 // reference this file's DEFAULT_CONFIG mirrors -- keep the two in sync by

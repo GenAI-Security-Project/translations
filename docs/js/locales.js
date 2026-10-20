@@ -10,8 +10,9 @@
 // resolve.
 //
 // `needsOverride: true` means this script category needs a render_config.json
-// override in translations-templates before Process 2 can publish it — none
-// exist there yet (that repo currently only has default/ configs), so every
+// override in translations-templates before the publish process (Process 2)
+// can publish it — none exist there yet (that repo currently only has
+// default/ configs), so every
 // locale in a needs-override category will show the readiness warning until
 // an admin adds one. `needsOverride: false` locales use the default config.
 const LOCALE_CATALOG = [

@@ -8,9 +8,9 @@ name: check-freshness
 #   2. When a locale has no draft/in_review/stale sections left (every
 #      section reviewed, total > 0) and no open "ready to publish" issue
 #      exists for it yet, open one with the three-way sign-off checklist
-#      publish.yml later reads (see check_signoff.py). This is Process 2's
-#      only automatic step -- everything after the issue opens requires a
-#      human action (FR4.1/NFR7).
+#      publish.yml later reads (see check_signoff.py). This is the publish
+#      process's (Process 2's) only automatic step -- everything after the
+#      issue opens requires a human action (FR4.1/NFR7).
 
 on:
   schedule:
@@ -118,7 +118,7 @@ jobs:
           fi
           gh issue create --title "$TITLE" --label ready-to-publish --body "$(cat <<'BODY'
           Every section of this asset/locale is now `reviewed`. Publishing
-          (assembly + render + release, Process 2) requires all three
+          (assembly + render + release, the publish process) requires all three
           sign-offs below -- check a box only once that role has actually
           confirmed. publish.yml re-checks this list on every edit.
 

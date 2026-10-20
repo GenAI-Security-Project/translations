@@ -4,7 +4,7 @@ How an asset actually moves through this pipeline today, from upload to
 release. See `DESIGN.md` for the technical detail behind each step and
 `REQUIREMENTS.md` for which PRD requirement each step satisfies.
 
-## Process 1 — Draft, Review & Finalize
+## The generate process (Process 1) — Draft, Review & Finalize
 
 ```
 docs/upload.html
@@ -40,15 +40,16 @@ ordinary PR review
       ▼
 [repeat translate-draft.yml / review loop per section, per correction]
       ▼
-status.json: every section "reviewed"  →  Process 1 ends here, nothing
-                                           downstream fires automatically
+status.json: every section "reviewed"  →  the generate process (Process 1)
+                                           ends here, nothing downstream
+                                           fires automatically
 ```
 
 `docs/status.html` is a live, read-only view over every asset/locale's
 `status.json` at any point in this loop — no auth needed, since `translations`
 itself is public.
 
-## Process 2 — Assemble & Publish
+## The publish process (Process 2) — Assemble & Publish
 
 Two separate paths exist. **They are not equivalent** — read both before
 assuming either one is "the" publish flow.

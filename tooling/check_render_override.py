@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process 2, FR5 -- override-readiness check.
+"""The publish process (Process 2), FR5 -- override-readiness check.
 
 Run before render.sh --final ever executes. Exits non-zero with an explicit,
 admin-routed error (NFR5: never a silent fallback to a mis-rendered default)
