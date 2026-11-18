@@ -4,236 +4,210 @@
   "sections": {
     "ASI01_Agent_Goal_Hijack": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 21,
-      "current_source_commit": "a05b19b"
+      "pr": 21
     },
     "ASI02_Tool_Misuse_and_Exploitation": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 22,
-      "current_source_commit": "a05b19b"
+      "pr": 22
     },
     "ASI03_Identity_and_Privilege_Abuse": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 23,
-      "current_source_commit": "a05b19b"
+      "pr": 23
     },
     "ASI04_Agentic_Supply_Chain_Vulnerabilities": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-29",
-      "pr": 24,
-      "current_source_commit": "a05b19b"
+      "pr": 24
     },
     "ASI05_Unexpected_Code_Execution_RCE": {
-      "status": "sreviewed",
-      "source_commit": "81c9164",
+      "status": "reviewed",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-29",
-      "pr": 25,
-      "current_source_commit": "a05b19b"
+      "pr": 25
     },
     "ASI06_Memory_Context_Poisoning": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 26,
-      "current_source_commit": "a05b19b"
+      "pr": 26
     },
     "ASI07_Insecure_Inter_Agent_Communication": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 28,
-      "current_source_commit": "a05b19b"
+      "pr": 28
     },
     "ASI08_Cascading_Failures": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 29,
-      "current_source_commit": "a05b19b"
+      "pr": 29
     },
     "ASI09_Human_Agent_Trust_Exploitation": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 30,
-      "current_source_commit": "a05b19b"
+      "pr": 30
     },
     "ASI10_Rogue_Agents": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 31,
-      "current_source_commit": "a05b19b"
+      "pr": 31
     },
     "Acknowledgements": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 32,
-      "current_source_commit": "a05b19b"
+      "pr": 32
     },
     "Acknowledgements_Figure_3": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 43,
-      "current_source_commit": "a05b19b"
+      "pr": 43
     },
     "Agentic_Top_10_At_A_Glance": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 42,
-      "current_source_commit": "a05b19b"
+      "pr": 42
     },
     "Agentic_Top_10_At_A_Glance_Figure_2": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-29",
-      "pr": 44,
-      "current_source_commit": "a05b19b"
+      "pr": 44
     },
     "Appendix_A_OWASP_Agentic_AI_Security_Mapping_Matrix": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 34,
-      "current_source_commit": "a05b19b"
+      "pr": 34
     },
     "Appendix_B_Relationship_to_OWASP_CycloneDX_and_AIBOM": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 35,
-      "current_source_commit": "a05b19b"
+      "pr": 35
     },
     "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 36,
-      "current_source_commit": "a05b19b"
+      "pr": 36
     },
     "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10_Figure": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
-      "reviewed_at": "2026-09-30",
-      "current_source_commit": "a05b19b"
+      "reviewed_at": "2026-09-30"
     },
     "Appendix_D_ASI_Agentic_Exploits_Incidents_Tracker": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 37,
-      "current_source_commit": "a05b19b"
+      "pr": 37
     },
     "Appendix_E_Abbreviations": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 41,
-      "current_source_commit": "a05b19b"
+      "pr": 41
     },
     "Letter_from_The_Agentic_Top_10_Leaders": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 38,
-      "current_source_commit": "a05b19b"
+      "pr": 38
     },
     "OWASP_Top_10_For_Agentic_Applications_2026": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 33,
-      "current_source_commit": "a05b19b"
+      "pr": 33
     },
     "OWASP_Top_10_For_Agentic_Applications_2026_Figure_3": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 45,
-      "current_source_commit": "a05b19b"
+      "pr": 45
     },
     "Preface_Figure": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-29",
-      "pr": 46,
-      "current_source_commit": "a05b19b"
+      "pr": 46
     },
     "Project_Supporters": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 39,
-      "current_source_commit": "a05b19b"
+      "pr": 39
     },
     "Table_of_Content": {
       "status": "reviewed",
-      "source_commit": "81c9164",
+      "source_commit": "a05b19b",
       "translator": "claude-code-session:claude-sonnet-5",
       "reviewer": "a-moskvin",
       "reviewed_at": "2026-09-30",
-      "pr": 40,
-      "current_source_commit": "a05b19b"
+      "pr": 40
     }
   }
 }
