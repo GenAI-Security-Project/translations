@@ -56,8 +56,8 @@ walkthrough; this file is just "what's left."
 - [ ] **Built 2026-11-21 on `process4-layout-handoff`; not yet run in real
   GitHub Actions.** Verified locally (ru-RU, plus an RTL smoke test on a
   scratch fa-IR) via LibreOffice; not yet opened in Microsoft Word.
-- [ ] **Run access is "write access to the repo"** -- tie it to the planned
-  translations-managers team once that exists (see Process 1 access work).
+- [x] **Run access** -- translations managers only, via
+  `.github/actions/require-manager` (2026-11-22).
 - [ ] **TOC is a Word field** -- Word fills it on open (updateFields is set);
   LibreOffice's headless convert leaves it empty. Designers using Word are
   unaffected.

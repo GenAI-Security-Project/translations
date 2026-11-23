@@ -1,9 +1,10 @@
 # Process 4 (Assemble for Layout): build the plain, watermarked .docx
 # manuscript of one reviewed asset/locale for a human layout designer.
 #
-# Who can run it: workflow_dispatch is only available to users with write
-# access to this repo (Actions tab -> layout-handoff -> Run workflow), so the
-# repo's own collaborator/team list is the gate -- no shared TOTP code.
+# Who can run it: translations managers only (Maintain/Admin on this repo --
+# the translations-managers team or an org owner), checked by
+# .github/actions/require-manager. Actions tab -> layout-handoff -> Run
+# workflow.
 #
 # Output: a run artifact (the .docx, figures/ and HANDOFF.md) that the
 # person who ran it downloads from the run page and sends to the designer.
@@ -39,6 +40,9 @@ jobs:
       LOCALE: ${{ inputs.locale }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Require translations manager
+        uses: ./.github/actions/require-manager
 
       - uses: actions/setup-node@v4
         with:

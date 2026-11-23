@@ -130,8 +130,8 @@ For when a person, not the renderer, does the final graphical layout.
 [every section of <asset>/<locale>/status.json is "reviewed"]
       ▼
 Actions → layout-handoff → Run workflow (asset, locale)
-      │  workflow_dispatch: only users with write access to this repo can
-      │  run it; the run records who did (GITHUB_ACTOR)
+      │  workflow_dispatch, translations managers only (require-manager);
+      │  the run records who did (GITHUB_ACTOR)
       ▼
 layout-handoff.yml → tooling/render-layout-docx.sh
       │  1. Refuses unless every section is "reviewed" (no override)
