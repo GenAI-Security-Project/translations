@@ -1,0 +1,40 @@
+name: require-translations-manager
+description: >
+  Fail the job unless the user who triggered it is a translations manager:
+  someone with the Maintain or Admin role on this repository. In practice
+  that's the translations-managers team (Maintain on translations only) and
+  the org owners (Admin everywhere). Write-only collaborators -- e.g. the
+  per-locale reviewer teams -- are refused.
+
+# Who counts as a manager is managed entirely in GitHub (Org -> Teams ->
+# translations-managers), so adding or removing a manager needs no code or
+# secret change. Uses only the job's own GITHUB_TOKEN: the collaborator
+# permission endpoint is readable with repository metadata access, unlike
+# org team membership, which would need an org-scoped token.
+#
+# triggering_actor rather than actor: on a re-run it's the person who
+# pressed "Re-run", who must pass the check themselves. For
+# repository_dispatch (the upload/publish pages) it's the owner of the
+# personal access token that fired the dispatch.
+
+runs:
+  using: composite
+  steps:
+    - name: Check translations-manager role
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        ACTOR: ${{ github.triggering_actor }}
+        REPO: ${{ github.repository }}
+      run: |
+        role=$(gh api "repos/$REPO/collaborators/$ACTOR/permission" --jq '.role_name' 2>/dev/null || true)
+        case "$role" in
+          admin|maintain)
+            echo "@$ACTOR is a translations manager (repo role: $role)"
+            echo "Started by translations manager **@$ACTOR** ($role)." >> "$GITHUB_STEP_SUMMARY"
+            ;;
+          *)
+            echo "::error::@$ACTOR is not a translations manager (repo role: ${role:-none}). Ask a repo admin to add you to the translations-managers team."
+            exit 1
+            ;;
+        esac

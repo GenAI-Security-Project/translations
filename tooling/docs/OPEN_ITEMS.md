@@ -18,9 +18,10 @@ walkthrough; this file is just "what's left."
   dispatched from the live site will fail at that checkout step. Needs an
   SSH deploy key generated for `translations-templates` (read-only is
   enough) and its private half added as this secret.
-- [ ] **Real named `CODEOWNERS`.** Currently a placeholder — blocks
-  meaningful PR-review/sign-off enforcement. Needs two named initiative
-  leads (a people decision, not a code change).
+- [x] **Real `CODEOWNERS`.** 2026-11-22: now routes to GitHub teams --
+  `translations-managers` by default, `translations-reviewers-<locale>` per
+  locale folder (managers kept on each line while those teams are empty).
+  Who is in them is a people decision made in GitHub, not a code change.
 - [ ] **`ANTHROPIC_API_KEY` (or whichever provider `translation-config.yaml`
   names) not set as a repo secret.** Without it, `translate-draft.yml` drafts
   in an offline/simulated mode rather than calling a real model — every
@@ -47,9 +48,19 @@ walkthrough; this file is just "what's left."
   `watermark.repeat` field exists and is accepted, but `render.js` only ever
   renders a single centered stamp regardless of its value — see
   `buildWatermarkCss`'s own comment in `tooling/render/render.js`.
-- [ ] **Per-locale GitHub Teams** for write access (the PRD's long-term plan)
-  — not created yet; access today is whatever the repo's default
-  permissions grant.
+- [x] **Per-locale GitHub Teams** -- created 2026-11-22:
+  `translations-reviewers-{de-de,fa-ir,fr-fr,pl-pl,ru-ru}` (Write on this
+  repo only, empty) and `translations-managers` (Maintain on this repo
+  only). Pipeline workflows require the manager role
+  (`.github/actions/require-manager`), replacing the shared TOTP code.
+- [ ] **Fill the teams.** Add managers and per-locale reviewers in GitHub.
+  New locale → new `translations-reviewers-<locale>` team (Write) + a
+  CODEOWNERS line.
+- [ ] **Delete the `UPLOAD_TOTP_SECRET` repo secret** once this change is
+  merged -- nothing reads it any more.
+- [ ] **`translations-templates` is readable by every org member** (org
+  base permission is Read). Fixing it needs the org default set to "No
+  permission" -- an org-wide decision pending the other owners.
 
 ## Known content/data issues
 

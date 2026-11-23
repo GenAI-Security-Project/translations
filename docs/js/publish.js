@@ -122,12 +122,7 @@ async function handlePublish(event) {
     return;
   }
 
-  const totpCode = document.getElementById("totp-input").value.trim();
-  if (!/^\d{6}$/.test(totpCode)) {
-    resultEl.textContent = "Enter the current 6-digit authenticator code.";
-    resultEl.className = "result-error";
-    return;
-  }
+  if (!(await ensureTranslationsManager(resultEl))) return;
 
   const checked = Array.from(document.querySelectorAll(".publish-row-checkbox:checked"));
   if (checked.length === 0) {
@@ -169,7 +164,7 @@ async function handlePublish(event) {
     const bar = new WorkflowStatusBar(barEl, label);
 
     try {
-      await dispatchPublishDirect({ asset, locale, watermark: includeWatermark, totp_code: totpCode });
+      await dispatchPublishDirect({ asset, locale, watermark: includeWatermark });
       successes.push(label);
     } catch (err) {
       failures.push(`${label}: ${err.message}`);

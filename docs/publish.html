@@ -28,7 +28,7 @@
     Assemble and publish reviewed translations as a final PDF (Process 2 —
     Assemble &amp; Publish). Normally publishing requires a three-way
     sign-off on a "ready to publish" issue; this page is a direct,
-    CAPTCHA/authenticator-gated path for testing the rendering pipeline —
+    CAPTCHA + manager-gated path for testing the rendering pipeline —
     see <code>.github/workflows/publish-direct.yml</code>.
   </p>
 
@@ -88,12 +88,11 @@
       <section>
         <h2>4. Confirm</h2>
         <p class="hint">
-          Enter the current 6-digit code from the shared authenticator —
-          ask a pipeline admin if you don't have it. Checked server-side
-          before anything is processed.
+          Only translations managers can publish: the GitHub account your
+          token belongs to must be in the <code>translations-managers</code>
+          team (or be an org owner). Checked again server-side before
+          anything is processed.
         </p>
-        <label for="totp-input">Authenticator code</label>
-        <input type="text" id="totp-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="123456" />
         <div id="captcha-container"></div>
       </section>
 

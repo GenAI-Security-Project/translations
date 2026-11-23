@@ -287,12 +287,7 @@ async function handleSubmit(event) {
     return;
   }
 
-  const totpCode = document.getElementById("totp-input").value.trim();
-  if (!/^\d{6}$/.test(totpCode)) {
-    resultEl.textContent = "Enter the current 6-digit authenticator code.";
-    resultEl.className = "result-error";
-    return;
-  }
+  if (!(await ensureTranslationsManager(resultEl))) return;
 
   const mode = document.querySelector('input[name="mode"]:checked').value;
   if (mode === "new" && submitBlockedByDuplicate) {
@@ -309,7 +304,7 @@ async function handleSubmit(event) {
     return;
   }
 
-  const payload = { version, locales: locales.join(","), totp_code: totpCode };
+  const payload = { version, locales: locales.join(",") };
 
   if (mode === "existing") {
     const assetId = document.getElementById("existing-asset-select").value;
