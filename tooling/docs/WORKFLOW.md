@@ -8,15 +8,15 @@ release. See `DESIGN.md` for the technical detail behind each step and
 
 ```
 docs/upload.html
-      │  (CAPTCHA + PAT auth; TOTP code entered but not client-verifiable)
+      │  (CAPTCHA + PAT auth; page pre-checks the translations-manager role)
       ▼
 repository_dispatch (bootstrap-asset)
       │
       ▼
 bootstrap-asset.yml
-      │  1. Verify TOTP code server-side against UPLOAD_TOTP_SECRET
-      │     (only when triggered via repository_dispatch — workflow_dispatch,
-      │     which already requires repo write access, is exempt)
+      │  1. require-manager: the triggering user must have Maintain/Admin
+      │     here (translations-managers team or org owner) — applies to
+      │     repository_dispatch and workflow_dispatch alike
       │  2. Run bootstrap_asset.py — validates the asset name/version is new
       │     (or a real new version of an existing asset), opens a PR adding
       │     the registry.yaml entry + scaffolded folder tree
@@ -85,7 +85,7 @@ publish.yml  (fires on every edit to that issue)
 No step here can be skipped or reordered by a client-side action — the
 whole gate lives server-side in the Action.
 
-### The testing path: `publish-direct.yml`, CAPTCHA + TOTP, no sign-off
+### The testing path: `publish-direct.yml`, CAPTCHA + manager check, no sign-off
 
 ```
 docs/publish.html
@@ -97,8 +97,7 @@ docs/publish.html
 repository_dispatch (publish-direct), one per checked row
       ▼
 publish-direct.yml
-      │  1. Verify TOTP code server-side against UPLOAD_TOTP_SECRET (same
-      │     secret and mechanism as bootstrap-asset.yml)
+      │  1. require-manager (same check as bootstrap-asset.yml)
       │  2. check_render_override.py — same FR5 check as the real path
       │  3. render.sh [--final if watermark unchecked]
       │  4. Commit to release/, cut a GitHub Release
@@ -111,8 +110,8 @@ publish-direct.yml
 - It **does** still enforce `render.sh --final`'s own hard requirement that
   every section be `reviewed` before a non-watermarked PDF is produced,
   regardless of what `TESTING_MODE` chose to list as selectable.
-- It **does not** require any human sign-off beyond whoever holds a valid
-  TOTP code and can solve the CAPTCHA — there is no localization-lead /
+- It **does not** require any human sign-off beyond one translations
+  manager choosing to run it — there is no localization-lead /
   technical-reviewer / ops-executive gate on this path at all.
 - **This is intentional and documented**, not a bug: it exists specifically
   so the rendering pipeline (`render.js`, `render.sh`) can be exercised
@@ -126,13 +125,14 @@ publish-direct.yml
 
 | Secret | Repo | Checked by | Gates |
 |---|---|---|---|
-| `UPLOAD_TOTP_SECRET` | `translations` | `bootstrap-asset.yml`, `publish-direct.yml` | Both public-triggered `repository_dispatch` surfaces (onboarding, testing-publish) |
 | `TEMPLATES_DEPLOY_KEY` | `translations` | `publish.yml`, `publish-direct.yml` | Checking out the private `translations-templates` repo — **not currently set** (see `DESIGN.md`'s "Known gaps"); neither publish workflow can complete in real GitHub Actions until it is |
 
-Neither secret is ever sent to the browser — both checks happen entirely
-inside the Action's own environment, which is why a TOTP code (not a
-client-side passphrase comparison) is the actual protection, not just UX
-friction.
+No secret is ever sent to the browser. Who may run the pipeline is not a
+secret at all: it's the `translations-managers` team (Maintain on this repo),
+checked by `.github/actions/require-manager` at the start of
+`bootstrap-asset.yml`, `translate-draft.yml`, `publish-direct.yml` and
+`layout-handoff.yml`. The old `UPLOAD_TOTP_SECRET` repo secret is no longer
+read by anything and can be deleted.
 
 ## What a fresh clone needs to run this locally
 

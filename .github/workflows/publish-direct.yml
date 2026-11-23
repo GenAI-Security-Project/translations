@@ -2,8 +2,8 @@ name: publish-direct
 
 # TESTING-ONLY direct publish path from the GitHub Pages "Publish" page.
 # Bypasses the three-way sign-off gate that publish.yml enforces (FR4.2) --
-# gated instead by CAPTCHA + a TOTP authenticator code, the same pattern
-# bootstrap-asset.yml uses for the public upload form. Exists so the
+# gated instead by CAPTCHA + the translations-manager role check (see
+# .github/actions/require-manager), the same gate bootstrap-asset.yml uses. Exists so the
 # rendering pipeline can be validated end-to-end against real content
 # without a live sign-off process in place yet. Revisit (fold into
 # publish.yml, or retire) once real sign-off practices exist.
@@ -31,6 +31,11 @@ jobs:
         with:
           path: translations
 
+      # Same check as bootstrap-asset.yml: only translations managers may
+      # fire this testing-only publish path (it skips the three-way sign-off).
+      - name: Require translations manager
+        uses: ./translations/.github/actions/require-manager
+
       - name: Check out translations-templates
         uses: actions/checkout@v4
         with:
@@ -48,32 +53,6 @@ jobs:
       - name: Install tooling dependencies
         working-directory: translations
         run: pip install -r tooling/requirements.txt
-
-      # Same check as bootstrap-asset.yml's public-form path: the secret
-      # lives only in this job's environment, never shipped to the browser,
-      # unlike a client-side passphrase check would be.
-      - name: Verify authenticator code
-        env:
-          TOTP_SECRET: ${{ secrets.UPLOAD_TOTP_SECRET }}
-          TOTP_CODE: ${{ github.event.client_payload.totp_code }}
-        run: |
-          pip install --quiet pyotp
-          python3 - <<'PY'
-          import os, sys
-          import pyotp
-
-          secret = os.environ.get("TOTP_SECRET")
-          code = (os.environ.get("TOTP_CODE") or "").strip()
-          if not secret:
-              print("::error::UPLOAD_TOTP_SECRET is not configured on this repo")
-              sys.exit(1)
-          if not code:
-              print("::error::No authenticator code was submitted with this publish request")
-              sys.exit(1)
-          if not pyotp.TOTP(secret).verify(code, valid_window=1):
-              print("::error::Authenticator code was incorrect or expired")
-              sys.exit(1)
-          PY
 
       - name: Resolve inputs
         id: resolve

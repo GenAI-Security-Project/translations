@@ -127,6 +127,39 @@ async function putFile(path, contentBase64, message) {
   });
 }
 
+// Only translations managers -- Maintain or Admin on CONTENT_REPO, i.e. the
+// translations-managers team or an org owner -- may fire the onboarding and
+// publish dispatches. The workflows enforce this server-side
+// (.github/actions/require-manager); this is the same rule checked early so
+// a non-manager gets a clear message instead of a failed Actions run.
+// Returns {login, role, ok}.
+async function checkTranslationsManager() {
+  const me = await ghFetch("/user");
+  const perm = await ghFetch(
+    `/repos/${ORG}/${CONTENT_REPO}/collaborators/${encodeURIComponent(me.login)}/permission`
+  );
+  const role = perm.role_name || perm.permission || "none";
+  return { login: me.login, role, ok: role === "admin" || role === "maintain" };
+}
+
+// Writes the refusal into resultEl and returns false for a non-manager. If
+// the check itself can't run (e.g. a fine-grained token without metadata
+// access), lets the submit through -- the workflow still enforces it.
+async function ensureTranslationsManager(resultEl) {
+  let mgr;
+  try {
+    mgr = await checkTranslationsManager();
+  } catch (_) {
+    return true;
+  }
+  if (mgr.ok) return true;
+  resultEl.textContent =
+    `@${mgr.login} isn't a translations manager (repo role: ${mgr.role}). ` +
+    "Ask a repo admin to add you to the translations-managers team.";
+  resultEl.className = "result-error";
+  return false;
+}
+
 // Fires bootstrap-asset.yml's repository_dispatch trigger.
 async function dispatchBootstrapAsset(clientPayload) {
   return ghFetch(`/repos/${ORG}/${CONTENT_REPO}/dispatches`, {

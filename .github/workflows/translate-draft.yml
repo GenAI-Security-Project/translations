@@ -35,6 +35,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Machine-drafting spends LLM budget: translations managers only.
+      - name: Require translations manager
+        uses: ./.github/actions/require-manager
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

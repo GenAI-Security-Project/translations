@@ -22,7 +22,7 @@ process's Process 1B step) works end-to-end.
 A real publish normally requires a three-way sign-off on a "ready to
 publish" issue (`check-freshness.yml` opens it, `publish.yml` enforces the
 gate — see `tooling/check_signoff.py`). `publish.html` is a separate,
-CAPTCHA + authenticator-gated direct path (`publish-direct.yml`) that
+CAPTCHA + manager-gated direct path (`publish-direct.yml`) that
 bypasses that sign-off gate, so the rendering pipeline can be exercised
 against real content before a live sign-off process exists.
 
@@ -38,10 +38,9 @@ against real content before a live sign-off process exists.
   section is reviewed, regardless of what `TESTING_MODE` lists as
   selectable.
 - **Publish selected**: one `repository_dispatch` (`publish-direct`) per
-  checked row, each carrying `{asset, locale, watermark, totp_code}`.
-  `publish-direct.yml` verifies the code server-side against
-  `UPLOAD_TOTP_SECRET` (same secret and mechanism as `bootstrap-asset.yml`'s
-  public-form path) before rendering anything.
+  checked row, each carrying `{asset, locale, watermark}`.
+  `publish-direct.yml` runs the translations-manager check (same as
+  `bootstrap-asset.yml`) before rendering anything.
 
 ## Auth: a pasted token, not "Sign in with GitHub" — and only where a write needs it
 
@@ -73,28 +72,28 @@ This asymmetry (public reads, gated writes) is intentional, not an
 oversight — revisit the pasted-token model if/when a GitHub App + a small
 auth proxy becomes worth standing up.
 
-## CAPTCHA + authenticator code
+## CAPTCHA + translations-manager check
 
 `js/captcha.js` gates `upload.html`'s submit action behind a simple
 addition problem, regenerated on a wrong answer — a lightweight "confirm
 you mean to trigger a commit + a workflow run" gate, not real bot-proofing.
 
-On top of that, `bootstrap-asset.yml` requires a 6-digit TOTP authenticator
-code (`client_payload.totp_code`, checked in the "Verify authenticator
-code" step) whenever it's reached via `repository_dispatch` — the path the
-public form uses now that the repo and Pages site are both public. This is
-real protection, not just friction, because the shared secret
-(`UPLOAD_TOTP_SECRET`, a repo secret) lives only in the Action's
-environment and is never shipped to the browser — unlike a client-side
-passphrase check would be, which anyone can read straight out of the
-page's own JS. `workflow_dispatch` (manual runs) is exempt: triggering it
-already requires write access to this repo, granted by GitHub itself.
+The real gate is **who** submits. Firing a `repository_dispatch` already
+needs a token with write access to this repo; on top of that,
+`bootstrap-asset.yml`, `translate-draft.yml` and `publish-direct.yml` each
+start with `.github/actions/require-manager`, which refuses the run unless
+the token's owner (`github.triggering_actor`) has the **Maintain or Admin**
+role here — the `translations-managers` team or an org owner. Write-only
+collaborators (the per-locale reviewer teams) are refused. The same check
+applies to `workflow_dispatch` runs from the Actions tab.
 
-The client only checks the code is 6 digits before submitting — it can't
-verify the code itself without holding the secret, which would defeat the
-point. A wrong/expired code still gets a `repository_dispatch` 204 back
-(that call just queues the event) and fails visibly on the Actions tab
-instead.
+Managers are added and removed in GitHub (Org → Teams →
+`translations-managers`) — no code or secret change. The pages run the same
+check early (`checkTranslationsManager()` in `js/github-api.js`) so a
+non-manager gets a clear message instead of a failed run; the workflow
+check is the one that counts. This replaced an earlier shared TOTP
+authenticator code (`UPLOAD_TOTP_SECRET`), which couldn't say who
+submitted.
 
 ## The two-step submit flow
 

@@ -42,7 +42,7 @@ been built). See `DESIGN.md` for the technical detail behind each pointer.
 | FR4.2 — Three-way sign-off required | Done | `check_signoff.py`'s checklist-structure check |
 
 **Addition beyond FR4:** `publish-direct.yml` + `publish.html`, a
-CAPTCHA+TOTP-gated path that **bypasses** FR4.2 entirely — see `WORKFLOW.md`
+CAPTCHA + manager-gated path that **bypasses** FR4.2 entirely — see `WORKFLOW.md`
 for the exact scope. This exists for pipeline validation only and is a
 deliberate, documented exception to FR4, not a replacement for it.
 
@@ -99,7 +99,7 @@ deliberate, documented exception to FR4, not a replacement for it.
 | NFR7 | No automatic publishing | Done | Enforced structurally by the two-process split; `publish-direct.yml` is a documented, gated exception used for pipeline testing only, not a violation of intent |
 | NFR8 | Correct rendering across scripts | **Partial** | See FR8.1 — the mechanism exists (`render_config_schema.py`'s `direction`/`line_breaking`/`numerals` fields, `locale_script_categories.py`'s gate) but has only been exercised for Latin-script locales so far |
 | NFR9 | No lost work (migration preserves everything) | **Not applicable yet** | No migration has run — see FR9.1. Nothing has been *lost* (nothing has been migrated), but the requirement's actual goal (archived work carried forward) is unmet |
-| NFR10 | Self-service intake, no maintainer request needed | Done | `docs/upload.html`'s full end-to-end flow, gated only by CAPTCHA + TOTP, not a human approval step |
+| NFR10 | Self-service intake, no maintainer request needed | Done | `docs/upload.html`'s full end-to-end flow, gated by CAPTCHA + the translations-manager role (a GitHub team), not a per-request human approval step |
 
 ## Additions beyond the original PRD
 
@@ -107,14 +107,14 @@ Implemented but not called for in the PRD — documented here so they're not
 mistaken for scope creep against a requirement, since none of them replace
 or weaken anything the PRD asked for:
 
-- **TOTP authenticator gate** on `bootstrap-asset.yml` and `publish-direct.yml`'s
-  `repository_dispatch` paths (`UPLOAD_TOTP_SECRET`, shared between both).
-  The PRD assumed GitHub OAuth device flow or a GitHub App for the Pages
-  form's auth; in practice, device-flow token exchange needs a backend a
-  static Pages site doesn't have, so the actual auth model is a pasted PAT
-  (for reads/writes the PAT itself scopes) plus a server-side-only TOTP
-  check specifically on the two Actions that fire off the public,
-  unauthenticated `repository_dispatch` surface.
+- **Translations-manager gate** (`.github/actions/require-manager`) on
+  `bootstrap-asset.yml`, `translate-draft.yml`, `publish-direct.yml` and
+  `layout-handoff.yml`. The PRD assumed GitHub OAuth device flow or a
+  GitHub App for the Pages form's auth; in practice, device-flow token
+  exchange needs a backend a static Pages site doesn't have, so the actual
+  auth model is a pasted PAT plus a server-side check that the PAT's owner
+  holds Maintain/Admin here (the `translations-managers` team). Replaced an
+  earlier shared TOTP code (`UPLOAD_TOTP_SECRET`).
 - **`publish-direct.yml` / `publish.html`** — see FR4's note above.
 - **Two-pass TOC page numbers** — the PRD/Build Spec only mentions "TOC
   labels" as a render_config field, not page numbers at all.

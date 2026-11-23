@@ -45,8 +45,8 @@ Two components not in the original seven, added during this build-out:
 
 | Addition | Implements | Why |
 |---|---|---|
-| TOTP gate on public-triggered Actions | `UPLOAD_TOTP_SECRET` repo secret, checked in `bootstrap-asset.yml` and `publish-direct.yml` | The PRD assumed a GitHub App/OAuth-gated form; the actual site is a public static Pages site with no backend, so anyone can POST a `repository_dispatch`. A server-side-only shared secret (never shipped to the browser) closes that gap without standing up an auth proxy. |
-| `publish-direct.yml` + `publish.html` | Testing-only publish path, CAPTCHA + TOTP gated, bypasses the three-way sign-off | Exists so the publish process's (Process 2's) rendering pipeline can be validated end-to-end against real content before a live sign-off process (named roles, an actual "ready to publish" issue habit) exists. **Not a substitute for `publish.yml`** — see `WORKFLOW.md` for exactly what it does and doesn't guarantee. |
+| Translations-manager gate on pipeline Actions | `.github/actions/require-manager`, run first in `bootstrap-asset.yml`, `translate-draft.yml`, `publish-direct.yml`, `layout-handoff.yml` | The PRD assumed a GitHub App/OAuth-gated form; the actual site is a static Pages site with no backend. Each run checks that its triggering user has Maintain/Admin on this repo (the `translations-managers` team or an org owner), using only the job's own token. Identity-based, managed in GitHub; replaced an earlier shared TOTP code that couldn't say who submitted. |
+| `publish-direct.yml` + `publish.html` | Testing-only publish path, CAPTCHA + manager gated, bypasses the three-way sign-off | Exists so the publish process's (Process 2's) rendering pipeline can be validated end-to-end against real content before a live sign-off process (named roles, an actual "ready to publish" issue habit) exists. **Not a substitute for `publish.yml`** — see `WORKFLOW.md` for exactly what it does and doesn't guarantee. |
 
 ## The renderer (`tooling/render/render.js`)
 
@@ -214,11 +214,11 @@ always mismatch for a template with `sponsors.image_path` configured.
 ## The GitHub Pages site (component 6)
 
 Fully covered in `docs/README.md` — not duplicated here. Summary: `index.html`
-(landing), `upload.html` (onboarding, CAPTCHA + TOTP gated, PAT-based auth
+(landing), `upload.html` (onboarding, CAPTCHA + manager gated, PAT-based auth
 since GitHub OAuth device flow needs a backend a static Pages site doesn't
 have), `status.html` (read-only dashboard, no auth needed — public repo),
-`publish.html` (the testing-only direct-publish path, same CAPTCHA + TOTP
-gate).
+`publish.html` (the testing-only direct-publish path, same CAPTCHA +
+manager gate).
 
 ## Known gaps
 
