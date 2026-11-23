@@ -39,7 +39,8 @@ MAX_EMPTY_RETRIES = 2  # total attempts = this + 1
 # per-model numbers (they're only visible in AI Studio). A 429 / 503 is
 # therefore an expected, transient condition here, not a failure: back off
 # and retry rather than failing the whole locale run.
-RATE_LIMIT_RETRIES = 6
+RATE_LIMIT_RETRIES = 6        # per model, when there's no fallback left
+RETRIES_BEFORE_FALLBACK = 2   # per model, while a fallback model remains
 RATE_LIMIT_BASE_DELAY_S = 10.0
 RATE_LIMIT_MAX_DELAY_S = 120.0
 # Hard cap on one Gemini request. Without it a stalled connection hangs the
@@ -53,9 +54,16 @@ GEMINI_REQUEST_TIMEOUT_S = 300
 class Usage:
     input_tokens: int = 0
     output_tokens: int = 0
+    # The model that actually answered (a fallback model, if the configured
+    # one was unavailable). None for offline stubs / no call made.
+    model: Optional[str] = None
 
     def __add__(self, other: "Usage") -> "Usage":
-        return Usage(self.input_tokens + other.input_tokens, self.output_tokens + other.output_tokens)
+        return Usage(
+            self.input_tokens + other.input_tokens,
+            self.output_tokens + other.output_tokens,
+            other.model or self.model,
+        )
 
 
 def _anthropic_call(engine: Engine, system: str, user_content: str, json_output: bool = False) -> Tuple[str, Usage]:
@@ -72,7 +80,7 @@ def _anthropic_call(engine: Engine, system: str, user_content: str, json_output:
         messages=[{"role": "user", "content": user_content}],
     )
     text = "".join(block.text for block in response.content if block.type == "text")
-    usage = Usage(input_tokens=response.usage.input_tokens, output_tokens=response.usage.output_tokens)
+    usage = Usage(input_tokens=response.usage.input_tokens, output_tokens=response.usage.output_tokens, model=engine.model)
     return text, usage
 
 
@@ -98,35 +106,51 @@ def _google_call(engine: Engine, system: str, user_content: str, json_output: bo
         max_output_tokens=16384,
         response_mime_type="application/json" if json_output else None,
     )
-    for attempt in range(RATE_LIMIT_RETRIES + 1):
-        try:
-            response = client.models.generate_content(
-                model=engine.model, contents=user_content, config=config
-            )
+    # Free-tier models go "high demand" (503) for long stretches -- observed
+    # live: gemini-3.8-flash refused 7 attempts over 8 minutes while
+    # gemini-3.6-flash and gemini-3.5-flash-lite answered. So retry each
+    # model briefly, then move down the configured fallback chain.
+    models = [engine.model, *engine.fallback_models]
+    response, used_model = None, None
+    for m_index, model in enumerate(models):
+        last_model = m_index == len(models) - 1
+        retries = RATE_LIMIT_RETRIES if last_model else RETRIES_BEFORE_FALLBACK
+        for attempt in range(retries + 1):
+            try:
+                response = client.models.generate_content(model=model, contents=user_content, config=config)
+                used_model = model
+                break
+            except (errors.APIError, httpx.TransportError) as e:
+                # Retryable: rate limit (429), overloaded/internal (503/500),
+                # and transport failures -- timeouts and dropped connections,
+                # which arrive as raw httpx errors, not APIError.
+                if isinstance(e, errors.APIError):
+                    retryable = e.code in (429, 500, 503)
+                    reason = f"HTTP {e.code} ({e.status})"
+                else:
+                    retryable = True
+                    reason = f"{type(e).__name__}: {e}"
+                if not retryable:
+                    raise
+                if attempt == retries:
+                    if last_model:
+                        raise
+                    print(f"gemini: {model} still unavailable ({reason}); "
+                          f"falling back to {models[m_index + 1]}", flush=True)
+                    break
+                delay = min(RATE_LIMIT_MAX_DELAY_S, RATE_LIMIT_BASE_DELAY_S * 2 ** attempt)
+                delay *= 0.75 + random.random() / 2  # jitter
+                print(f"gemini: {model} {reason}; retrying in {delay:.0f}s "
+                      f"[{attempt + 1}/{retries}]", flush=True)
+                time.sleep(delay)
+        if response is not None:
             break
-        except (errors.APIError, httpx.TransportError) as e:
-            # Retryable: rate limit (429), overloaded/internal (503/500), and
-            # transport failures -- timeouts and dropped connections, which
-            # the free tier produces under load and which arrive as raw
-            # httpx errors, not APIError.
-            if isinstance(e, errors.APIError):
-                retryable = e.code in (429, 500, 503)
-                reason = f"HTTP {e.code} ({e.status})"
-            else:
-                retryable = True
-                reason = f"{type(e).__name__}: {e}"
-            if not retryable or attempt == RATE_LIMIT_RETRIES:
-                raise
-            delay = min(RATE_LIMIT_MAX_DELAY_S, RATE_LIMIT_BASE_DELAY_S * 2 ** attempt)
-            delay *= 0.75 + random.random() / 2  # jitter
-            print(f"gemini: {reason}; retrying in {delay:.0f}s "
-                  f"[{attempt + 1}/{RATE_LIMIT_RETRIES}]", flush=True)
-            time.sleep(delay)
     text = response.text or ""
     meta = response.usage_metadata
     usage = Usage(
         input_tokens=(meta.prompt_token_count or 0) if meta else 0,
         output_tokens=((meta.candidates_token_count or 0) + (meta.thoughts_token_count or 0)) if meta else 0,
+        model=used_model,
     )
     return text, usage
 

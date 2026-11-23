@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Tuple
 
 import yaml
 
@@ -19,6 +20,10 @@ CONFIG_PATH = Path(__file__).resolve().parent / "translation-config.yaml"
 class Engine:
     provider: str
     model: str
+    # Tried in order when `model` is unavailable (overloaded / rate-limited)
+    # -- currently only honoured by the google provider. The model that
+    # actually produced a translation is what gets recorded per section.
+    fallback_models: Tuple[str, ...] = ()
 
     @property
     def label(self) -> str:
@@ -34,7 +39,11 @@ def resolve_engine(asset: str, config_path: Path = CONFIG_PATH) -> Engine:
         raise SystemExit(
             f"{config_path} has no usable `default` (and no override for '{asset}')."
         )
-    return Engine(provider=entry["provider"], model=entry["model"])
+    return Engine(
+        provider=entry["provider"],
+        model=entry["model"],
+        fallback_models=tuple(entry.get("fallback_models") or ()),
+    )
 
 
 if __name__ == "__main__":

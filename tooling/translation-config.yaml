@@ -14,6 +14,12 @@
 default:
   provider: google      # anthropic | google
   model: gemini-3.8-flash
+  # Free-tier models are often "high demand" (HTTP 503) for minutes at a
+  # time; these are tried in order when the model above stays unavailable.
+  # Each section's status.json `translator` records the model actually used.
+  fallback_models:
+    - gemini-3.6-flash
+    - gemini-3.5-flash-lite
 
 # Optional per-asset override — falls back to `default` when an asset isn't
 # listed here. Keyed by the asset name exactly as it appears in registry.yaml.
