@@ -1,4 +1,138 @@
 const REPO_TREE_BASE = `https://github.com/${ORG}/${CONTENT_REPO}/tree/main`;
+const NEW_ISSUE_URL = `https://github.com/${ORG}/${CONTENT_REPO}/issues/new`;
+const LOCALE_CODE_RE = /^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
+
+function languageLabel(code) {
+  return LANGUAGE_NAMES[code] ? `${LANGUAGE_NAMES[code]} (${code})` : code;
+}
+
+// Opens the "Add languages" issue form with both fields filled in. GitHub
+// pre-fills issue-form inputs from query parameters named by field id.
+function addLanguageUrl(assetId, codes) {
+  const q = new URLSearchParams({
+    template: "add-language.yml",
+    title: `Add languages: ${assetId} — ${codes.join(", ")}`,
+    asset: assetId,
+    locales: codes.join(", "),
+  });
+  return `${NEW_ISSUE_URL}?${q}`;
+}
+
+// The "Add languages" button and its picker, for one document. Existing
+// locales are shown ticked and locked; nothing is sent from here -- the
+// request is made on GitHub, signed in, where the manager check runs.
+function renderAddLanguages(section, assetId, existing) {
+  const have = new Set(existing);
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "secondary add-lang-toggle";
+  toggle.textContent = "+ Add languages";
+  toggle.setAttribute("aria-expanded", "false");
+
+  const panel = document.createElement("div");
+  panel.className = "add-lang-panel";
+  panel.hidden = true;
+
+  const intro = document.createElement("p");
+  intro.className = "hint";
+  intro.textContent =
+    "Tick the languages to add, then press Request. GitHub opens the request form already filled in; " +
+    "press Create there and machine drafting starts automatically. Translations managers only.";
+  panel.appendChild(intro);
+
+  const search = document.createElement("input");
+  search.type = "text";
+  search.placeholder = "Filter languages…";
+  search.setAttribute("aria-label", "Filter languages");
+  panel.appendChild(search);
+
+  const grid = document.createElement("div");
+  grid.className = "add-lang-grid";
+  panel.appendChild(grid);
+
+  const boxes = [];
+  for (const [code, name, native] of LANGUAGES) {
+    const label = document.createElement("label");
+    label.className = "locale-row" + (have.has(code) ? " locale-row-disabled" : "");
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.value = code;
+    box.checked = have.has(code);
+    box.disabled = have.has(code);
+    const text = document.createElement("span");
+    text.textContent = `${name} — ${native} `;
+    const codeEl = document.createElement("code");
+    codeEl.textContent = code;
+    label.append(box, text, codeEl);
+    if (have.has(code)) {
+      const note = document.createElement("span");
+      note.className = "locale-note";
+      note.textContent = " already added";
+      label.appendChild(note);
+    }
+    label.dataset.search = `${name} ${native} ${code}`.toLowerCase();
+    grid.appendChild(label);
+    boxes.push(box);
+  }
+
+  const otherLabel = document.createElement("label");
+  otherLabel.textContent = "Other language codes (optional, comma-separated, e.g. mn-MN)";
+  const other = document.createElement("input");
+  other.type = "text";
+  otherLabel.appendChild(other);
+  panel.appendChild(otherLabel);
+
+  const actions = document.createElement("p");
+  const request = document.createElement("a");
+  request.className = "button-link";
+  request.target = "_blank";
+  request.rel = "noopener";
+  request.textContent = "Request translation →";
+  const message = document.createElement("span");
+  message.className = "hint add-lang-message";
+  actions.append(request, message);
+  panel.appendChild(actions);
+
+  function selected() {
+    const picked = boxes.filter((b) => b.checked && !b.disabled).map((b) => b.value);
+    const typed = other.value.split(/[\s,]+/).map((c) => c.trim()).filter(Boolean);
+    const bad = typed.filter((c) => !LOCALE_CODE_RE.test(c));
+    const extra = typed.filter((c) => LOCALE_CODE_RE.test(c) && !have.has(c));
+    return { codes: [...new Set([...picked, ...extra])], bad };
+  }
+
+  function refresh() {
+    const { codes, bad } = selected();
+    if (bad.length) {
+      message.textContent = ` Not a language code: ${bad.join(", ")}`;
+    } else if (codes.length === 0) {
+      message.textContent = " Choose at least one language.";
+    } else {
+      message.textContent = ` ${codes.length} selected: ${codes.join(", ")}`;
+    }
+    const ok = codes.length > 0 && bad.length === 0;
+    request.classList.toggle("button-link-disabled", !ok);
+    request.setAttribute("aria-disabled", String(!ok));
+    if (ok) request.href = addLanguageUrl(assetId, codes);
+    else request.removeAttribute("href");
+  }
+
+  search.addEventListener("input", () => {
+    const q = search.value.trim().toLowerCase();
+    for (const label of grid.children) label.hidden = q !== "" && !label.dataset.search.includes(q);
+  });
+  grid.addEventListener("change", refresh);
+  other.addEventListener("input", refresh);
+  toggle.addEventListener("click", () => {
+    panel.hidden = !panel.hidden;
+    toggle.setAttribute("aria-expanded", String(!panel.hidden));
+    if (!panel.hidden) search.focus();
+  });
+  refresh();
+
+  section.append(toggle, panel);
+}
 
 async function fetchStatusJson(asset, locale) {
   const text = await fetchRawFile(`${asset}/${locale}/status.json`);
@@ -29,6 +163,7 @@ function renderAssetSection(container, assetId, entry) {
   const list = document.createElement("ul");
   list.className = "locale-status-list";
   section.appendChild(list);
+  renderAddLanguages(section, assetId, entry.locales || []);
   container.appendChild(section);
   return list;
 }
@@ -42,8 +177,8 @@ function renderLocaleItem(list, assetId, locale, summary) {
   const pct = total ? Math.round(((summary.reviewed || 0) / total) * 100) : 0;
 
   const linkOrPlain = total > 0
-    ? `<a href="${REPO_TREE_BASE}/${assetId}/${locale}" target="_blank">${locale}</a>`
-    : `<span class="locale-not-started">${locale}</span>`;
+    ? `<a href="${REPO_TREE_BASE}/${assetId}/${locale}" target="_blank">${languageLabel(locale)}</a>`
+    : `<span class="locale-not-started">${languageLabel(locale)}</span>`;
 
   li.innerHTML = `
     ${linkOrPlain}

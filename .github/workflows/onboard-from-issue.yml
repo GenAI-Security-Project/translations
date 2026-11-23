@@ -1,16 +1,25 @@
-# Process 1 intake without a personal access token: a translations manager
-# opens an "Onboard a document" issue (.github/ISSUE_TEMPLATE/
-# onboard-document.yml), attaching the English .pdf/.docx. This workflow
-# checks they're a manager, reads the form, and runs bootstrap-asset.yml
-# (as a reusable workflow, so the manager stays the triggering actor),
-# then reports the onboarding PR back on the issue.
+# Process 1 intake without a personal access token. Two issue forms:
 #
-# Trigger: the `onboarding` label being applied. GitHub sends a `labeled`
-# event both when an issue is created with the label (the form does this)
-# and when the label is added later -- so listening to `labeled` alone runs
-# exactly once per submission (listening to `opened` too ran it twice), and
-# a manager can (re-)run someone else's request by removing and re-adding
-# the label. require-manager checks whoever applied it.
+#   - "Onboard a document" (label `onboarding`, onboard-document.yml): a
+#     translations manager attaches the English .pdf/.docx (or names an
+#     existing document for new locales / a new version). This opens an
+#     onboarding PR for review; merging it starts the drafts
+#     (start-translations.yml).
+#   - "Add languages" (label `add-language`, add-language.yml, usually
+#     opened prefilled from the Status page): an existing document, same
+#     version, new locales. The setup PR only adds the locales to
+#     registry.yaml plus an empty folder each, so it is merged here straight
+#     away and machine drafting starts at once, one locale at a time. Each
+#     draft is its own PR for human review.
+#
+# Both run bootstrap-asset.yml as a reusable workflow, so the manager stays
+# the triggering actor that require-manager checks.
+#
+# Trigger: the label being applied. GitHub sends `labeled` both when an
+# issue is created with the label (the forms do this) and when it's added
+# later -- so listening to `labeled` alone runs exactly once per submission,
+# and a manager can (re-)run someone else's request by removing and
+# re-adding the label. require-manager checks whoever applied it.
 name: onboard-from-issue
 
 on:
@@ -26,13 +35,15 @@ concurrency:
 
 jobs:
   parse:
-    if: github.event.label.name == 'onboarding'
+    if: github.event.label.name == 'onboarding' || github.event.label.name == 'add-language'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
     outputs:
       payload: ${{ steps.form.outputs.payload }}
+      asset: ${{ steps.form.outputs.asset }}
+      locales: ${{ steps.form.outputs.locales }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,7 +56,10 @@ jobs:
         env:
           BODY: ${{ github.event.issue.body }}
           AUTHOR: ${{ github.event.issue.user.login }}
-        run: python tooling/parse_onboarding_issue.py
+          FORM: ${{ github.event.label.name }}
+        run: |
+          pip install --quiet pyyaml
+          python tooling/parse_onboarding_issue.py
 
       - name: Report a refused or invalid request
         if: failure()
@@ -53,9 +67,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           ACTOR: ${{ github.triggering_actor }}
+          LABEL: ${{ github.event.label.name }}
         run: |
           gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body \
-            "✗ Onboarding didn't start. Either @$ACTOR isn't a translations manager, or the form couldn't be read — the [run log]($RUN_URL) says which. A manager can retry by removing and re-adding the \`onboarding\` label."
+            "✗ The request didn't start. Either @$ACTOR isn't a translations manager, or the form couldn't be read — the [run log]($RUN_URL) says which. A manager can retry by removing and re-adding the \`$LABEL\` label."
 
   bootstrap:
     needs: parse
@@ -66,27 +81,103 @@ jobs:
     with:
       payload: ${{ needs.parse.outputs.payload }}
 
-  report:
+  # Add-language only: merge the generated registry-only setup PR so
+  # drafting can start. GITHUB_TOKEN merges don't fire pull_request events,
+  # so start-translations.yml's own merge trigger doesn't also run.
+  merge-setup:
     needs: [parse, bootstrap]
-    if: always() && needs.parse.result == 'success'
+    if: github.event.label.name == 'add-language' && needs.bootstrap.outputs.pr_url != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ needs.bootstrap.outputs.pr_url }}
+          ACTOR: ${{ github.triggering_actor }}
+        run: |
+          gh pr comment "$PR_URL" --body "Merged automatically: an add-language request from translations manager @$ACTOR (issue #${{ github.event.issue.number }}). This PR only registers the new locales."
+          gh pr merge "$PR_URL" --squash --delete-branch
+
+  announce:
+    needs: [parse, bootstrap, merge-setup]
+    if: needs.merge-setup.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
       - env:
           GH_TOKEN: ${{ github.token }}
-          RESULT: ${{ needs.bootstrap.result }}
-          PR_URL: ${{ needs.bootstrap.outputs.pr_url }}
-          ASSET: ${{ needs.bootstrap.outputs.asset }}
+          ASSET: ${{ needs.parse.outputs.asset }}
+          LOCALES: ${{ needs.parse.outputs.locales }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [ "$RESULT" = "success" ] && [ -n "$PR_URL" ]; then
-            body="✓ Onboarding PR for \`$ASSET\`: $PR_URL
+          gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body \
+            "✓ Registered **$LOCALES** for \`$ASSET\`. Machine drafting has started, one language at a time ([progress]($RUN_URL)). Each draft opens its own pull request for review; they'll be linked here when done."
 
-          Next: review and merge it, then draft each locale from Actions → **translate-draft** → Run workflow (asset \`$ASSET\`, one locale per run)."
-            gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body "$body"
-            gh issue close "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --reason completed
+  translate:
+    needs: [parse, merge-setup]
+    if: needs.merge-setup.result == 'success'
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/start-translations.yml
+    with:
+      asset: ${{ needs.parse.outputs.asset }}
+      locales: ${{ needs.parse.outputs.locales }}
+    secrets: inherit
+
+  report:
+    needs: [parse, bootstrap, merge-setup, translate]
+    if: always() && needs.parse.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          LABEL: ${{ github.event.label.name }}
+          BOOTSTRAP: ${{ needs.bootstrap.result }}
+          MERGE: ${{ needs.merge-setup.result }}
+          TRANSLATE: ${{ needs.translate.result }}
+          PR_URL: ${{ needs.bootstrap.outputs.pr_url }}
+          ASSET: ${{ needs.bootstrap.outputs.asset }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          issue="${{ github.event.issue.number }}"
+          say() { gh issue comment "$issue" -R "$GITHUB_REPOSITORY" --body "$1"; }
+
+          if [ "$BOOTSTRAP" != "success" ] || [ -z "$PR_URL" ]; then
+            say "✗ Setup failed ($BOOTSTRAP) — see the [run log]($RUN_URL). Fix the issue text if needed, then remove and re-add the \`$LABEL\` label to retry."
+            exit 0
+          fi
+
+          if [ "$LABEL" = "onboarding" ]; then
+            say "✓ Onboarding PR for \`$ASSET\`: $PR_URL
+
+          Next: review and merge it. Merging starts the machine-drafted translation of each new locale automatically (one pull request per locale)."
+            gh issue close "$issue" -R "$GITHUB_REPOSITORY" --reason completed
+            exit 0
+          fi
+
+          if [ "$MERGE" != "success" ]; then
+            say "✗ The setup PR ($PR_URL) couldn't be merged automatically — see the [run log]($RUN_URL). A manager can merge it by hand; merging starts the drafts."
+            exit 0
+          fi
+
+          # Draft PRs made by this run (their branch names end in the run id).
+          prs=$(gh pr list -R "$GITHUB_REPOSITORY" --state open --label status:draft --limit 100 \
+                  --json url,headRefName --jq ".[] | select(.headRefName | endswith(\"-$RUN_ID\")) | \"- \" + .url")
+          if [ "$TRANSLATE" = "success" ]; then
+            say "✓ Drafts are ready for review:
+          ${prs:-"(none opened — see the [run log]($RUN_URL))"}"
+            gh issue close "$issue" -R "$GITHUB_REPOSITORY" --reason completed
           else
-            gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body \
-              "✗ Onboarding failed ($RESULT) — see the [run log]($RUN_URL). Fix the issue text if needed, then remove and re-add the \`onboarding\` label to retry."
+            say "⚠ Some drafts didn't finish ($TRANSLATE) — see the [run log]($RUN_URL). Opened so far:
+          ${prs:-"(none)"}
+
+          Re-run the failed jobs from the run page, or run Actions → translate-draft for the missing language."
           fi

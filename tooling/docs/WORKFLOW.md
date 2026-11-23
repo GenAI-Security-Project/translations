@@ -8,24 +8,29 @@ release. See `DESIGN.md` for the technical detail behind each step and
 
 ```
 "Onboard a document" issue form (linked from docs/upload.html)
+  — or "Add languages" (pre-filled from docs/status.html's picker)
       │  GitHub sign-in, file dragged into the form — no token
       ▼
-onboard-from-issue.yml  (issue opened / `onboarding` label added)
+onboard-from-issue.yml  (`onboarding` / `add-language` label applied)
       │  require-manager, then parse_onboarding_issue.py validates the form
       ▼
-bootstrap-asset.yml  (as a reusable workflow; also workflow_dispatch /
-      │               repository_dispatch for manual runs)
+bootstrap-asset.yml  (as a reusable workflow; also workflow_dispatch
+      │               for manual runs)
       │  1. require-manager: the triggering user must have Maintain/Admin
-      │     here (translations-managers team or org owner) — applies to
-      │     repository_dispatch and workflow_dispatch alike
+      │     here (translations-managers team or org owner), however it
+      │     was started
       │  2. Download the issue attachment (if any) to the runner
       │  3. Run bootstrap_asset.py — validates the asset name/version is new
       │     (or a real new version of an existing asset), opens a PR adding
       │     the registry.yaml entry + scaffolded folder tree
       ▼
-[human merges the onboarding PR]
+[a manager merges the onboarding PR — or, for "Add languages", the
+ workflow merges its registry-only setup PR itself]
       ▼
-translate-draft.yml  (fired once per requested locale)
+start-translations.yml  (bootstrap PR merged, or called after add-language)
+      │  works out the newly registered locales; one at a time:
+      ▼
+translate-draft.yml  (once per new locale; also Run workflow by hand)
       │  1. If a new .docx/.pdf was uploaded: split it into _source/ once
       │     (docx_split.py / pdf_split.py, by heading_1 style or detected
       │     PDF heading font sizes)
@@ -87,21 +92,17 @@ publish.yml  (fires on every edit to that issue)
 No step here can be skipped or reordered by a client-side action — the
 whole gate lives server-side in the Action.
 
-### The testing path: `publish-direct.yml`, CAPTCHA + manager check, no sign-off
+### The testing path: `publish-direct.yml`, manager check, no sign-off
 
 ```
-docs/publish.html
-      │  TESTING_MODE=true lists every asset/locale regardless of review
-      │  completeness (each row shows its reviewed/total count). Checkboxes
-      │  select which (asset, locale) pairs to publish; "Include watermark"
-      │  (checked by default) maps to render.sh's --final flag being *absent*.
-      ▼
-repository_dispatch (publish-direct), one per checked row
+Actions → publish-direct → Run workflow  (GitHub sign-in, no token;
+      │  inputs: asset, locale, watermark [default on]. Not offered on
+      │  docs/publish.html while Process 2 is being set up.)
       ▼
 publish-direct.yml
-      │  1. require-manager (same check as bootstrap-asset.yml)
+      │  1. require-manager (same check as every pipeline workflow)
       │  2. check_render_override.py — same FR5 check as the real path
-      │  3. render.sh [--final if watermark unchecked]
+      │  3. render.sh [--final if watermark unticked]
       │  4. Commit to release/, cut a GitHub Release
 ```
 

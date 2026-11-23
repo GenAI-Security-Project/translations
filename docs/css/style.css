@@ -271,3 +271,20 @@ button.secondary { background: transparent; color: var(--accent); border: 1px so
 .publish-table th, .publish-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
 .publish-table td:first-child, .publish-table th:first-child { width: 32px; }
 .publish-table input[type="checkbox"] { width: auto; margin: 0; }
+
+/* Status page: "Add languages" picker */
+.add-lang-toggle { margin-top: 12px; padding: 6px 14px; font-size: 0.88rem; }
+.add-lang-panel { margin-top: 10px; padding: 12px; border: 1px solid var(--border, rgba(127,127,127,0.35)); border-radius: 8px; }
+.add-lang-panel[hidden] { display: none; }
+.add-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0 16px;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 10px 0;
+}
+.add-lang-grid .locale-row[hidden] { display: none; }
+.add-lang-grid code { font-size: 0.8rem; color: var(--muted); }
+.add-lang-message { margin-left: 10px; }
+a.button-link-disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }

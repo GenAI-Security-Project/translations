@@ -15,7 +15,7 @@
       <h1 class="brand-lockup"><a class="brand-lockup-link" href="https://GenAI.OWASP.org" target="_blank" rel="noopener"><span class="brand-genai">GenAI</span> <span class="brand-rest">Translations</span></a></h1>
       <nav>
         <a href="index.html">Home</a>
-        <a href="upload.html">Onboard / add locale</a>
+        <a href="upload.html">Onboard a document</a>
         <a href="status.html">Status</a>
         <a href="publish.html">Publish</a>
       </nav>
@@ -25,9 +25,14 @@
 <div class="page">
 
   <p class="hint">
-    Submit a finished English document for translation, or add locales or a
-    new version to one that's already here (Process 1). It's done through a
-    short form on GitHub, using your normal GitHub sign-in — no access token.
+    Submit a finished English document for translation, or a new version of
+    one that's already here (Process 1). It's done through a short form on
+    GitHub, using your normal GitHub sign-in — no access token.
+  </p>
+  <p class="hint">
+    <strong>Just adding languages to an existing document?</strong> Use
+    <strong>+ Add languages</strong> next to it on the <a href="status.html">Status</a>
+    page instead: pick the languages from a list and the drafts start straight away.
   </p>
 
   <section>
@@ -49,8 +54,8 @@
       <li>Fill in the version and the locales (e.g. <code>de-DE, es-ES</code>), tick the public-file
         box, and press <strong>Create</strong>.</li>
       <li>Within a few minutes a comment on your issue links the <strong>onboarding pull request</strong>.
-        Once it's reviewed and merged, each locale is machine-drafted from
-        Actions → <em>translate-draft</em>.</li>
+        Once it's reviewed and merged, each locale is machine-drafted automatically, one pull
+        request per locale.</li>
     </ol>
     <p class="hint">
       The repository is public, so a file attached to the issue can be downloaded by anyone —

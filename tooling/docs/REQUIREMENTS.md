@@ -13,9 +13,9 @@ been built). See `DESIGN.md` for the technical detail behind each pointer.
 | Req | Status | Notes |
 |---|---|---|
 | FR1.1 — GitHub Pages form, single entry point | Done | `docs/upload.html` → the "Onboard a document" issue form (`.github/ISSUE_TEMPLATE/onboard-document.yml`); locales entered as BCP-47 codes, validated by `tooling/parse_onboarding_issue.py` |
-| FR1.2 — Submitting triggers `bootstrap_asset.py`, scoped to selected locales | Done | Via `repository_dispatch` → `bootstrap-asset.yml` |
+| FR1.2 — Submitting triggers `bootstrap_asset.py`, scoped to selected locales | Done | `onboard-from-issue.yml` → `bootstrap-asset.yml` (reusable workflow) |
 | FR1.3 — Re-submitting at a new version = new translation cycle | Done | `bootstrap_asset.py`'s existing-asset path |
-| FR1.4 — Add-locale-later without a new version | Done | Same form, existing-asset mode |
+| FR1.4 — Add-locale-later without a new version | Done | Status page **+ Add languages** → "Add languages" issue form; drafting starts automatically (`start-translations.yml`) |
 | FR1.5 — Override-readiness heads-up at submit time, blocks only that locale later | Done | `js/upload.js`'s live `translations-templates` lookup at submit time; `check_render_override.py` is what actually blocks at publish time, per-locale |
 
 ### FR2 — Draft translation (the generate process, Process 1, part A)

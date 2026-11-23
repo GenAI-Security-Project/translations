@@ -1,0 +1,108 @@
+# Starts machine drafting (translate-draft.yml) for locales that were just
+# added to registry.yaml, so nobody has to run translate-draft by hand once
+# per locale.
+#
+# Two ways in:
+#   - pull_request closed: a `bootstrap` onboarding PR was merged by a
+#     person. The new locales are read from that merge's registry.yaml diff.
+#     The person who merged it is the triggering actor and must be a
+#     translations manager (require-manager, inside translate-draft.yml).
+#   - workflow_call: onboard-from-issue.yml after an "Add languages" request,
+#     which merges its own setup PR with GITHUB_TOKEN. (A merge made with
+#     GITHUB_TOKEN doesn't fire pull_request events, so that path never runs
+#     twice.)
+#
+# Drafts run one locale at a time: the Gemini free tier is rate limited.
+name: start-translations
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_call:
+    inputs:
+      asset:
+        type: string
+        required: true
+      locales:
+        description: "Comma-separated BCP-47 codes"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    if: >-
+      github.event_name != 'pull_request' || (
+        github.event.pull_request.merged == true &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        contains(github.event.pull_request.labels.*.name, 'bootstrap'))
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Work out which locales to draft
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          IN_ASSET: ${{ inputs.asset }}
+          IN_LOCALES: ${{ inputs.locales }}
+        run: |
+          pip install --quiet pyyaml
+          python - <<'PY'
+          import json, os, re, subprocess, yaml
+
+          def registry(rev):
+              try:
+                  text = subprocess.run(["git", "show", f"{rev}:registry.yaml"], check=True,
+                                        capture_output=True, text=True).stdout
+              except subprocess.CalledProcessError:
+                  return {}
+              return (yaml.safe_load(text) or {}).get("assets") or {}
+
+          now = registry("main")
+          pairs = []
+          if os.environ["EVENT"] == "pull_request":
+              sha = os.environ["MERGE_SHA"]
+              before, after = registry(f"{sha}^1"), registry(sha)
+              for asset, entry in after.items():
+                  old = set((before.get(asset) or {}).get("locales") or [])
+                  pairs += [(asset, l) for l in entry.get("locales") or [] if l not in old]
+          else:
+              asset = os.environ["IN_ASSET"]
+              pairs = [(asset, l.strip()) for l in os.environ["IN_LOCALES"].split(",") if l.strip()]
+
+          ok = re.compile(r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+          # Only draft what main actually registers (and only valid codes).
+          pairs = [(a, l) for a, l in pairs if ok.match(l) and l in ((now.get(a) or {}).get("locales") or [])]
+          matrix = {"include": [{"asset": a, "locale": l} for a, l in pairs]}
+          print("drafting:", pairs or "nothing")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"matrix={json.dumps(matrix)}\ncount={len(pairs)}\n")
+          PY
+
+  draft:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    strategy:
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+      max-parallel: 1
+      fail-fast: false
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/translate-draft.yml
+    with:
+      asset: ${{ matrix.asset }}
+      locale: ${{ matrix.locale }}
+      ref: main
+    secrets: inherit
