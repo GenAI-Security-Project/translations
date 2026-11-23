@@ -5,15 +5,17 @@
 # (as a reusable workflow, so the manager stays the triggering actor),
 # then reports the onboarding PR back on the issue.
 #
-# Triggers: the issue being opened with the `onboarding` label, or that
-# label being added later -- so a manager can (re-)run someone else's
-# request by removing and re-adding the label. require-manager checks
-# whoever triggered it: the opener, or the person who added the label.
+# Trigger: the `onboarding` label being applied. GitHub sends a `labeled`
+# event both when an issue is created with the label (the form does this)
+# and when the label is added later -- so listening to `labeled` alone runs
+# exactly once per submission (listening to `opened` too ran it twice), and
+# a manager can (re-)run someone else's request by removing and re-adding
+# the label. require-manager checks whoever applied it.
 name: onboard-from-issue
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 permissions:
   contents: read
@@ -24,9 +26,7 @@ concurrency:
 
 jobs:
   parse:
-    if: >
-      contains(github.event.issue.labels.*.name, 'onboarding') &&
-      (github.event.action == 'opened' || github.event.label.name == 'onboarding')
+    if: github.event.label.name == 'onboarding'
     runs-on: ubuntu-latest
     permissions:
       contents: read
