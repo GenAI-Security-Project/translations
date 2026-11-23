@@ -72,7 +72,14 @@ jobs:
       - name: Validate registry.yaml
         run: python tooling/registry_schema.py
 
+      # A run that only partly succeeds (e.g. the Gemini free-tier quota runs
+      # out part-way) still opens a PR with what it drafted, so that work
+      # isn't thrown away; the job is marked failed at the end. Failed
+      # sections get no status.json entry, so once that PR is merged,
+      # running translate-draft again drafts just the missing ones.
       - name: Draft translations for ${{ env.ASSET }} / ${{ env.LOCALE }}
+        id: draft
+        continue-on-error: true
         run: python tooling/translate_section.py --asset "$ASSET" --locale "$LOCALE"
 
       - name: Resolve asset owners for review request
@@ -92,9 +99,11 @@ jobs:
           commit-message: "translate-draft: ${{ env.ASSET }} / ${{ env.LOCALE }}"
           base: main
           branch: "translate-draft/${{ env.ASSET }}-${{ env.LOCALE }}-${{ github.run_id }}"
-          title: "[${{ env.ASSET }}] Draft translation: ${{ env.LOCALE }}"
+          title: "[${{ env.ASSET }}] Draft translation: ${{ env.LOCALE }}${{ steps.draft.outcome == 'failure' && ' (partial)' || '' }}"
           body: |
             Machine-drafted sections for `${{ env.ASSET }}` / `${{ env.LOCALE }}`.
+
+            ${{ steps.draft.outcome == 'failure' && '**Partial draft:** some sections failed (see this PR''s workflow run). Merge this, then run Actions → translate-draft again for this locale to draft the rest.' || '' }}
 
             Every section listed as `draft` in `status.json` needs human review
             before it can move to `reviewed`. Edit directly on this PR's branch,
@@ -107,3 +116,9 @@ jobs:
           add-paths: |
             registry.yaml
             ${{ env.ASSET }}/**
+
+      - name: Fail if the draft was incomplete
+        if: steps.draft.outcome == 'failure'
+        run: |
+          echo "::error::Some sections weren't drafted (see the draft step above). Anything that was drafted is in the PR; merge it, then run translate-draft again for $ASSET / $LOCALE."
+          exit 1
