@@ -174,7 +174,7 @@ read by anything and can be deleted.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r tooling/requirements.txt
-export ANTHROPIC_API_KEY=sk-...     # for real translation; omit + pass --offline to skip
+export GEMINI_API_KEY=...          # for real translation (Gemini, the default); omit + pass --offline to skip
 
 python tooling/bootstrap_asset.py --asset my-asset --version 2026.1 \
   --locales es-ES --source-repo owner/repo --source-path _source/ \

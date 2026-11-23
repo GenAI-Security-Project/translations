@@ -79,9 +79,9 @@ processes. What's still outstanding before this is fully self-service,
 without someone from the build-out team involved:
 
 - Real named `CODEOWNERS` for review/sign-off — currently a placeholder.
-- A repo secret for the translation LLM (`ANTHROPIC_API_KEY`, or whichever
+- A repo secret for the translation LLM (`GEMINI_API_KEY` for the default Gemini model, or whichever
   provider `tooling/translation-config.yaml` names) — without it, drafting
-  runs in an offline/simulated mode rather than calling a real model.
+  stops with a clear "key not set" error instead of calling a real model.
 - A deploy key letting the publish workflow check out `translations-templates`
   (the render templates repo) in a real GitHub Actions run.
 - No document has been migrated from the archived repo yet — the migration

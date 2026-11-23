@@ -265,7 +265,7 @@ python tooling/bootstrap_asset.py \
   --uploaded-path /path/to/split/sections
 
 # Draft-translate one locale (--offline skips the real LLM call, for testing)
-export ANTHROPIC_API_KEY=sk-...
+export GEMINI_API_KEY=...   # default provider: Gemini (see translation-config.yaml)
 python tooling/translate_section.py --asset my-asset --locale es-ES
 
 # Publish process (Process 2) -- render a preview PDF + DOCX (add --final
@@ -293,7 +293,8 @@ covers both.
 
 In GitHub Actions, both scripts run behind `bootstrap-asset.yml` and
 `translate-draft.yml` via `workflow_dispatch` today (Actions tab → run
-workflow), with `ANTHROPIC_API_KEY` set as a repo secret.
+workflow), with `GEMINI_API_KEY` set as a repo secret (or `ANTHROPIC_API_KEY`
+if `translation-config.yaml` is switched back to `anthropic`).
 
 ## Outstanding decisions (carried over from the Build Spec)
 

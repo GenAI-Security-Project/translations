@@ -32,6 +32,8 @@ jobs:
       ASSET: ${{ github.event.inputs.asset || github.event.client_payload.asset }}
       LOCALE: ${{ github.event.inputs.locale || github.event.client_payload.locale }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      # Gemini (translation-config.yaml's default provider) reads this.
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 

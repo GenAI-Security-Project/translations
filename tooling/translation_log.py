@@ -45,6 +45,10 @@ _HEADING_RE = re.compile(r"^#{1,6}\s", re.MULTILINE)
 PRICING_PER_MTOK = {
     "anthropic:claude-sonnet-5": (2.00, 10.00),   # (input, output)
     "anthropic:claude-opus-5": (5.00, 25.00),
+    # google:gemini-3.8-flash is deliberately NOT listed: it's used on the
+    # free tier ($0). Its paid rates ($0.75 / $3.75 to 2026-12-31, then
+    # $1.50 / $7.50) would log a cost nobody pays. Add it here if the
+    # GEMINI_API_KEY moves to a paid (billing-enabled) project.
 }
 
 

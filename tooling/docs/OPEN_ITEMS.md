@@ -22,10 +22,14 @@ walkthrough; this file is just "what's left."
   `translations-managers` by default, `translations-reviewers-<locale>` per
   locale folder (managers kept on each line while those teams are empty).
   Who is in them is a people decision made in GitHub, not a code change.
-- [ ] **`ANTHROPIC_API_KEY` (or whichever provider `translation-config.yaml`
-  names) not set as a repo secret.** Without it, `translate-draft.yml` drafts
-  in an offline/simulated mode rather than calling a real model — every
-  translation onboarded so far was drafted this way, not with a live LLM.
+- [ ] **`GEMINI_API_KEY` repo secret not set.** 2026-11-23: the default
+  translator is now Gemini (`google:gemini-3.8-flash`, free tier) via
+  `llm_client.py`'s google provider. Until the secret exists,
+  `translate-draft.yml` stops with a clear "GEMINI_API_KEY is not set"
+  error. Free tier: Google may use submitted text to improve its products,
+  and per-project rate limits are unpublished (429s are retried with
+  backoff). Every translation onboarded so far was drafted without a live
+  provider.
 
 ## Operational safeguards
 
