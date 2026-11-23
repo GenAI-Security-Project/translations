@@ -28,7 +28,9 @@ renderer — is open and auditable in this repo.
 
 1. **Request it.** An initiative lead uploads their source document (a
    finished PDF, or a `.docx`) and picks which locales they want, using the
-   [upload page](https://genai-security-project.github.io/translations/upload.html).
+   onboarding form linked from the
+   [upload page](https://genai-security-project.github.io/translations/upload.html)
+   (a GitHub issue form — your normal GitHub sign-in, no token).
    That kicks off onboarding: the document gets a stable id, and its own
    folder is created in this repo to hold every locale's work.
 2. **It gets machine-drafted.** The pipeline splits the source into its real

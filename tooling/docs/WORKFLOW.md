@@ -7,17 +7,19 @@ release. See `DESIGN.md` for the technical detail behind each step and
 ## The generate process (Process 1) — Draft, Review & Finalize
 
 ```
-docs/upload.html
-      │  (CAPTCHA + PAT auth; page pre-checks the translations-manager role)
+"Onboard a document" issue form (linked from docs/upload.html)
+      │  GitHub sign-in, file dragged into the form — no token
       ▼
-repository_dispatch (bootstrap-asset)
-      │
+onboard-from-issue.yml  (issue opened / `onboarding` label added)
+      │  require-manager, then parse_onboarding_issue.py validates the form
       ▼
-bootstrap-asset.yml
+bootstrap-asset.yml  (as a reusable workflow; also workflow_dispatch /
+      │               repository_dispatch for manual runs)
       │  1. require-manager: the triggering user must have Maintain/Admin
       │     here (translations-managers team or org owner) — applies to
       │     repository_dispatch and workflow_dispatch alike
-      │  2. Run bootstrap_asset.py — validates the asset name/version is new
+      │  2. Download the issue attachment (if any) to the runner
+      │  3. Run bootstrap_asset.py — validates the asset name/version is new
       │     (or a real new version of an existing asset), opens a PR adding
       │     the registry.yaml entry + scaffolded folder tree
       ▼

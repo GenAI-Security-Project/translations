@@ -209,9 +209,10 @@ section, not less:**
 
 The publish process (Process 2, components 3, 4, 5) and the GitHub Pages
 site (component 6) are now built — see `tooling/docs/DESIGN.md` for the render pipeline's internals
-(`render/render.js`) and `docs/README.md` for the site. `bootstrap-asset.yml`
-and `translate-draft.yml` fire via `repository_dispatch` from
-`docs/upload.html` (or `workflow_dispatch` for a manual run), gated by the
+(`render/render.js`) and `docs/README.md` for the site. Onboarding starts from
+the "Onboard a document" issue form (`onboard-from-issue.yml` →
+`bootstrap-asset.yml`); `translate-draft.yml` runs via `workflow_dispatch`.
+All are gated by the
 translations-manager role check (`.github/actions/require-manager`) — see
 `tooling/docs/WORKFLOW.md`.
 

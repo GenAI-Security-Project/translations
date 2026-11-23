@@ -1,0 +1,79 @@
+name: Onboard a document for translation
+description: "Translations managers only: submit a finished English document (or new locales / a new version of an existing one) to the translation pipeline."
+title: "Onboard: "
+labels: ["onboarding"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submitting this form starts onboarding automatically (Process 1). It only works for
+        **translations managers** (the `translations-managers` team or an org owner); anyone
+        else's request is refused with a comment. A manager can re-run it later by removing and
+        re-adding the `onboarding` label. The result is an onboarding pull request, linked here
+        in a comment.
+  - type: dropdown
+    id: mode
+    attributes:
+      label: What are you submitting?
+      options:
+        - A new document
+        - New locales or a new version of an existing document
+    validations:
+      required: true
+  - type: textarea
+    id: source_file
+    attributes:
+      label: Source file (new documents only)
+      description: "Drag the finished English **.pdf** or **.docx** into this box (one file). Its file name becomes the document id, so name it well, e.g. `OWASP-Top-10-for-LLM-Applications-2026.pdf`."
+      placeholder: Drop the .pdf or .docx here
+  - type: input
+    id: asset
+    attributes:
+      label: Existing document id (existing documents only)
+      description: "As listed on the Status page, e.g. owasp-top-10-for-agentic-applications-2026-12-6-1"
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "2026.12.6"
+    validations:
+      required: true
+  - type: input
+    id: locales
+    attributes:
+      label: Locales to translate into
+      description: Comma-separated BCP-47 codes.
+      placeholder: "de-DE, es-ES, ja-JP"
+    validations:
+      required: true
+  - type: dropdown
+    id: template
+    attributes:
+      label: Layout template (new documents only)
+      options:
+        - green-template
+        - blue-template
+        - yellow-template
+      default: 0
+  - type: input
+    id: source_repo
+    attributes:
+      label: English source repository (optional, new documents only)
+      placeholder: "GenAI-Security-Project/Agentic-Top-10"
+  - type: input
+    id: source_path
+    attributes:
+      label: Path in that repository (optional)
+      placeholder: "_source/"
+  - type: input
+    id: owners
+    attributes:
+      label: Document owners (optional, new documents only)
+      description: Comma-separated GitHub usernames. Defaults to you.
+  - type: checkboxes
+    id: public_ack
+    attributes:
+      label: Public file
+      options:
+        - label: I understand that this repository is public, so the attached file can be downloaded by anyone.
+          required: true

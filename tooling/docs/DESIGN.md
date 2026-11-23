@@ -214,11 +214,11 @@ always mismatch for a template with `sponsors.image_path` configured.
 ## The GitHub Pages site (component 6)
 
 Fully covered in `docs/README.md` — not duplicated here. Summary: `index.html`
-(landing), `upload.html` (onboarding, CAPTCHA + manager gated, PAT-based auth
-since GitHub OAuth device flow needs a backend a static Pages site doesn't
-have), `status.html` (read-only dashboard, no auth needed — public repo),
-`publish.html` (the testing-only direct-publish path, same CAPTCHA +
-manager gate).
+(landing), `upload.html` (links the "Onboard a document" issue form —
+token-free, handled by `onboard-from-issue.yml`), `status.html` (read-only
+dashboard, no auth needed — public repo), `publish.html` (for now only
+Process 4's layout handoff, via GitHub's Run workflow form). No page asks
+for a personal access token.
 
 ## Known gaps
 

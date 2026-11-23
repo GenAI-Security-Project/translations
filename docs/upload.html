@@ -25,109 +25,50 @@
 <div class="page">
 
   <p class="hint">
-    Upload a finished English asset to start translating it, or add locales to
-    one that's already onboarded. This one form does both — see
-    <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/README.md" target="_blank">tooling/README.md</a>
-    for how the pipeline works underneath.
+    Submit a finished English document for translation, or add locales or a
+    new version to one that's already here (Process 1). It's done through a
+    short form on GitHub, using your normal GitHub sign-in — no access token.
   </p>
 
   <section>
-    <h2>1. GitHub access</h2>
+    <h2>Who can submit</h2>
     <p class="hint">
-      Paste a fine-grained personal access token scoped to
-      <code>GenAI-Security-Project/translations</code> and
-      <code>GenAI-Security-Project/translations-templates</code>, with
-      <strong>Contents: Read and write</strong> permission (needed to check
-      render-template coverage and stage your upload). Generate one at
-      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a>.
-      The token is kept only in this browser tab's memory — it's never sent
-      anywhere but api.github.com, and it's gone when you close the tab.
+      Translations managers only: members of the <code>translations-managers</code>
+      team, people given Maintain on the <code>translations</code> repo, or org owners.
+      Anyone else's request is refused automatically with a comment explaining why.
     </p>
-    <label for="gh-token">Personal access token</label>
-    <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_…" />
-    <button id="verify-token-button" type="button">Verify token</button>
-    <span id="token-status" class="token-status"></span>
   </section>
 
-  <div id="form-body" hidden>
-    <form id="upload-form">
-      <section>
-        <h2>2. What are you onboarding?</h2>
-        <label><input type="radio" name="mode" value="new" checked /> A brand-new asset</label>
-        <label><input type="radio" name="mode" value="existing" /> Add locale(s)/a new version to an existing asset</label>
-      </section>
-
-      <section id="new-asset-fields">
-        <h2>New asset</h2>
-        <label for="file-input">Finished English source (.docx or .pdf)</label>
-        <input type="file" id="file-input" accept=".docx,.pdf" />
-        <p class="hint" id="asset-id-preview"></p>
-        <div id="duplicate-warning"></div>
-
-        <label for="template-select">Render template</label>
-        <select id="template-select">
-          <option value="">— choose —</option>
-          <option value="blue-template">blue-template — ranked-risk-list docs (Top 10 style)</option>
-          <option value="green-template">green-template — narrative long-form reports</option>
-          <option value="yellow-template">yellow-template — checklist/matrix documents</option>
-        </select>
-
-        <details class="optional-fields">
-          <summary>Optional: attribution</summary>
-          <label for="source-repo-input">Source repo (owner/repo, if this asset has one)</label>
-          <input type="text" id="source-repo-input" placeholder="GenAI-Security-Project/…" />
-          <label for="source-path-input">Path within that repo</label>
-          <input type="text" id="source-path-input" placeholder="_source/" />
-          <label for="owners-input">Owners (comma-separated GitHub usernames)</label>
-          <input type="text" id="owners-input" placeholder="octocat, hubot" />
-        </details>
-      </section>
-
-      <section id="existing-asset-fields" hidden>
-        <h2>Existing asset</h2>
-        <label for="existing-asset-select">Asset</label>
-        <select id="existing-asset-select"></select>
-      </section>
-
-      <section>
-        <h2>3. Version</h2>
-        <label for="version-input">Version identifier</label>
-        <input type="text" id="version-input" placeholder="2026.1" />
-      </section>
-
-      <section>
-        <h2>4. Locales</h2>
-        <p class="hint">
-          A locale flagged with ⚠ has no render override in
-          translations-templates yet — the draft translation still proceeds,
-          it just can't be published until an admin adds one.
-        </p>
-        <div id="locale-checklist"></div>
-      </section>
-
-      <section>
-        <h2>5. Confirm</h2>
-        <p class="hint">
-          Only translations managers can submit: the GitHub account your
-          token belongs to must be in the <code>translations-managers</code>
-          team (or be an org owner). Ask a repo admin to add you. This is
-          checked again server-side before anything is processed.
-        </p>
-        <div id="captcha-container"></div>
-      </section>
-
-      <button id="submit-button" type="submit">Submit</button>
-      <div id="submit-result"></div>
-      <div id="submit-status-bar"></div>
-    </form>
-  </div>
+  <section>
+    <h2>How it works</h2>
+    <ol class="hint">
+      <li>Press <strong>Open the onboarding form</strong> below (you'll be asked to sign in to GitHub if you aren't).</li>
+      <li>Choose <strong>A new document</strong> and drag the finished <code>.pdf</code> or
+        <code>.docx</code> into the <em>Source file</em> box — or choose <strong>New locales or a new
+        version</strong> and enter the existing document id from the <a href="status.html">Status</a> page.</li>
+      <li>Fill in the version and the locales (e.g. <code>de-DE, es-ES</code>), tick the public-file
+        box, and press <strong>Create</strong>.</li>
+      <li>Within a few minutes a comment on your issue links the <strong>onboarding pull request</strong>.
+        Once it's reviewed and merged, each locale is machine-drafted from
+        Actions → <em>translate-draft</em>.</li>
+    </ol>
+    <p class="hint">
+      The repository is public, so a file attached to the issue can be downloaded by anyone —
+      only submit documents that are meant to be published. The file name becomes the
+      document id, so name it clearly (e.g. <code>OWASP-Top-10-for-LLM-Applications-2026.pdf</code>).
+    </p>
+    <p>
+      <a class="button-link" id="onboard-link" target="_blank" rel="noopener"
+         href="https://github.com/GenAI-Security-Project/translations/issues/new?template=onboard-document.yml">
+        Open the onboarding form →</a>
+    </p>
+    <p class="hint">
+      <a target="_blank" rel="noopener"
+         href="https://github.com/GenAI-Security-Project/translations/issues?q=label%3Aonboarding">
+        Past onboarding requests →</a>
+    </p>
+  </section>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
-<script src="js/locales.js"></script>
-<script src="js/github-api.js"></script>
-<script src="js/workflow-status.js"></script>
-<script src="js/captcha.js"></script>
-<script src="js/upload.js"></script>
 </body>
 </html>
