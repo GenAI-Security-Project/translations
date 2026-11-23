@@ -121,6 +121,41 @@ publish-direct.yml
   real sign-off practice exists. Don't treat a `publish-direct.yml` release
   as equivalent in trust to a `publish.yml` release.
 
+## Process 4 — Assemble for Layout (designer handoff)
+
+For when a person, not the renderer, does the final graphical layout.
+
+```
+[every section of <asset>/<locale>/status.json is "reviewed"]
+      ▼
+Actions → layout-handoff → Run workflow (asset, locale)
+      │  workflow_dispatch, translations managers only (require-manager);
+      │  the run records who did (GITHUB_ACTOR)
+      ▼
+layout-handoff.yml → tooling/render-layout-docx.sh
+      │  1. Refuses unless every section is "reviewed" (no override)
+      │  2. Assembles the same sections, in the same order, as the PDF
+      │  3. Writes a plain .docx: Word built-in styles only (Title,
+      │     Heading 1–6, Normal, List, Quote, Table Grid, Caption), a
+      │     handoff sheet + review record + TOC field up front, a running
+      │     header (title/locale/version), a diagonal "DRAFT – NOT FOR
+      │     DISTRIBUTION" watermark and footer on every page, content sha256
+      │  4. Exports figure sources to figures/ (self-contained SVG); dashed
+      │     placeholders in the .docx mark where each figure / sponsor
+      │     block belongs
+      ▼
+run artifact "layout-handoff-<asset>-<locale>" (.docx, figures/,
+HANDOFF.md; kept 14 days) → downloaded by whoever ran it → sent to the
+layout designer
+```
+
+No template assets are read, so the .docx is safe to hand outside the admin
+group and the workflow runs without `TEMPLATES_DEPLOY_KEY`. The content
+sha256 matches the one in the published PDF's footer for the same content.
+Artifacts on a public repo are downloadable by any signed-in GitHub user
+while retained — acceptable here because the text is already public in the
+repo, but don't treat the artifact as private.
+
 ## Secrets and what they gate
 
 | Secret | Repo | Checked by | Gates |

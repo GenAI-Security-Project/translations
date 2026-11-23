@@ -2,11 +2,12 @@
   "name": "translations-render",
   "version": "1.0.0",
   "private": true,
-  "description": "Process 2 (Assemble & Publish) PDF generator -- markdown-it + Puppeteer, extending the archived repo's Track A tool per the Build Spec. Also holds Process 3's DOCX generator (render_docx.js), which shares render.js's registry/config loaders.",
+  "description": "Process 2 (Assemble & Publish) PDF generator -- markdown-it + Puppeteer, extending the archived repo's Track A tool per the Build Spec. Also holds Process 3's DOCX generator (render_docx.js) and Process 4's plain layout-handoff DOCX generator (render_layout_docx.js), which share render.js's registry/config loaders.",
   "type": "commonjs",
   "dependencies": {
     "docx": "^9.5.1",
     "js-yaml": "^4.1.0",
+    "jszip": "^3.10.2",
     "markdown-it": "^14.1.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.7.284",

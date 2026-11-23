@@ -804,7 +804,14 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(`render_docx.js failed: ${err.message}`);
-  process.exit(1);
-});
+// Process 4 (render_layout_docx.js) reuses the section-gathering and SVG
+// rasterizing helpers above rather than a third hand-synced copy of them --
+// hence the require.main guard, same pattern as render.js.
+module.exports = { gatherSections, rasterizeSvg, fitWidth, MAX_IMAGE_WIDTH };
+
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(`render_docx.js failed: ${err.message}`);
+    process.exit(1);
+  });
+}

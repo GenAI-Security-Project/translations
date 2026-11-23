@@ -62,6 +62,17 @@ walkthrough; this file is just "what's left."
   base permission is Read). Fixing it needs the org default set to "No
   permission" -- an org-wide decision pending the other owners.
 
+## Process 4 (Assemble for Layout)
+
+- [ ] **Built 2026-11-21 on `process4-layout-handoff`; not yet run in real
+  GitHub Actions.** Verified locally (ru-RU, plus an RTL smoke test on a
+  scratch fa-IR) via LibreOffice; not yet opened in Microsoft Word.
+- [x] **Run access** -- translations managers only, via
+  `.github/actions/require-manager` (2026-11-22).
+- [ ] **TOC is a Word field** -- Word fills it on open (updateFields is set);
+  LibreOffice's headless convert leaves it empty. Designers using Word are
+  unaffected.
+
 ## Known content/data issues
 
 - [ ] **`fr-FR/Acknowledgements_Figure_3.svg` has 7 of 8 originally-found
