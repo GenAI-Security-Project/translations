@@ -1,0 +1,92 @@
+# Process 1 intake without a personal access token: a translations manager
+# opens an "Onboard a document" issue (.github/ISSUE_TEMPLATE/
+# onboard-document.yml), attaching the English .pdf/.docx. This workflow
+# checks they're a manager, reads the form, and runs bootstrap-asset.yml
+# (as a reusable workflow, so the manager stays the triggering actor),
+# then reports the onboarding PR back on the issue.
+#
+# Triggers: the issue being opened with the `onboarding` label, or that
+# label being added later -- so a manager can (re-)run someone else's
+# request by removing and re-adding the label. require-manager checks
+# whoever triggered it: the opener, or the person who added the label.
+name: onboard-from-issue
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: onboard-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  parse:
+    if: >
+      contains(github.event.issue.labels.*.name, 'onboarding') &&
+      (github.event.action == 'opened' || github.event.label.name == 'onboarding')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      payload: ${{ steps.form.outputs.payload }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Require translations manager
+        id: manager
+        uses: ./.github/actions/require-manager
+
+      - name: Read the issue form
+        id: form
+        env:
+          BODY: ${{ github.event.issue.body }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+        run: python tooling/parse_onboarding_issue.py
+
+      - name: Report a refused or invalid request
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          ACTOR: ${{ github.triggering_actor }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body \
+            "✗ Onboarding didn't start. Either @$ACTOR isn't a translations manager, or the form couldn't be read — the [run log]($RUN_URL) says which. A manager can retry by removing and re-adding the \`onboarding\` label."
+
+  bootstrap:
+    needs: parse
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/bootstrap-asset.yml
+    with:
+      payload: ${{ needs.parse.outputs.payload }}
+
+  report:
+    needs: [parse, bootstrap]
+    if: always() && needs.parse.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ needs.bootstrap.result }}
+          PR_URL: ${{ needs.bootstrap.outputs.pr_url }}
+          ASSET: ${{ needs.bootstrap.outputs.asset }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$RESULT" = "success" ] && [ -n "$PR_URL" ]; then
+            body="✓ Onboarding PR for \`$ASSET\`: $PR_URL
+
+          Next: review and merge it, then draft each locale from Actions → **translate-draft** → Run workflow (asset \`$ASSET\`, one locale per run)."
+            gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body "$body"
+            gh issue close "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --reason completed
+          else
+            gh issue comment "${{ github.event.issue.number }}" -R "$GITHUB_REPOSITORY" --body \
+              "✗ Onboarding failed ($RESULT) — see the [run log]($RUN_URL). Fix the issue text if needed, then remove and re-add the \`onboarding\` label to retry."
+          fi

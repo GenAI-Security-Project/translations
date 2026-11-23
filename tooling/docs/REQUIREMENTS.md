@@ -12,7 +12,7 @@ been built). See `DESIGN.md` for the technical detail behind each pointer.
 
 | Req | Status | Notes |
 |---|---|---|
-| FR1.1 — GitHub Pages form, single entry point | Done | `docs/upload.html`, full locale multi-select via `docs/js/locales.js` |
+| FR1.1 — GitHub Pages form, single entry point | Done | `docs/upload.html` → the "Onboard a document" issue form (`.github/ISSUE_TEMPLATE/onboard-document.yml`); locales entered as BCP-47 codes, validated by `tooling/parse_onboarding_issue.py` |
 | FR1.2 — Submitting triggers `bootstrap_asset.py`, scoped to selected locales | Done | Via `repository_dispatch` → `bootstrap-asset.yml` |
 | FR1.3 — Re-submitting at a new version = new translation cycle | Done | `bootstrap_asset.py`'s existing-asset path |
 | FR1.4 — Add-locale-later without a new version | Done | Same form, existing-asset mode |
@@ -99,7 +99,7 @@ deliberate, documented exception to FR4, not a replacement for it.
 | NFR7 | No automatic publishing | Done | Enforced structurally by the two-process split; `publish-direct.yml` is a documented, gated exception used for pipeline testing only, not a violation of intent |
 | NFR8 | Correct rendering across scripts | **Partial** | See FR8.1 — the mechanism exists (`render_config_schema.py`'s `direction`/`line_breaking`/`numerals` fields, `locale_script_categories.py`'s gate) but has only been exercised for Latin-script locales so far |
 | NFR9 | No lost work (migration preserves everything) | **Not applicable yet** | No migration has run — see FR9.1. Nothing has been *lost* (nothing has been migrated), but the requirement's actual goal (archived work carried forward) is unmet |
-| NFR10 | Self-service intake, no maintainer request needed | Done | `docs/upload.html`'s full end-to-end flow, gated by CAPTCHA + the translations-manager role (a GitHub team), not a per-request human approval step |
+| NFR10 | Self-service intake, no maintainer request needed | Done | the onboarding issue form's end-to-end flow (`onboard-from-issue.yml`), gated by the translations-manager role (a GitHub team), not a per-request human approval step |
 
 ## Additions beyond the original PRD
 
@@ -112,9 +112,11 @@ or weaken anything the PRD asked for:
   `layout-handoff.yml`. The PRD assumed GitHub OAuth device flow or a
   GitHub App for the Pages form's auth; in practice, device-flow token
   exchange needs a backend a static Pages site doesn't have, so the actual
-  auth model is a pasted PAT plus a server-side check that the PAT's owner
-  holds Maintain/Admin here (the `translations-managers` team). Replaced an
-  earlier shared TOTP code (`UPLOAD_TOTP_SECRET`).
+  auth model is GitHub's own sign-in (an issue form for onboarding, the
+  Actions "Run workflow" form elsewhere) plus a server-side check that the
+  triggering user holds Maintain/Admin here (the `translations-managers`
+  team). Replaced a pasted personal access token and, before that, a shared
+  TOTP code (`UPLOAD_TOTP_SECRET`).
 - **`publish-direct.yml` / `publish.html`** — see FR4's note above.
 - **Two-pass TOC page numbers** — the PRD/Build Spec only mentions "TOC
   labels" as a render_config field, not page numbers at all.

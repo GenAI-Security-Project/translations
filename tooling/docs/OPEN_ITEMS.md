@@ -66,6 +66,19 @@ walkthrough; this file is just "what's left."
   base permission is Read). Fixing it needs the org default set to "No
   permission" -- an org-wide decision pending the other owners.
 
+## Token-free intake (2026-11-23)
+
+- [x] **Upload page no longer needs a personal access token** -- onboarding
+  is an issue form handled by `onboard-from-issue.yml`; the publish page
+  links GitHub's Run workflow form.
+- [ ] **Not yet exercised live** -- one real onboarding issue (a throwaway
+  asset, closed and cleaned up after) would confirm the attachment
+  download and the reusable-workflow call.
+- [ ] **Lost from the old upload page:** fuzzy duplicate-document warning
+  and the locale override-readiness warning (see `docs/README.md`).
+- [ ] **Merging an onboarding PR doesn't start drafting** -- each locale is
+  run from Actions -> translate-draft. (The old PR text claimed otherwise.)
+
 ## Process 4 (Assemble for Layout)
 
 - [ ] **Built 2026-11-21 on `process4-layout-handoff`; not yet run in real
