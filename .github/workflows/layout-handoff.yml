@@ -1,0 +1,79 @@
+# Process 4 (Assemble for Layout): build the plain, watermarked .docx
+# manuscript of one reviewed asset/locale for a human layout designer.
+#
+# Who can run it: workflow_dispatch is only available to users with write
+# access to this repo (Actions tab -> layout-handoff -> Run workflow), so the
+# repo's own collaborator/team list is the gate -- no shared TOTP code.
+#
+# Output: a run artifact (the .docx, figures/ and HANDOFF.md) that the
+# person who ran it downloads from the run page and sends to the designer.
+# Nothing is committed or released. The .docx carries no
+# translations-templates brand assets, so this needs no TEMPLATES_DEPLOY_KEY
+# -- but note that artifacts on a public repo can be downloaded by any
+# signed-in GitHub user while they're retained (14 days here). The content is
+# the same reviewed text already public in this repo.
+name: layout-handoff
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset:
+        description: "Asset id as it appears in registry.yaml"
+        required: true
+      locale:
+        description: "BCP-47 locale code (e.g. ru-RU)"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: layout-handoff-${{ inputs.asset }}-${{ inputs.locale }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ASSET: ${{ inputs.asset }}
+      LOCALE: ${{ inputs.locale }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Asset/locale arrive as free text -- validate their shape before they
+      # reach a path or an artifact name.
+      - name: Validate inputs
+        run: |
+          [[ "$ASSET" =~ ^[a-z0-9][a-z0-9.-]*$ ]] || { echo "::error::invalid asset id: $ASSET"; exit 1; }
+          [[ "$LOCALE" =~ ^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$ ]] || { echo "::error::invalid locale: $LOCALE"; exit 1; }
+
+      - name: Build layout handoff
+        id: render
+        run: |
+          OUT_DIR="$RUNNER_TEMP/layout-handoff"
+          bash tooling/render-layout-docx.sh --asset "$ASSET" --locale "$LOCALE" --out-dir "$OUT_DIR" | tee render.log
+          echo "out_dir=$OUT_DIR" >> "$GITHUB_OUTPUT"
+          grep '^sha256=' render.log >> "$GITHUB_OUTPUT"
+
+      - name: Upload handoff package
+        uses: actions/upload-artifact@v4
+        with:
+          name: layout-handoff-${{ inputs.asset }}-${{ inputs.locale }}
+          path: ${{ steps.render.outputs.out_dir }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Summary
+        run: |
+          {
+            echo "## Layout handoff: \`$ASSET\` / \`$LOCALE\`"
+            echo
+            echo "Requested by @${GITHUB_ACTOR}. Content sha256: \`${{ steps.render.outputs.sha256 }}\`"
+            echo
+            echo "Download **layout-handoff-$ASSET-$LOCALE** from the Artifacts section below and send it to the layout designer."
+            echo "The .docx is watermarked *DRAFT – NOT FOR DISTRIBUTION*; it is a manuscript, not a release."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -10,3 +10,7 @@ __pycache__/
 # This is a structural backstop for that policy, not the only enforcement of
 # it -- see tooling/README.md's Process 3 section.
 **/release/*.docx
+
+# Process 4's layout-handoff package (.docx + figures/ + HANDOFF.md) is a
+# run artifact handed to a layout designer, never committed.
+**/release/layout-handoff/

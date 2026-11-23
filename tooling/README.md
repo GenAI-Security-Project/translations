@@ -1,6 +1,6 @@
 # tooling/
 
-Scripts and config backing all three processes — the generate process
+Scripts and config backing all four processes — the generate process
 (Process 1: Draft, Review & Finalize — everything through `## Components in
 this repo (Process 1)` below), the publish process (Process 2: Assemble &
 Publish, PDF + DOCX: `render.sh`, `render/render.js`, `render/render_docx.js`,
@@ -18,7 +18,14 @@ opposite case). **Neither workflow commits or releases the `.docx`** —
 embeds `translations-templates`' real brand images (cover art, sponsors
 grid) verbatim and recoverably in `word/media/`; per explicit policy, the
 rendered `.pdf` is the only sanctioned form those assets reach this public
-repo in. Treat the DOCX as a local/reviewer artifact only. See **`tooling/docs/`**
+repo in. Treat the DOCX as a local/reviewer artifact only. Process 4
+(Assemble for Layout: `render-layout-docx.sh`, `render/render_layout_docx.js`,
+`.github/workflows/layout-handoff.yml`) is the exception by design: a
+**plain, unstyled, watermarked** `.docx` manuscript of a fully reviewed
+locale, built with no `translations-templates` input at all (so no brand
+assets, and no `TEMPLATES_DEPLOY_KEY` needed), for a human designer to lay
+out in the template by hand. It is still never committed -- it ships as a
+workflow run artifact. See **`tooling/docs/`**
 (`REQUIREMENTS.md`, `DESIGN.md`, `WORKFLOW.md`, `OPEN_ITEMS.md`) for the full
 current-state writeup, reconciled against the original PRD/Build Spec, plus
 a running list of what's still outstanding — this file stays focused on the
@@ -268,6 +275,10 @@ bash tooling/render.sh --asset my-asset --locale es-ES \
 # Process 3 -- render a preview DOCX only, without also rendering the PDF
 bash tooling/render-docx.sh --asset my-asset --locale es-ES \
   --templates-root /path/to/translations-templates
+
+# Process 4 -- plain layout-handoff DOCX (every section must be reviewed;
+# no --templates-root needed). Writes <asset>/<locale>/release/layout-handoff/
+bash tooling/render-layout-docx.sh --asset my-asset --locale es-ES
 ```
 
 Both `render.sh` and `render-docx.sh` default `--templates-root` to a
