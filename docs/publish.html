@@ -25,88 +25,54 @@
 <div class="page">
 
   <p class="hint">
-    Assemble and publish reviewed translations as a final PDF (Process 2 —
-    Assemble &amp; Publish). Normally publishing requires a three-way
-    sign-off on a "ready to publish" issue; this page is a direct,
-    CAPTCHA + manager-gated path for testing the rendering pipeline —
-    see <code>.github/workflows/publish-direct.yml</code>.
+    For now this page runs only <strong>Process 4 — Assemble for Layout</strong>:
+    a plain, watermarked ("DRAFT – NOT FOR DISTRIBUTION") <code>.docx</code> of a
+    fully reviewed translation, plus its figure files, for a designer to lay
+    out in the template by hand. Final PDF publishing (Process 2) is not
+    offered here while it's being set up.
   </p>
 
-  <div id="testing-mode-notice" class="duplicate-warning-soft" hidden>
-    <p>
-      <strong>Testing mode:</strong> every locale is listed below, including
-      ones not fully reviewed yet — normally only a fully-reviewed locale
-      would be publishable. Unchecking "Include watermark" on a locale
-      that isn't fully reviewed will still be refused server-side; only
-      the watermarked/preview path is expected to succeed right now.
-    </p>
-  </div>
-
   <section>
-    <h2>1. GitHub access</h2>
+    <h2>How to run a layout handoff</h2>
+    <ol class="hint">
+      <li>Find a row below marked <strong>ready</strong> and press <strong>Copy asset id</strong>.</li>
+      <li>Press <strong>Run layout handoff</strong>. GitHub's own Actions page opens — you use your
+        normal GitHub sign-in there, no token needed.</li>
+      <li>Click <strong>Run workflow</strong>, leave the branch as <code>main</code>, paste the asset id,
+        type the locale shown in the row, and click the green <strong>Run workflow</strong> button.</li>
+      <li>When the run finishes (a few minutes), open it and download
+        <strong>layout-handoff-&lt;asset&gt;-&lt;locale&gt;</strong> from <em>Artifacts</em>
+        (kept 14 days), then send it to the designer.</li>
+    </ol>
     <p class="hint">
-      Paste a fine-grained personal access token scoped to
-      <code>GenAI-Security-Project/translations</code> and
-      <code>GenAI-Security-Project/translations-templates</code>, with
-      <strong>Contents: Read and write</strong> permission. Generate one at
-      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com/settings/personal-access-tokens/new</a>.
-      The token is kept only in this browser tab's memory — it's never sent
-      anywhere but api.github.com, and it's gone when you close the tab.
+      Only translations managers can run it (the <code>translations-managers</code>
+      team, or Maintain/Admin on the repo); anyone else's run stops at the first step.
+      A locale is only ready once every section is reviewed — the workflow refuses anything else.
     </p>
-    <label for="gh-token">Personal access token</label>
-    <input type="password" id="gh-token" autocomplete="off" placeholder="github_pat_…" />
-    <button id="verify-token-button" type="button">Verify token</button>
-    <span id="token-status" class="token-status"></span>
   </section>
 
-  <div id="form-body" hidden>
-    <form id="publish-form">
-      <section>
-        <h2>2. Select documents &amp; locales to publish</h2>
-        <p class="hint" id="table-message">Loading…</p>
-        <table id="publish-table" class="publish-table" hidden>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Asset</th>
-              <th>Locale</th>
-              <th>Review status</th>
-            </tr>
-          </thead>
-          <tbody id="publish-table-body"></tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>3. Watermark</h2>
-        <label>
-          <input type="checkbox" id="include-watermark-checkbox" checked />
-          Include watermark (unchecking requests a real final render — refused unless every section is reviewed)
-        </label>
-      </section>
-
-      <section>
-        <h2>4. Confirm</h2>
-        <p class="hint">
-          Only translations managers can publish: the GitHub account your
-          token belongs to must be in the <code>translations-managers</code>
-          team (or be an org owner). Checked again server-side before
-          anything is processed.
-        </p>
-        <div id="captcha-container"></div>
-      </section>
-
-      <button id="publish-button" type="submit">Publish selected</button>
-      <div id="publish-result"></div>
-      <div id="publish-status-bars"></div>
-    </form>
-  </div>
+  <section>
+    <h2>Documents &amp; locales</h2>
+    <p class="hint" id="table-message">Loading…</p>
+    <table id="publish-table" class="publish-table" hidden>
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Locale</th>
+          <th>Review status</th>
+          <th>Layout handoff</th>
+        </tr>
+      </thead>
+      <tbody id="publish-table-body"></tbody>
+    </table>
+    <p class="hint">
+      <a id="recent-runs-link" target="_blank" rel="noopener">Recent layout handoff runs →</a>
+    </p>
+  </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 <script src="js/github-api.js"></script>
-<script src="js/workflow-status.js"></script>
-<script src="js/captcha.js"></script>
 <script src="js/publish.js"></script>
 </body>
 </html>
