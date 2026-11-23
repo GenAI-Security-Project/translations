@@ -71,9 +71,16 @@ walkthrough; this file is just "what's left."
 - [x] **Upload page no longer needs a personal access token** -- onboarding
   is an issue form handled by `onboard-from-issue.yml`; the publish page
   links GitHub's Run workflow form.
-- [ ] **Not yet exercised live** -- one real onboarding issue (a throwaway
-  asset, closed and cleaned up after) would confirm the attachment
-  download and the reusable-workflow call.
+- [ ] **Blocked: "Allow GitHub Actions to create and approve pull requests"
+  is off** (org and repo, checked 2026-11-23). Live test (issue #71, run
+  45133890737): manager check, form parsing, reusable bootstrap call and
+  `bootstrap_asset.py` all passed, then `create-pull-request` failed with
+  "GitHub Actions is not permitted to create or approve pull requests".
+  Same setting blocks `translate-draft.yml`'s draft PRs. Enable it in this
+  repo's Settings -> Actions -> General -> Workflow permissions (if greyed
+  out, an org owner enables it at org level first).
+- [ ] **Attachment download not yet exercised live** -- needs one real form
+  submission from a browser (the API can't attach files).
 - [ ] **Lost from the old upload page:** fuzzy duplicate-document warning
   and the locale override-readiness warning (see `docs/README.md`).
 - [ ] **Merging an onboarding PR doesn't start drafting** -- each locale is
