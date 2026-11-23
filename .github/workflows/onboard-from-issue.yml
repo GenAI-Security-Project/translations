@@ -1,13 +1,13 @@
 # Process 1 intake without a personal access token. Two issue forms:
 #
-#   - "Onboard a document" (label `onboarding`, onboard-document.yml): a
-#     translations manager attaches the English .pdf/.docx (or names an
-#     existing document for new locales / a new version). This opens an
+#   - "Onboard a new document" (label `onboarding`, onboard-document.yml): a
+#     translations manager attaches the English .pdf/.docx of a document
+#     that isn't registered yet. This opens an
 #     onboarding PR for review; merging it starts the drafts
 #     (start-translations.yml).
 #   - "Add languages" (label `add-language`, add-language.yml, usually
 #     opened prefilled from the Status page): an existing document, same
-#     version, new locales. The setup PR only adds the locales to
+#     version, new locales, picked from dropdowns. The setup PR only adds the locales to
 #     registry.yaml plus an empty folder each, so it is merged here straight
 #     away and machine drafting starts at once, one locale at a time. Each
 #     draft is its own PR for human review.

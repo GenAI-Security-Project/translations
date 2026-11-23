@@ -35,11 +35,18 @@ teams (Write), routed by `CODEOWNERS`.
 
 ## Onboarding via the issue form
 
-1. A manager opens a new issue from the **Onboard a document** template:
-   what they're submitting (new document, or new locales/version of an
-   existing one), the source `.pdf`/`.docx` dragged into the form (new
-   documents), version, locales, template and optional source repo/path and
-   owners, and a required acknowledgement that the attachment is public.
+1. A manager opens a new issue from the **Onboard a new document**
+   template: the source `.pdf`/`.docx` dragged into the form, version,
+   languages (multi-select dropdown, plus an optional box for codes not
+   listed), template (dropdown), optional source repo/path and owners, and a
+   required acknowledgement that the attachment is public. New documents
+   only; languages for existing ones use the other form (below).
+
+   Both forms are **generated** by `tooling/gen_issue_forms.py` from
+   `registry.yaml` (the document dropdown) and `tooling/languages.json`
+   (the language dropdowns, and `docs/js/languages.js`);
+   `sync-issue-forms.yml` re-runs it on every push to `main` that changes
+   those, so a newly onboarded document appears in the dropdown by itself.
 2. `onboard-from-issue.yml` runs on the issue being opened with the
    `onboarding` label (or that label being added later — how a manager
    retries or runs someone else's request):
@@ -64,9 +71,11 @@ teams (Write), routed by `CODEOWNERS`.
 
 1. A manager presses **+ Add languages** under a document on
    `status.html`, ticks languages, and presses **Request translation**.
-   That opens `.github/ISSUE_TEMPLATE/add-language.yml` with the document
-   id and codes filled in (issue forms pre-fill from query parameters
-   named by field id); they press **Create**.
+   That opens `.github/ISSUE_TEMPLATE/add-language.yml` — a **Document**
+   dropdown and a multi-select **Languages** dropdown, no file upload —
+   pre-filled where GitHub allows (query parameters named by field id); they
+   check the choices and press **Create**. The form can also be opened
+   directly.
 2. `onboard-from-issue.yml` (label `add-language`): `require-manager`;
    `parse_onboarding_issue.py` (with `FORM=add-language`) checks the
    document exists and keeps only languages it doesn't have yet, taking the

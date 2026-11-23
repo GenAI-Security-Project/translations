@@ -1,0 +1,51 @@
+# Keeps the intake issue forms' dropdowns current. GitHub issue-form
+# dropdowns are fixed lists inside the form files, so when a document is
+# onboarded (registry.yaml changes) or the language list is edited, this
+# regenerates the forms (and docs/js/languages.js) with
+# tooling/gen_issue_forms.py and commits the result to main.
+#
+# The commit is made with GITHUB_TOKEN, which doesn't trigger further
+# workflow runs, so this can't loop.
+name: sync-issue-forms
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - registry.yaml
+      - tooling/languages.json
+      - tooling/gen_issue_forms.py
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-issue-forms
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Regenerate forms and language list
+        run: |
+          pip install --quiet pyyaml
+          python tooling/gen_issue_forms.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet; then
+            echo "Already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add .github/ISSUE_TEMPLATE docs/js/languages.js
+          git commit -m "sync-issue-forms: regenerate from registry.yaml / languages.json"
+          git pull --rebase --quiet origin main
+          git push origin HEAD:main
