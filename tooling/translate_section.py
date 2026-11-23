@@ -174,10 +174,13 @@ def main(argv: Optional[List[str]] = None) -> None:
             continue
 
         finish = datetime.now(timezone.utc)
+        # Record the model that actually answered -- it differs from the
+        # configured one when a fallback model was used.
+        translator = f"{engine.provider}:{usage.model}" if usage.model else engine.label
         validation = translation_log.validate_translation(source_text, translated_text)
         translation_log.append_entry(
             log_file, section=section, start=start, finish=finish, status="success",
-            validation=validation, usage=usage, translator=engine.label,
+            validation=validation, usage=usage, translator=translator,
         )
         if not validation.valid:
             # A validation failure (empty/garbled/truncated output — caught
@@ -197,7 +200,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         status.sections[section] = SectionEntry(
             status=SectionStatus.draft,
             source_commit=source_commit,
-            translator=engine.label,
+            translator=translator,
         )
         translated_now.append(section)
 

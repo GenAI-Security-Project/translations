@@ -5,9 +5,21 @@
 # the model/provider is never hardcoded in the workflow or its scripts, so
 # changing it is a config PR, not a code change.
 
+# Gemini on Google's free tier (2026-11): gemini-3.8-flash is the strongest
+# stable Flash model and is free of charge for input and output. Two
+# trade-offs of the free tier: Google may use submitted text to improve its
+# products (fine for this public OWASP content; a paid key turns it off),
+# and rate limits are per project and unpublished -- llm_client.py backs
+# off and retries on HTTP 429. Key: the GEMINI_API_KEY repo secret.
 default:
-  provider: anthropic   # anthropic | openai | google | ...
-  model: claude-sonnet-5
+  provider: google      # anthropic | google
+  model: gemini-3.8-flash
+  # Free-tier models are often "high demand" (HTTP 503) for minutes at a
+  # time; these are tried in order when the model above stays unavailable.
+  # Each section's status.json `translator` records the model actually used.
+  fallback_models:
+    - gemini-3.6-flash
+    - gemini-3.5-flash-lite
 
 # Optional per-asset override — falls back to `default` when an asset isn't
 # listed here. Keyed by the asset name exactly as it appears in registry.yaml.
