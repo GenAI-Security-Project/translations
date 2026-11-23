@@ -1,0 +1,33 @@
+name: Add languages to a document
+description: "Translations managers only: request new translations of a document that's already onboarded. Machine drafting starts automatically."
+title: "Add languages: "
+labels: ["add-language"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The easiest way to fill this in is the **Add languages** button next to a document on the
+        [Status page](https://genai-security-project.github.io/translations/status.html), which
+        fills in both boxes for you.
+
+        Only **translations managers** can use this (the `translations-managers` team, Maintain on
+        this repo, or an org owner); anyone else's request is declined with a comment. When you
+        press **Create**, the pipeline registers the languages and starts a machine-drafted
+        translation for each one, one at a time. Each draft arrives as its own pull request for
+        review, linked in a comment here.
+  - type: input
+    id: asset
+    attributes:
+      label: Document id
+      description: As listed on the Status page.
+      placeholder: owasp-top-10-for-agentic-applications-2026-12-6-1
+    validations:
+      required: true
+  - type: input
+    id: locales
+    attributes:
+      label: Languages to add
+      description: Comma-separated BCP-47 codes. Languages the document already has are skipped.
+      placeholder: "es-ES, ja-JP"
+    validations:
+      required: true

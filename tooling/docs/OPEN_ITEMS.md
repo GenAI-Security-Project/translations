@@ -71,7 +71,8 @@ walkthrough; this file is just "what's left."
 - [x] **Upload page no longer needs a personal access token** -- onboarding
   is an issue form handled by `onboard-from-issue.yml`; the publish page
   links GitHub's Run workflow form.
-- [ ] **Blocked: "Allow GitHub Actions to create and approve pull requests"
+- [x] **Resolved 2026-11-23 (enabled; live test issue #73 → PR #74
+  passed). Was: "Allow GitHub Actions to create and approve pull requests"
   is off** (org and repo, checked 2026-11-23). Live test (issue #71, run
   45133890737): manager check, form parsing, reusable bootstrap call and
   `bootstrap_asset.py` all passed, then `create-pull-request` failed with
@@ -163,3 +164,17 @@ walkthrough; this file is just "what's left."
 one-line note (PR/commit + date) rather than deleting the line, and add
 anything newly discovered under the section it fits best — create a new
 section heading if none fits.*
+
+## Add languages + manager-only publishing (2026-11-23)
+
+- [x] Status page **+ Add languages** picker → "Add languages" issue form →
+  setup PR merged automatically → `start-translations.yml` drafts each new
+  language (one at a time, Gemini free tier).
+- [x] Merging any `bootstrap` onboarding PR also starts drafting its new
+  locales automatically.
+- [x] Publishing is managers-only with no tokens: `publish-direct.yml` is
+  now Run workflow only (repository_dispatch removed); `publish.yml`
+  checks the manager role on manual runs and on the sign-off edit.
+- [ ] Live-test an add-language request end to end.
+- [ ] A new document onboarded with several locales: each locale's draft
+  run splits the source itself; check the split PRs merge cleanly.

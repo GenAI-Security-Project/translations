@@ -15,7 +15,7 @@
       <h1 class="brand-lockup"><a class="brand-lockup-link" href="https://GenAI.OWASP.org" target="_blank" rel="noopener"><span class="brand-genai">GenAI</span> <span class="brand-rest">Translations</span></a></h1>
       <nav>
         <a href="index.html">Home</a>
-        <a href="upload.html">Onboard / add locale</a>
+        <a href="upload.html">Onboard a document</a>
         <a href="status.html">Status</a>
         <a href="publish.html">Publish</a>
       </nav>
@@ -23,6 +23,15 @@
 </header>
 
 <div class="page">
+
+  <p class="hint">
+    <strong>Adding a language:</strong> translations managers can press
+    <strong>+ Add languages</strong> under a document, tick the languages, and
+    press <strong>Request translation</strong>. GitHub opens the request already
+    filled in; pressing <strong>Create</strong> there registers the languages and
+    starts a machine-drafted translation of each, which arrives as a pull request
+    for review.
+  </p>
 
   <p class="hint">
     Every onboarded document and its translations, read live from each
@@ -39,6 +48,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 <script src="js/github-api.js"></script>
+<script src="js/languages.js"></script>
 <script src="js/status.js"></script>
 </body>
 </html>

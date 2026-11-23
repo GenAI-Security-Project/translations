@@ -1,5 +1,6 @@
 """Read an "Onboard a document" issue form (.github/ISSUE_TEMPLATE/
-onboard-document.yml) into the JSON payload bootstrap-asset.yml takes.
+onboard-document.yml), or an "Add languages" one (add-language.yml, when
+$FORM is "add-language"), into the JSON payload bootstrap-asset.yml takes.
 
 Used by .github/workflows/onboard-from-issue.yml. Reads the issue body from
 $BODY and the issue author from $AUTHOR; writes `payload=<json>` to
@@ -17,7 +18,8 @@ import json
 import os
 import re
 import sys
-from typing import Dict, Optional
+from pathlib import Path
+from typing import Dict, List, Optional
 from urllib.parse import unquote, urlparse
 
 LOCALE_RE = re.compile(r"^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
@@ -46,11 +48,17 @@ FIELDS = {
 }
 
 
+ADD_LANGUAGE_FIELDS = {
+    "asset": "Document id",
+    "locales": "Languages to add",
+}
+
+
 class FormError(Exception):
     pass
 
 
-def parse_sections(body: str) -> Dict[str, str]:
+def parse_sections(body: str, fields: Dict[str, str] = FIELDS) -> Dict[str, str]:
     sections: Dict[str, str] = {}
     for block in re.split(r"^### ", body or "", flags=re.MULTILINE)[1:]:
         label, _, value = block.partition("\n")
@@ -59,7 +67,7 @@ def parse_sections(body: str) -> Dict[str, str]:
             value = ""
         sections[label.strip()] = value
     out = {}
-    for key, prefix in FIELDS.items():
+    for key, prefix in fields.items():
         out[key] = next((v for k, v in sections.items() if k.startswith(prefix)), "")
     return out
 
@@ -82,14 +90,7 @@ def build_payload(form: Dict[str, str], author: str) -> Dict[str, str]:
     if not VERSION_RE.match(version):
         raise FormError(f"version {version!r} isn't valid (letters, digits, . _ -)")
 
-    locales = [l.strip() for l in re.split(r"[,\s]+", form["locales"]) if l.strip()]
-    if not locales:
-        raise FormError("list at least one locale, e.g. de-DE")
-    bad = [l for l in locales if not LOCALE_RE.match(l)]
-    if bad:
-        raise FormError(f"not BCP-47 locale codes: {', '.join(bad)}")
-
-    payload = {"version": version, "locales": ",".join(dict.fromkeys(locales))}
+    payload = {"version": version, "locales": ",".join(split_locales(form["locales"]))}
     url = attachment_url(form["source_file"])
 
     if new_doc:
@@ -126,9 +127,45 @@ def build_payload(form: Dict[str, str], author: str) -> Dict[str, str]:
     return payload
 
 
+def split_locales(text: str) -> List[str]:
+    locales = [l.strip() for l in re.split(r"[,\s]+", text or "") if l.strip()]
+    if not locales:
+        raise FormError("list at least one locale, e.g. de-DE")
+    bad = [l for l in locales if not LOCALE_RE.match(l)]
+    if bad:
+        raise FormError(f"not BCP-47 locale codes: {', '.join(bad)}")
+    return list(dict.fromkeys(locales))
+
+
+def build_add_language_payload(form: Dict[str, str], registry: Dict) -> Dict[str, str]:
+    """An existing document, same version, new locales only."""
+    asset = form["asset"].strip()
+    if not ASSET_RE.match(asset):
+        raise FormError("give the document id (as listed on the Status page)")
+    entry = (registry.get("assets") or {}).get(asset)
+    if not entry:
+        raise FormError(f"no document {asset!r} is registered; new documents use the onboarding form")
+    have = set(entry.get("locales") or [])
+    new = [l for l in split_locales(form["locales"]) if l not in have]
+    if not new:
+        raise FormError(f"{asset} already has every language listed")
+    return {"asset": asset, "version": str(entry["version"]), "locales": ",".join(new)}
+
+
+def load_registry() -> Dict:
+    import yaml  # only needed on this path
+    root = Path(__file__).resolve().parent.parent
+    # BaseLoader keeps every value a string, so a version like 2026.10 stays "2026.10".
+    return yaml.load((root / "registry.yaml").read_text(), Loader=yaml.BaseLoader) or {}
+
+
 def main() -> None:
     try:
-        payload = build_payload(parse_sections(os.environ.get("BODY", "")), os.environ.get("AUTHOR", ""))
+        if os.environ.get("FORM") == "add-language":
+            form = parse_sections(os.environ.get("BODY", ""), ADD_LANGUAGE_FIELDS)
+            payload = build_add_language_payload(form, load_registry())
+        else:
+            payload = build_payload(parse_sections(os.environ.get("BODY", "")), os.environ.get("AUTHOR", ""))
     except FormError as e:
         print(f"::error::Onboarding form: {e}")
         sys.exit(1)
@@ -137,6 +174,9 @@ def main() -> None:
     if out:
         with open(out, "a") as f:
             f.write(f"payload={json.dumps(payload)}\n")
+            # Validated above, so safe as plain outputs (asset is blank for a
+            # new document; bootstrap derives it from the file name).
+            f.write(f"asset={payload.get('asset', '')}\nlocales={payload['locales']}\n")
 
 
 if __name__ == "__main__":

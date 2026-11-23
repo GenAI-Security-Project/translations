@@ -13,9 +13,11 @@ description: >
 # org team membership, which would need an org-scoped token.
 #
 # triggering_actor rather than actor: on a re-run it's the person who
-# pressed "Re-run", who must pass the check themselves. For
-# repository_dispatch (the upload/publish pages) it's the owner of the
-# personal access token that fired the dispatch.
+# pressed "Re-run", who must pass the check themselves. For an issue form
+# (onboarding, add languages) it's whoever applied the label -- the
+# submitter, or a manager re-running it; for a workflow called from another
+# (start-translations -> translate-draft) it's whoever started the caller.
+# No pipeline step uses a personal access token.
 
 runs:
   using: composite

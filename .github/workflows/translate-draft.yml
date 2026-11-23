@@ -20,6 +20,22 @@ on:
         required: true
   repository_dispatch:
     types: [translate-draft]
+  # Called by start-translations.yml (after an add-language request or an
+  # onboarding PR is merged), so the manager who started it stays the
+  # triggering actor that require-manager checks.
+  workflow_call:
+    inputs:
+      asset:
+        type: string
+        required: true
+      locale:
+        type: string
+        required: true
+      ref:
+        description: "Branch to draft from. Chained calls pass main so a just-merged registry change is seen."
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -29,13 +45,15 @@ jobs:
   draft:
     runs-on: ubuntu-latest
     env:
-      ASSET: ${{ github.event.inputs.asset || github.event.client_payload.asset }}
-      LOCALE: ${{ github.event.inputs.locale || github.event.client_payload.locale }}
+      ASSET: ${{ inputs.asset || github.event.client_payload.asset }}
+      LOCALE: ${{ inputs.locale || github.event.client_payload.locale }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       # Gemini (translation-config.yaml's default provider) reads this.
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
 
       # Machine-drafting spends LLM budget: translations managers only.
       - name: Require translations manager
@@ -72,6 +90,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: "translate-draft: ${{ env.ASSET }} / ${{ env.LOCALE }}"
+          base: main
           branch: "translate-draft/${{ env.ASSET }}-${{ env.LOCALE }}-${{ github.run_id }}"
           title: "[${{ env.ASSET }}] Draft translation: ${{ env.LOCALE }}"
           body: |
