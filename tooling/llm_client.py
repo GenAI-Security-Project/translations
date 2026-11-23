@@ -42,6 +42,11 @@ MAX_EMPTY_RETRIES = 2  # total attempts = this + 1
 RATE_LIMIT_RETRIES = 6
 RATE_LIMIT_BASE_DELAY_S = 10.0
 RATE_LIMIT_MAX_DELAY_S = 120.0
+# Hard cap on one Gemini request. Without it a stalled connection hangs the
+# job until Google drops it -- observed live: ~17 minutes, then "Server
+# disconnected without sending a response". A long section normally takes
+# well under this.
+GEMINI_REQUEST_TIMEOUT_S = 300
 
 
 @dataclass
@@ -78,6 +83,7 @@ def _google_call(engine: Engine, system: str, user_content: str, json_output: bo
     translate_batch), which it honours far more reliably than a prompt-only
     instruction. Thinking tokens are billed as output, so they're counted
     as output here too."""
+    import httpx
     from google import genai
     from google.genai import errors, types
 
@@ -86,7 +92,7 @@ def _google_call(engine: Engine, system: str, user_content: str, json_output: bo
             "translation-config.yaml names provider 'google' but GEMINI_API_KEY is not set "
             "(in Actions: add the GEMINI_API_KEY repo secret). Use --offline to test without it."
         )
-    client = genai.Client()
+    client = genai.Client(http_options=types.HttpOptions(timeout=GEMINI_REQUEST_TIMEOUT_S * 1000))
     config = types.GenerateContentConfig(
         system_instruction=system,
         max_output_tokens=16384,
@@ -98,12 +104,22 @@ def _google_call(engine: Engine, system: str, user_content: str, json_output: bo
                 model=engine.model, contents=user_content, config=config
             )
             break
-        except errors.APIError as e:
-            if e.code not in (429, 500, 503) or attempt == RATE_LIMIT_RETRIES:
+        except (errors.APIError, httpx.TransportError) as e:
+            # Retryable: rate limit (429), overloaded/internal (503/500), and
+            # transport failures -- timeouts and dropped connections, which
+            # the free tier produces under load and which arrive as raw
+            # httpx errors, not APIError.
+            if isinstance(e, errors.APIError):
+                retryable = e.code in (429, 500, 503)
+                reason = f"HTTP {e.code} ({e.status})"
+            else:
+                retryable = True
+                reason = f"{type(e).__name__}: {e}"
+            if not retryable or attempt == RATE_LIMIT_RETRIES:
                 raise
             delay = min(RATE_LIMIT_MAX_DELAY_S, RATE_LIMIT_BASE_DELAY_S * 2 ** attempt)
             delay *= 0.75 + random.random() / 2  # jitter
-            print(f"gemini: HTTP {e.code} ({e.status}); retrying in {delay:.0f}s "
+            print(f"gemini: {reason}; retrying in {delay:.0f}s "
                   f"[{attempt + 1}/{RATE_LIMIT_RETRIES}]", flush=True)
             time.sleep(delay)
     text = response.text or ""
