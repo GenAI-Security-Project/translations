@@ -21,6 +21,19 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
   *Run workflow* form for `layout-handoff.yml`. Process 2's direct publish
   path is not offered while Process 2 is set up.
 
+- **`docs.html`** — links to the guides and reference docs in this repo
+  (workflow walkthrough, this README, tooling reference, design,
+  requirements, open items) and to requests, reviews and workflow runs.
+
+## Look and feel
+
+Branded to match genai.owasp.org: the project's official logo
+(`assets/owasp-genai-security-project-logo.png`, the white logo from
+genai.owasp.org, used unmodified) on a navy header band, and the site's
+colours (`css/style.css` lists them). Light and dark themes follow the
+system setting; the header's theme button (`js/theme.js`) can pin Light or
+Dark, remembered in that browser only.
+
 ## Who may do what
 
 Pipeline actions are limited to **translations managers**: Maintain or Admin
