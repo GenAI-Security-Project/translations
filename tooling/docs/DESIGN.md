@@ -46,7 +46,7 @@ Two components not in the original seven, added during this build-out:
 | Addition | Implements | Why |
 |---|---|---|
 | Translations-manager gate on pipeline Actions | `.github/actions/require-manager`, run first in `bootstrap-asset.yml`, `translate-draft.yml`, `publish-direct.yml`, `layout-handoff.yml` | The PRD assumed a GitHub App/OAuth-gated form; the actual site is a static Pages site with no backend. Each run checks that its triggering user has Maintain/Admin on this repo (the `translations-managers` team or an org owner), using only the job's own token. Identity-based, managed in GitHub; replaced an earlier shared TOTP code that couldn't say who submitted. |
-| `publish-direct.yml` + `publish.html` | Testing-only publish path, CAPTCHA + manager gated, bypasses the three-way sign-off | Exists so the publish process's (Process 2's) rendering pipeline can be validated end-to-end against real content before a live sign-off process (named roles, an actual "ready to publish" issue habit) exists. **Not a substitute for `publish.yml`** — see `WORKFLOW.md` for exactly what it does and doesn't guarantee. |
+| `publish-direct.yml` | Manager-only watermarked preview render (run artifact only) | Lets the rendering pipeline be checked against real content before sign-off. Since 2026-11-24 it can't publish — no unwatermarked option, no commit, no Release — so `publish.yml`'s three-way sign-off is the only way anything is published. |
 
 ## The renderer (`tooling/render/render.js`)
 
@@ -181,8 +181,7 @@ not be conflated.
 
 A single centered diagonal "DRAFT — NOT FOR RELEASE" stamp on every page of
 a non-`--final` render (`render.sh`'s `--final` flag, set only by
-`publish.yml`'s approved run and `publish-direct.yml` when its watermark
-checkbox is unchecked). **`watermark.repeat` (tiled mode) is defined in the
+`publish.yml`'s approved run; `publish-direct.yml` never sets it). **`watermark.repeat` (tiled mode) is defined in the
 schema but not implemented** — `render.js` always renders the single-stamp
 variant regardless of that config value. Revisit if a single stamp proves
 easy to crop out of a screenshot/photo in practice.

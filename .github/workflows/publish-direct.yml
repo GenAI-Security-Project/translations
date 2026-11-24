@@ -1,20 +1,16 @@
 name: publish-direct
 
-# TESTING-ONLY direct publish path. Bypasses the three-way sign-off gate
-# that publish.yml enforces (FR4.2) -- gated instead by the
-# translations-manager role check (.github/actions/require-manager), the same
-# gate every pipeline workflow uses. Exists so the rendering pipeline can be
-# validated end-to-end against real content without a live sign-off process
-# in place yet. Revisit (fold into publish.yml, or retire) once real sign-off
-# practices exist.
+# TESTING-ONLY preview render: a WATERMARKED PDF of the current
+# translation (every section, whatever its review status), for checking
+# the rendered layout before sign-off. Managers only (require-manager),
+# started from Actions -> publish-direct -> Run workflow.
 #
-# Started from Actions -> publish-direct -> Run workflow, under the
-# manager's own GitHub sign-in (no personal access token; the old
-# repository_dispatch trigger, which needed one, is gone). One run per
-# (asset, locale). `watermark` controls render.sh's --final flag: true (the
-# default) renders a watermarked preview, always allowed regardless of
-# review status; false requests a real final render, which still
-# hard-requires every section reviewed -- render.sh's own --final check.
+# It never publishes: the PDF is always watermarked DRAFT (render.sh is
+# never given --final here), it is NOT committed to the repo, and NO GitHub
+# Release is created -- the file is only a workflow artifact, kept 14 days.
+# Policy: nothing is published without the three-way sign-off, which only
+# publish.yml implements. (Until 2026-11-24 this workflow could also do an
+# unwatermarked render and cut a release without sign-off; removed.)
 
 on:
   workflow_dispatch:
@@ -25,13 +21,9 @@ on:
       locale:
         description: "BCP-47 locale code (e.g. ru-RU)"
         required: true
-      watermark:
-        description: "Watermarked preview (untick for a final render; needs every section reviewed)"
-        type: boolean
-        default: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   publish:
@@ -77,18 +69,13 @@ jobs:
         env:
           ASSET: ${{ inputs.asset }}
           LOCALE: ${{ inputs.locale }}
-          WATERMARK: ${{ inputs.watermark }}
         run: |
           # Validated before they reach any later shell step.
           [[ "$ASSET" =~ ^[a-z0-9][a-z0-9.-]{0,120}$ ]] || { echo "::error::bad asset id: $ASSET"; exit 1; }
           [[ "$LOCALE" =~ ^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$ ]] || { echo "::error::bad locale: $LOCALE"; exit 1; }
           echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
           echo "locale=$LOCALE" >> "$GITHUB_OUTPUT"
-          if [ "$WATERMARK" = "false" ]; then
-            echo "final_flag=--final" >> "$GITHUB_OUTPUT"
-          else
-            echo "final_flag=" >> "$GITHUB_OUTPUT"
-          fi
+          echo "out=$RUNNER_TEMP/preview/$ASSET-$LOCALE-DRAFT-PREVIEW.pdf" >> "$GITHUB_OUTPUT"
 
       - name: Override-readiness check (FR5)
         working-directory: translations
@@ -98,37 +85,26 @@ jobs:
             --locale "${{ steps.resolve.outputs.locale }}" \
             --templates-root "$GITHUB_WORKSPACE/translations-templates"
 
-      - name: Render the PDF
+      # Never --final: always the watermarked preview.
+      - name: Render the watermarked preview PDF
         working-directory: translations
         run: |
+          mkdir -p "$(dirname "${{ steps.resolve.outputs.out }}")"
           bash tooling/render.sh \
             --asset "${{ steps.resolve.outputs.asset }}" \
             --locale "${{ steps.resolve.outputs.locale }}" \
             --templates-root "$GITHUB_WORKSPACE/translations-templates" \
-            ${{ steps.resolve.outputs.final_flag }}
+            --out "${{ steps.resolve.outputs.out }}" \
+            --pdf-only
 
-      - name: Commit the release PDF
-        working-directory: translations
-        run: |
-          git config user.name "publish-direct[bot]"
-          git config user.email "actions@github.com"
-          git add "${{ steps.resolve.outputs.asset }}/${{ steps.resolve.outputs.locale }}/release/"
-          git commit -m "publish (direct/testing): ${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }}"
-          git push
+      - name: Upload the preview (not published)
+        uses: actions/upload-artifact@v4
+        with:
+          name: draft-preview-${{ steps.resolve.outputs.asset }}-${{ steps.resolve.outputs.locale }}
+          path: ${{ steps.resolve.outputs.out }}
+          retention-days: 14
+          if-no-files-found: error
 
-      - name: Resolve the release filename
-        id: release_file
-        working-directory: translations
+      - name: Summary
         run: |
-          FILE=$(ls -t "${{ steps.resolve.outputs.asset }}/${{ steps.resolve.outputs.locale }}/release/"*.pdf | head -1)
-          echo "path=$FILE" >> "$GITHUB_OUTPUT"
-
-      - name: Cut a GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        working-directory: translations
-        run: |
-          TAG="${{ steps.resolve.outputs.asset }}-${{ steps.resolve.outputs.locale }}-$(date +%Y%m%d%H%M%S)"
-          gh release create "$TAG" "${{ steps.release_file.outputs.path }}" \
-            --title "${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }} (direct/testing publish)" \
-            --notes "Published via the direct/testing publish path by a translations manager (no sign-off gate)."
+          echo "Watermarked DRAFT preview of **${{ steps.resolve.outputs.asset }} / ${{ steps.resolve.outputs.locale }}** — download it from this run's Artifacts (14 days). Not published: nothing is committed or released without the three-way sign-off (publish.yml)." >> "$GITHUB_STEP_SUMMARY"

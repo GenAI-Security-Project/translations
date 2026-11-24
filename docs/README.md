@@ -133,8 +133,9 @@ personal access token:
   the sign-off issue: the edit that completes the three-way checklist must
   be a manager's, otherwise nothing is published and a comment asks a
   manager to confirm.
-- **Testing-only `publish-direct.yml`** — Run workflow (`require-manager`);
-  its old `repository_dispatch` trigger, which needed a token, was removed.
+- **Preview-only `publish-direct.yml`** — Run workflow (`require-manager`):
+  a watermarked DRAFT PDF as a 14-day run artifact. It never commits or
+  releases anything, so nothing is published without sign-off.
 
 ## Publish page
 
