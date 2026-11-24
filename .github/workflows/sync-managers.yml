@@ -1,0 +1,61 @@
+# Publishes the list of translations managers for the site's Managers page
+# (docs/managers.html reads docs/data/managers.json).
+#
+# A manager is anyone with Maintain or Admin on this repo -- the same rule
+# .github/actions/require-manager enforces. The collaborator list isn't
+# readable by a public page, so this job reads it with the workflow's own
+# token and commits the result to main (logins, roles and profile links
+# only -- all already public on GitHub). Runs daily and on demand; managers
+# are added and removed in GitHub settings, never here.
+name: sync-managers
+
+on:
+  schedule:
+    - cron: "23 4 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-managers
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: List managers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p docs/data
+          gh api --paginate "repos/$GITHUB_REPOSITORY/collaborators?affiliation=all&per_page=100" \
+            | jq -s '[ .[][] | select(.type == "User" and (.role_name == "admin" or .role_name == "maintain"))
+                       | {login, role: .role_name, url: .html_url, avatar: .avatar_url} ]
+                     | sort_by(.role != "maintain", (.login | ascii_downcase))' > /tmp/managers.json
+          # Never publish an empty list (e.g. a token that can't see collaborators).
+          [ "$(jq length /tmp/managers.json)" -gt 0 ] || { echo "::error::no managers returned"; exit 1; }
+          jq -n --slurpfile m /tmp/managers.json \
+            '{generated_at: (now | todate), source: "Maintain/Admin on this repository", managers: $m[0]}' \
+            > docs/data/managers.json.new
+          # Only commit when the list itself changed (ignore the timestamp).
+          if [ -f docs/data/managers.json ] && \
+             [ "$(jq -S .managers docs/data/managers.json)" = "$(jq -S .managers docs/data/managers.json.new)" ]; then
+            rm docs/data/managers.json.new; echo "No change."; exit 0
+          fi
+          mv docs/data/managers.json.new docs/data/managers.json
+
+      - name: Commit if changed
+        run: |
+          git diff --quiet -- docs/data/managers.json && git ls-files --error-unmatch docs/data/managers.json >/dev/null 2>&1 && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add docs/data/managers.json
+          git commit -m "sync-managers: update the managers list"
+          git pull --rebase --quiet origin main
+          git push origin HEAD:main

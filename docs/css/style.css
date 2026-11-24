@@ -376,3 +376,11 @@ a.button-link-disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed
 .doc-list a:hover { text-decoration: underline; }
 .doc-list p { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
 .explainer { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; margin: 0 0 12px; }
+
+/* Managers page */
+.manager-list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.manager-list li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.manager-list img { border-radius: 50%; flex: none; }
+.manager-list a { font-weight: 600; text-decoration: none; }
+.manager-list p { margin: 2px 0 0; font-size: 0.85rem; color: var(--muted); }
+.manager-list a { overflow-wrap: anywhere; }

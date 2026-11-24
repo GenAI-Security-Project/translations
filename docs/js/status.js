@@ -194,6 +194,18 @@ function renderLocaleItem(list, assetId, locale, summary) {
   list.appendChild(li);
 }
 
+// Counts come from the sections themselves rather than the file's stored
+// "summary": a status.json updated by hand in a PR (the documented way to
+// mark a later edit reviewed) may not carry an up-to-date summary.
+function summarize(status) {
+  const out = { total: 0, draft: 0, in_review: 0, reviewed: 0, stale: 0 };
+  for (const s of Object.values((status && status.sections) || {})) {
+    out.total++;
+    if (s.status in out) out[s.status]++;
+  }
+  return out;
+}
+
 // CONTENT_REPO is public, so this reads with no token at all — see
 // github-api.js. If GitHub's unauthenticated rate limit (60/hr per IP) is
 // ever actually hit here, that would surface as a plain fetch error below.
@@ -221,7 +233,7 @@ async function loadStatus() {
     const list = renderAssetSection(container, assetId, entry);
     for (const locale of entry.locales || []) {
       const status = await fetchStatusJson(assetId, locale);
-      renderLocaleItem(list, assetId, locale, status && status.summary ? status.summary : {});
+      renderLocaleItem(list, assetId, locale, summarize(status));
     }
   }
   messageEl.textContent = "";

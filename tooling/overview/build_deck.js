@@ -110,7 +110,7 @@ async function icon(Comp, color, size = 256) {
     ["Request", "New document or new language"],
     ["Machine draft", "Gemini drafts each section"],
     ["Review & edit", "Language reviewers fix the draft"],
-    ["Mark reviewed", "Approve and merge"],
+    ["Mark reviewed", "status.json set to reviewed via a PR"],
     ["Layout handoff", "Watermarked draft for the designer"],
     ["Layout & final review", "Laid out in the template, checked"],
     ["Sign-off & publish", "Three approvals, then publish"],
@@ -131,7 +131,7 @@ async function icon(Comp, color, size = 256) {
   ], { x: 1.45, y: 3.95, w: 7.8, h: 0.75, fontSize: 15, valign: "middle", margin: 0, isTextBox: true });
   s.addNotes(
     "Here's the whole journey in seven steps. A translations manager makes a request: either a new document, or a new language for a document that's already in the pipeline. " +
-    "Gemini then machine-drafts every section. Language reviewers review and edit that draft, and mark it as reviewed by approving and merging it. " +
+    "Gemini then machine-drafts every section. Language reviewers review and edit that draft, and each section is marked reviewed in the language's status file, through a merged pull request. " +
     "Once every section is reviewed, a manager produces a watermarked layout draft for the designer, who lays it out in the template for final review. " +
     "And finally, three people sign off before anything is published. That last point is the rule that matters most: nothing is published without sign-off."
   );
@@ -271,27 +271,68 @@ async function icon(Comp, color, size = 256) {
     s.addText(d, { x: x + 0.2, y: 1.85, w: 2.2, h: 0.5, fontSize: 11.5, color: "3F4A57", margin: 0, isTextBox: true });
     if (i < 2) s.addShape(pres.shapes.RIGHT_ARROW, { x: x + 2.68, y: 1.72, w: 0.44, h: 0.32, fill: { color: C.accent1 }, line: { color: C.accent1 } });
   });
-  s.addText("Mark the PR Ready for review", { x: 2.2, y: 2.6, w: 2.4, h: 0.5, fontSize: 11.5, bold: true, color: C.accent3, align: "center", margin: 0, isTextBox: true });
-  s.addText("Approve and merge the PR", { x: 5.4, y: 2.6, w: 2.4, h: 0.5, fontSize: 11.5, bold: true, color: C.accent3, align: "center", margin: 0, isTextBox: true });
+  s.addText("Draft PR marked Ready for review", { x: 2.0, y: 2.6, w: 2.8, h: 0.5, fontSize: 11.5, bold: true, color: C.accent3, align: "center", margin: 0, isTextBox: true });
+  s.addText("Merged PR sets status.json to reviewed", { x: 5.2, y: 2.6, w: 2.8, h: 0.5, fontSize: 11.5, bold: true, color: C.accent3, align: "center", margin: 0, isTextBox: true });
   card(s, 0.5, 3.35, 9.0, 1.4, "review-notes");
   await iconCircle(s, fa.FaChartBar, 0.7, 3.55);
   s.addText([
-    { text: "The pipeline records each change of state — nobody edits status files by hand.", options: { bullet: true, breakLine: true } },
-    { text: "Progress per language shows on the Documents & languages page.", options: { bullet: true, breakLine: true } },
+    { text: "A section's status lives in <document>/<language>/status.json — only \"reviewed\" counts for handoff.", options: { bullet: true, breakLine: true } },
+    { text: "Machine-draft PRs update it automatically; later edits must update it themselves (next slide).", options: { bullet: true, breakLine: true } },
     { text: "If the English source changes later, affected sections are flagged stale for another look.", options: { bullet: true } },
   ], { x: 1.45, y: 3.5, w: 7.9, h: 1.15, fontSize: 12, color: "3F4A57", valign: "middle", paraSpaceAfter: 4, margin: 0, isTextBox: true });
   s.addNotes(
-    "Every section moves through three states. It starts as a draft. When a reviewer begins, they mark the pull request Ready for review, and its sections move to In review. " +
-    "When the review is done, approving and merging the pull request moves those sections to Reviewed. " +
-    "The pipeline records each change itself, so nobody edits status files by hand, and the Documents and languages page shows the progress for each language. " +
-    "If the English source changes later, the affected sections are flagged as stale so they get another look."
+    "Every section moves through three states, and its state is recorded in the language's status dot json file. It starts as a draft. " +
+    "For the machine-draft pull request, the pipeline updates that file for you: marking the pull request Ready for review moves its sections to In review, and merging it moves them to Reviewed. " +
+    "Only sections marked reviewed in status dot json count when a language is handed off for layout. " +
+    "If you edit a section later, in a separate pull request, the status isn't updated for you. That's the next slide. " +
+    "And if the English source changes later, the affected sections are flagged as stale so they get another look."
+  );
+
+  // ---- 7b. Edits after the draft: update status.json -----------------
+  s = content("Edited a section later? Update status.json", "Review");
+  const upd = [
+    ["Edit the section in a PR", "Change the section's file under <document>/<language>/ on a new branch."],
+    ["Open status.json in the same PR", "<document>/<language>/status.json, and find that section's entry."],
+    ["Set the correct status", "\"reviewed\" once it's checked, plus who reviewed it, the date and the PR number."],
+    ["Get the PR reviewed and merged", "The section now counts as reviewed on the status and Publish pages."],
+  ];
+  upd.forEach(([t, d], i) => {
+    const y = 1.15 + i * 0.72;
+    num(s, i + 1, 0.5, y + 0.04);
+    s.addText(t, { x: 1.1, y, w: 4.0, h: 0.3, fontSize: 14, bold: true, color: C.text2, margin: 0, isTextBox: true });
+    s.addText(d, { x: 1.1, y: y + 0.3, w: 4.0, h: 0.45, fontSize: 11.5, color: "3F4A57", valign: "top", margin: 0, isTextBox: true });
+  });
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 5.4, y: 1.2, w: 4.1, h: 2.55, rectRadius: 0.08, fill: { color: C.text2 }, line: { color: C.text2 }, objectName: "json" });
+  s.addText("status.json — one section's entry", { x: 5.6, y: 1.3, w: 3.7, h: 0.35, fontSize: 11, bold: true, color: "9DC3CF", margin: 0, isTextBox: true });
+  s.addText([
+    '"ASI01_Agent_Goal_Hijack": {',
+    '  "status": "reviewed",',
+    '  "source_commit": "a05b19b",',
+    '  "translator": "google:gemini-3.6-flash",',
+    '  "reviewer": "your-github-name",',
+    '  "reviewed_at": "2026-11-24",',
+    '  "pr": 84',
+    '}',
+  ].map((line, i, arr) => ({ text: line, options: { breakLine: i < arr.length - 1 } })),
+    { x: 5.6, y: 1.7, w: 3.75, h: 1.95, fontFace: "Courier New", fontSize: 10.5, color: "E7F6FF", valign: "top", margin: 0, isTextBox: true });
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.5, y: 4.3, w: 9.0, h: 0.65, rectRadius: 0.08, fill: { color: C.accent4 }, line: { color: C.accent4 }, objectName: "status-warning" });
+  s.addImage({ data: await icon(fa.FaExclamationTriangle, HEX.accent3), x: 0.72, y: 4.42, w: 0.4, h: 0.4 });
+  s.addText([
+    { text: "Skip this and the section stays a draft: ", options: { bold: true } },
+    { text: "the layout handoff refuses any language that isn't reviewed in status.json." },
+  ], { x: 1.3, y: 4.3, w: 8.0, h: 0.65, fontSize: 12.5, color: C.text2, valign: "middle", margin: 0, isTextBox: true });
+  s.addNotes(
+    "Here's the step that's easy to miss. When you edit a generated section after its machine draft has been merged, in its own pull request, the pipeline does not update its status for you. " +
+    "So in the same pull request, open the language's status dot json file, find that section's entry, and set the correct status: reviewed, once it has been checked, along with the reviewer's GitHub name, the date and the pull request number. Leave the other fields as they are. " +
+    "When that pull request is reviewed and merged, the section counts as reviewed on the status and Publish pages. " +
+    "If you skip this, the section stays a draft, and the layout handoff refuses the whole language until it's fixed."
   );
 
   // ---- 8. Layout handoff --------------------------------------------
   pres.addSection({ title: "Layout and publishing" });
   s = content("Layout handoff: the watermarked draft", "Layout and publishing");
   const hand = [
-    ["Every section reviewed", "The Publish page marks the language ready."],
+    ["Every section reviewed", "status.json shows them all reviewed; the Publish page marks the language ready."],
     ["Run layout handoff", "Copy the document id, open Run workflow, enter id and language."],
     ["Download the package", "From the run's Artifacts (kept 14 days)."],
     ["Send it to the designer", "To lay out in the document's template."],
@@ -312,7 +353,7 @@ async function icon(Comp, color, size = 256) {
     { text: "Only fully reviewed languages can be handed off.", options: { bullet: true } },
   ], { x: 5.7, y: 2.08, w: 3.65, h: 2.55, fontSize: 12, color: "3F4A57", valign: "top", paraSpaceAfter: 6, margin: 0, isTextBox: true });
   s.addNotes(
-    "Once every section of a language is reviewed, the Publish page marks it as ready. A manager copies the document id, opens the layout handoff workflow, enters the id and the language, and runs it. " +
+    "Once status dot json shows every section of a language as reviewed, the Publish page marks it as ready. A manager copies the document id, opens the layout handoff workflow, enters the id and the language, and runs it. " +
     "A few minutes later the package can be downloaded from the run. It holds a Word file of the reviewed translation, watermarked Draft, not for distribution, along with the figures as separate files and handoff notes. " +
     "That package goes to the designer to lay out in the document's template. It's a working draft, not a publication, and only fully reviewed languages can be handed off."
   );
