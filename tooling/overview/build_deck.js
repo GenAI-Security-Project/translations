@@ -42,15 +42,24 @@ async function icon(Comp, color, size = 256) {
   pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
   const C = pres.SchemeColor;
 
-  const logoData = "image/png;base64," + fs.readFileSync(LOGO).toString("base64");
-  const LOGO_RATIO = 102 / 768;
+  // The deck and video show only "GenAI SECURITY PROJECT": the left 300px
+  // of the logo (the OWASP mark, the word OWASP and the divider) are cropped
+  // off by default. LOGO_CROP_LEFT=0 shows the full logo. The crop is done
+  // in memory; the logo file itself is never edited.
+  const cropLeft = parseInt(process.env.LOGO_CROP_LEFT ?? "300", 10);
+  let logoBuf = fs.readFileSync(LOGO);
+  const meta = await sharp(logoBuf).metadata();
+  if (cropLeft > 0) logoBuf = await sharp(logoBuf).extract({ left: cropLeft, top: 0, width: meta.width - cropLeft, height: meta.height }).png().toBuffer();
+  const logoData = "image/png;base64," + logoBuf.toString("base64");
+  const LOGO_RATIO = meta.height / (meta.width - cropLeft);
+  const LOGO_W = 3.6 * (meta.width - cropLeft) / meta.width; // same letter size either way
 
   // ---- Layouts -------------------------------------------------------
   pres.defineSlideMaster({
     title: "Dark title",
     background: { color: HEX.dk2 },
     objects: [
-      { image: { data: logoData, x: 0.6, y: 0.55, w: 3.6, h: 3.6 * LOGO_RATIO, altText: "OWASP GenAI Security Project" } },
+      { image: { data: logoData, x: 0.6, y: 0.55, w: LOGO_W, h: LOGO_W * LOGO_RATIO, altText: cropLeft > 0 ? "GenAI Security Project" : "OWASP GenAI Security Project" } },
       { placeholder: { options: { name: "title", type: "title", x: 0.6, y: 1.7, w: 8.8, h: 1.2, fontSize: 40, bold: true, color: C.background1, valign: "bottom", align: "left", margin: 0 }, text: "" } },
       { placeholder: { options: { name: "body", type: "body", x: 0.6, y: 3.05, w: 8.2, h: 1.1, fontSize: 18, color: C.accent4, valign: "top", margin: 0 }, text: "" } },
     ],

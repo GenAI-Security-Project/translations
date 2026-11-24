@@ -27,7 +27,7 @@ renderer — is open and auditable in this repo.
 
 ## How a translation happens, step by step
 
-New to it? Watch the six-minute
+New to it? Watch the seven-minute
 [explainer video](https://genai-security-project.github.io/translations/docs.html) or download the
 [manager overview slides](docs/media/GenAI-Translations-Manager-Overview.pptx).
 
