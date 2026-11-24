@@ -188,11 +188,69 @@ function renderLocaleItem(list, assetId, locale, summary) {
 
   li.innerHTML = `
     ${linkOrPlain}
-    <span class="${cls}">${label}</span>
+    <span class="${cls} locale-progress-pill">${label}</span>
     ${total > 0 ? `<span class="locale-counts">${summary.reviewed || 0}/${total} reviewed (${pct}%) — ${summary.draft || 0} draft, ${summary.in_review || 0} in review, ${summary.stale || 0} stale</span>` : ""}
+    <span class="locale-activity" aria-live="polite"></span>
   `;
+  li.dataset.key = `${assetId}|${locale}`;
+  li.dataset.hasSections = total > 0 ? "1" : "";
   list.appendChild(li);
 }
+
+// Live activity (js/activity.js), refreshed in place. GitHub allows ~60
+// unauthenticated API reads an hour per network and a refresh costs ~3, so:
+// every 3 minutes while something is queued/drafting; otherwise only when
+// the tab becomes visible again (at most every 2 minutes) or on "Refresh";
+// and never automatically once fewer than 10 reads are left this hour.
+const ACTIVE_REFRESH_MS = 3 * 60 * 1000;
+const MIN_GAP_MS = 2 * 60 * 1000;
+const LOW_BUDGET = 10;
+let activityTimer = null;
+let lastActivityAt = 0;
+
+async function refreshActivity({ manual = false } = {}) {
+  clearTimeout(activityTimer);
+  const note = document.getElementById("activity-note");
+  lastActivityAt = Date.now();
+  const { byLocale, active, error } = await fetchActivity();
+  for (const li of document.querySelectorAll(".locale-status-item[data-key]")) {
+    const info = byLocale.get(li.dataset.key);
+    const hasSections = li.dataset.hasSections === "1";
+    renderActivity(li.querySelector(".locale-activity"), info, hasSections);
+    // "no sections yet" is misleading once a draft is running or waiting in a PR.
+    const pill = li.querySelector(".locale-progress-pill");
+    if (pill && !hasSections) pill.hidden = Boolean(info && info.state !== "done" && info.state !== "failed");
+  }
+
+  const low = activityBudget.remaining !== null && activityBudget.remaining < LOW_BUDGET;
+  if (note) {
+    const t = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    let text = error || `Live activity from GitHub · updated ${t}`;
+    if (!error && low) {
+      const back = activityBudget.reset ? new Date(activityBudget.reset).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "within the hour";
+      text += ` · auto-refresh paused until ${back} (GitHub's hourly limit for this network)`;
+    } else if (!error && active) {
+      text += " · refreshing every 3 minutes while drafting";
+    }
+    note.textContent = text + " · ";
+    const btn = document.createElement("a");
+    btn.href = "#";
+    btn.textContent = "Refresh";
+    btn.addEventListener("click", (e) => { e.preventDefault(); refreshActivity({ manual: true }); });
+    note.appendChild(btn);
+  }
+  if (active && !low && !error) {
+    activityTimer = setTimeout(() => {
+      if (document.visibilityState === "visible") refreshActivity();
+    }, ACTIVE_REFRESH_MS);
+  }
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible" || !document.querySelector(".locale-status-item")) return;
+  if (Date.now() - lastActivityAt < MIN_GAP_MS) return;
+  if (activityBudget.remaining !== null && activityBudget.remaining < LOW_BUDGET) return;
+  refreshActivity();
+});
 
 // CONTENT_REPO is public, so this reads with no token at all — see
 // github-api.js. If GitHub's unauthenticated rate limit (60/hr per IP) is
@@ -225,6 +283,13 @@ async function loadStatus() {
     }
   }
   messageEl.textContent = "";
+  if (!document.getElementById("activity-note")) {
+    const note = document.createElement("p");
+    note.id = "activity-note";
+    note.className = "hint activity-note";
+    container.before(note);
+  }
+  refreshActivity();
 }
 
 document.addEventListener("DOMContentLoaded", loadStatus);
