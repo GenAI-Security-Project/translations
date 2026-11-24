@@ -375,3 +375,4 @@ a.button-link-disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed
 .doc-list a { font-weight: 600; text-decoration: none; }
 .doc-list a:hover { text-decoration: underline; }
 .doc-list p { margin: 4px 0 0; color: var(--muted); font-size: 0.9rem; }
+.explainer { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); background: #0f172a; margin: 0 0 12px; }

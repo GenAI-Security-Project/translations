@@ -1,0 +1,313 @@
+WEBVTT
+
+00:00:00.600 --> 00:00:01.068
+Welcome.
+
+00:00:01.068 --> 00:00:05.689
+This is an overview of the OWASP GenAI Security Project's translation pipeline,
+
+00:00:05.689 --> 00:00:07.209
+for translations managers.
+
+00:00:07.209 --> 00:00:11.830
+We'll cover how a document gets into the pipeline, how a new language is added,
+
+00:00:11.830 --> 00:00:16.217
+where translations are reviewed and edited, how they're marked as reviewed,
+
+00:00:16.217 --> 00:00:19.200
+and how a finished translation goes through layout,
+
+00:00:19.200 --> 00:00:22.417
+final review and sign-off before anything is published.
+
+00:00:23.917 --> 00:00:26.222
+Here's the whole journey in seven steps.
+
+00:00:26.222 --> 00:00:29.796
+A translations manager makes a request: either a new document,
+
+00:00:29.796 --> 00:00:33.484
+or a new language for a document that's already in the pipeline.
+
+00:00:33.484 --> 00:00:35.847
+Gemini then machine-drafts every section.
+
+00:00:35.847 --> 00:00:38.499
+Language reviewers review and edit that draft,
+
+00:00:38.499 --> 00:00:41.496
+and mark it as reviewed by approving and merging it.
+
+00:00:41.496 --> 00:00:43.282
+Once every section is reviewed,
+
+00:00:43.282 --> 00:00:46.913
+a manager produces a watermarked layout draft for the designer,
+
+00:00:46.913 --> 00:00:49.737
+who lays it out in the template for final review.
+
+00:00:49.737 --> 00:00:53.426
+And finally, three people sign off before anything is published.
+
+00:00:53.426 --> 00:00:58.325
+That last point is the rule that matters most: nothing is published without sign-off.
+
+00:00:59.825 --> 00:01:00.645
+Who does what.
+
+00:01:00.645 --> 00:01:04.102
+Translations managers start everything: they make requests,
+
+00:01:04.102 --> 00:01:06.621
+run layout handoffs and confirm publishing.
+
+00:01:06.621 --> 00:01:10.019
+Every pipeline action checks that the person is a manager.
+
+00:01:10.019 --> 00:01:13.827
+Language reviewers review and edit the drafts for their language,
+
+00:01:13.827 --> 00:01:16.757
+and they're requested automatically on each draft.
+
+00:01:16.757 --> 00:01:19.100
+Document owners are asked to review too.
+
+00:01:19.100 --> 00:01:22.850
+The layout designer lays the reviewed draft out in the template.
+
+00:01:22.850 --> 00:01:27.713
+Three sign-off approvers, the localization lead, the technical or content reviewer,
+
+00:01:27.713 --> 00:01:30.818
+and the project or ops executive, approve publishing.
+
+00:01:30.818 --> 00:01:33.806
+And the pipeline itself, running on GitHub Actions,
+
+00:01:33.806 --> 00:01:37.263
+does the drafting and keeps track of each section's status.
+
+00:01:38.763 --> 00:01:43.383
+To add a new document, open the translations site and choose Onboard a document,
+
+00:01:43.383 --> 00:01:45.693
+then open the onboarding form on GitHub.
+
+00:01:45.693 --> 00:01:48.985
+Drag the finished English PDF or Word file into the form.
+
+00:01:48.985 --> 00:01:52.451
+Its file name becomes the document's id, so name it clearly.
+
+00:01:52.451 --> 00:01:56.840
+Then pick the version, the languages and the layout template from the lists,
+
+00:01:56.840 --> 00:01:57.822
+and press Create.
+
+00:01:57.822 --> 00:02:03.136
+The pipeline checks that you're a translations manager and opens an onboarding pull request.
+
+00:02:03.136 --> 00:02:07.525
+When that's merged, machine drafting of every language starts automatically.
+
+00:02:07.525 --> 00:02:09.778
+Remember that the repository is public,
+
+00:02:09.778 --> 00:02:13.012
+so only attach documents that are meant to be published.
+
+00:02:14.512 --> 00:02:17.867
+To translate an existing document into another language,
+
+00:02:17.867 --> 00:02:21.102
+the easiest route is the Documents and languages page.
+
+00:02:21.102 --> 00:02:25.176
+Press Add languages under the document, tick the languages you want,
+
+00:02:25.176 --> 00:02:26.973
+and press Request translation.
+
+00:02:26.973 --> 00:02:29.310
+GitHub opens the request; press Create.
+
+00:02:29.310 --> 00:02:35.720
+You can also open the Add languages form directly and pick the document and languages from drop-down lists.
+
+00:02:35.720 --> 00:02:36.799
+No file is needed.
+
+00:02:36.799 --> 00:02:41.711
+The pipeline checks you're a manager, skips any language the document already has,
+
+00:02:41.711 --> 00:02:45.126
+registers the new ones, and drafts each language in turn.
+
+00:02:45.126 --> 00:02:50.338
+Each draft arrives as its own pull request for review, and it's linked on your request.
+
+00:02:50.338 --> 00:02:54.053
+On the free Gemini tier a long document can need a second run;
+
+00:02:54.053 --> 00:02:56.749
+a partial draft still opens its pull request.
+
+00:02:58.249 --> 00:03:00.861
+Where do translations get reviewed and edited?
+
+00:03:00.861 --> 00:03:03.359
+In the draft pull request for that language.
+
+00:03:03.359 --> 00:03:05.459
+You'll find it linked on the request,
+
+00:03:05.459 --> 00:03:08.582
+or under Translations awaiting review on the Docs page.
+
+00:03:08.582 --> 00:03:13.408
+Reviewers for the language and the document owners are asked to review automatically.
+
+00:03:13.408 --> 00:03:18.461
+Each section is its own file, under the document's folder and then the language's folder.
+
+00:03:18.461 --> 00:03:22.549
+To edit, open the pull request's Files changed tab and choose Edit file,
+
+00:03:22.549 --> 00:03:25.671
+or press the full-stop key to open GitHub's web editor,
+
+00:03:25.671 --> 00:03:29.191
+and commit your changes straight to the pull request's branch.
+
+00:03:30.691 --> 00:03:33.040
+Every section moves through three states.
+
+00:03:33.040 --> 00:03:34.243
+It starts as a draft.
+
+00:03:34.243 --> 00:03:38.138
+When a reviewer begins, they mark the pull request Ready for review,
+
+00:03:38.138 --> 00:03:40.143
+and its sections move to In review.
+
+00:03:40.143 --> 00:03:41.517
+When the review is done,
+
+00:03:41.517 --> 00:03:45.642
+approving and merging the pull request moves those sections to Reviewed.
+
+00:03:45.642 --> 00:03:50.109
+The pipeline records each change itself, so nobody edits status files by hand,
+
+00:03:50.109 --> 00:03:54.348
+and the Documents and languages page shows the progress for each language.
+
+00:03:54.348 --> 00:03:56.410
+If the English source changes later,
+
+00:03:56.410 --> 00:04:00.305
+the affected sections are flagged as stale so they get another look.
+
+00:04:01.805 --> 00:04:06.552
+Once every section of a language is reviewed, the Publish page marks it as ready.
+
+00:04:06.552 --> 00:04:10.537
+A manager copies the document id, opens the layout handoff workflow,
+
+00:04:10.537 --> 00:04:13.116
+enters the id and the language, and runs it.
+
+00:04:13.116 --> 00:04:16.808
+A few minutes later the package can be downloaded from the run.
+
+00:04:16.808 --> 00:04:22.082
+It holds a Word file of the reviewed translation, watermarked Draft, not for distribution,
+
+00:04:22.082 --> 00:04:25.540
+along with the figures as separate files and handoff notes.
+
+00:04:25.540 --> 00:04:29.760
+That package goes to the designer to lay out in the document's template.
+
+00:04:29.760 --> 00:04:32.104
+It's a working draft, not a publication,
+
+00:04:32.104 --> 00:04:35.151
+and only fully reviewed languages can be handed off.
+
+00:04:36.651 --> 00:04:38.978
+The designer returns the laid-out draft,
+
+00:04:38.978 --> 00:04:43.168
+and it goes through a final review by the reviewers and document owners.
+
+00:04:43.168 --> 00:04:44.971
+Once every section is reviewed,
+
+00:04:44.971 --> 00:04:49.335
+the pipeline opens a Ready to publish issue for that document and language.
+
+00:04:49.335 --> 00:04:53.524
+It carries a sign-off checklist with three boxes: the localization lead,
+
+00:04:53.524 --> 00:04:57.480
+the technical or content reviewer, and the project or ops executive.
+
+00:04:57.480 --> 00:04:58.935
+All three must be ticked,
+
+00:04:58.935 --> 00:05:03.647
+and the step that completes the sign-off has to come from a translations manager.
+
+00:05:03.647 --> 00:05:06.498
+Only then is the final PDF produced and released.
+
+00:05:06.498 --> 00:05:10.978
+If someone who isn't a manager completes the checklist, nothing is published;
+
+00:05:10.978 --> 00:05:12.724
+a manager is asked to confirm.
+
+00:05:14.224 --> 00:05:18.363
+To repeat the most important rule: nothing is published without sign-off.
+
+00:05:18.363 --> 00:05:23.410
+Machine drafts, reviewed drafts and the watermarked layout drafts are all working copies.
+
+00:05:23.410 --> 00:05:29.421
+A translation is released only after all three sign-offs are complete and a translations manager confirms.
+
+00:05:30.921 --> 00:05:35.731
+Everything starts from the translations site, which has pages for onboarding,
+
+00:05:35.731 --> 00:05:38.605
+documents and languages, publishing, and docs.
+
+00:05:38.605 --> 00:05:44.227
+The Docs page links the guides and reference, plus requests, translations awaiting review,
+
+00:05:44.227 --> 00:05:45.351
+and workflow runs.
+
+00:05:45.351 --> 00:05:49.786
+There are no access tokens: everything uses your normal GitHub sign-in,
+
+00:05:49.786 --> 00:05:52.098
+and an admin adds managers in GitHub.
+
+00:05:52.098 --> 00:05:56.158
+Each language has its own reviewer team, requested automatically.
+
+00:05:57.658 --> 00:06:00.279
+That's the pipeline from request to release.
+
+00:06:00.279 --> 00:06:04.151
+For more detail, start at the Docs page on the translations site.
+
+00:06:04.151 --> 00:06:05.342
+Thanks for watching.
