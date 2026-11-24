@@ -69,9 +69,27 @@ Standard GitHub flow:
 - **For `.svg` figures**, only change the text inside `<text>...</text>`
   elements. Don't touch the `<image>` element, coordinates, or any other
   attribute.
-- **Never hand-edit `status.json` or `translation_log.jsonl`.** These are
-  written automatically by the pipeline (see below) — a manual edit to them
-  will be overwritten or cause the automation to skip your PR.
+- **Update the section's status in `status.json` in the same PR.** Edits to
+  a section that's already on `main` are *not* tracked automatically (only
+  the machine-draft PRs are). Open `<asset-id>/<locale>/status.json`, find
+  the section's entry, and set the correct status — `"reviewed"` once the
+  section has been checked — plus `"reviewer"` (the GitHub username who
+  reviewed it), `"reviewed_at"` (`YYYY-MM-DD`) and `"pr"` (this PR's
+  number). Leave the other fields (`source_commit`, `translator`) and other
+  sections alone. **If you skip this, the section stays `draft`, and the
+  layout handoff refuses the whole language.** Example:
+
+  ```json
+  "ASI01_Agent_Goal_Hijack": {
+    "status": "reviewed",
+    "source_commit": "a05b19b",
+    "translator": "google:gemini-3.6-flash",
+    "reviewer": "your-github-name",
+    "reviewed_at": "2026-11-24",
+    "pr": 84
+  }
+  ```
+- **Never edit `translation_log.jsonl`** — it's written only by the pipeline.
 
 ## 4. Open a pull request
 
@@ -91,20 +109,21 @@ will be requested as a reviewer automatically.
 - A human reviews your change against the English original, the same way a
   code change gets reviewed — they may comment, request changes, or edit
   directly on your branch.
-- If your PR is labeled for the pipeline's automated status tracking, merging
-  it will move the section(s) you touched to `reviewed` in `status.json`
-  automatically (`tooling/review_transition.py`, triggered by
-  `.github/workflows/review-transitions.yml`) — you don't need to do anything
-  for this yourself.
+- Machine-draft PRs (labelled `status:draft` / `status:in_review`) update
+  `status.json` for the sections they touch automatically when they're
+  marked ready for review and merged (`tooling/review_transition.py`, via
+  `.github/workflows/review-transitions.yml`).
+- **Any other PR that edits a section must set that section's status in
+  `status.json` itself** (step 3 above); the reviewer checks it along with
+  the wording. Once merged, the section counts as reviewed on the
+  Documents & languages and Publish pages and for the layout handoff.
 - Once merged, your fix is live in the repo.
 
 ## Good to know
 
-- **Fixing an already-`reviewed` section is completely fine** — you don't
-  need to do anything special. Open the PR and get it reviewed like any
-  other change. (Today, every section in every locale in this repo is still
-  `draft` — nothing has gone through the full review cycle yet — but this
-  applies once that changes too.)
+- **Fixing an already-`reviewed` section is fine** — open the PR and get it
+  reviewed like any other change, updating its `status.json` entry
+  (`reviewer`, `reviewed_at`, `pr`) to reflect the new review.
 - **The `<!-- status: draft -->` banner at the top of a `.md` file does not
   track live status.** It's written once, when the section is first drafted,
   and is never updated afterward — even after a section is fully reviewed.

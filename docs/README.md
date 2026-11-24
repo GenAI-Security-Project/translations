@@ -32,6 +32,19 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
   (workflow walkthrough, this README, tooling reference, design,
   requirements, open items) and to requests, reviews and workflow runs.
 
+- **`managers.html`** — the current translations managers (Maintain or
+  Admin on this repo), from `data/managers.json`, which
+  `sync-managers.yml` writes daily from the repo's collaborator roles (a
+  public page can't read those itself).
+
+## Visibility
+
+The site is **public**: the repo is public and so is its GitHub Pages site
+(GitHub only offers access-controlled Pages on Enterprise Cloud). Anyone
+can *view* every page, including the Managers list. Viewing changes
+nothing: every pipeline action happens on GitHub and is refused unless the
+person is a translations manager (`require-manager`).
+
 ## Look and feel
 
 Branded to match genai.owasp.org: the project's official logo

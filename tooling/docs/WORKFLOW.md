@@ -41,11 +41,15 @@ translate-draft.yml  (once per new locale; also Run workflow by hand)
 [draft PR opened, labeled status:draft, locale owner requested as reviewer]
       ▼
 ordinary PR review
-      │  review_transition.py (via review-transitions.yml) is the only
-      │  writer of draft→in_review (PR marked ready) and in_review→reviewed
-      │  (PR merged) — always an explicit human action
+      │  For the machine-draft PR, review_transition.py (via
+      │  review-transitions.yml) moves the touched sections draft→in_review
+      │  (PR marked ready) and →reviewed (PR merged) — always an explicit
+      │  human action
       ▼
-[repeat translate-draft.yml / review loop per section, per correction]
+[later corrections: a PR editing a section ALSO sets that section's entry
+ in status.json — "reviewed" + reviewer, reviewed_at, pr — in the same PR;
+ review-transitions.yml doesn't act on unlabelled PRs, so without this the
+ section stays "draft" and layout-handoff refuses the language]
       ▼
 status.json: every section "reviewed"  →  the generate process (Process 1)
                                            ends here, nothing downstream

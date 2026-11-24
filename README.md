@@ -27,9 +27,14 @@ renderer — is open and auditable in this repo.
 
 ## How a translation happens, step by step
 
-New to it? Watch the seven-minute
-[explainer video](https://genai-security-project.github.io/translations/docs.html) or download the
+New to it? Watch the eight-minute explainer video (click to play, with
+captions), or download the
 [manager overview slides](docs/media/GenAI-Translations-Manager-Overview.pptx).
+
+[![Explainer video: how the GenAI translation pipeline works (8 min)](docs/media/explainer-poster.jpg)](https://genai-security-project.github.io/translations/docs.html)
+
+▶ [Play the video](https://genai-security-project.github.io/translations/docs.html) ·
+[download the MP4](https://genai-security-project.github.io/translations/media/GenAI-Translations-Explainer.mp4)
 
 1. **Request it** (translations managers only). Either:
    - **a new document** — the *Onboard a new document* form, linked from the
@@ -51,9 +56,13 @@ New to it? Watch the seven-minute
    document owners are requested on the draft PR automatically. Reviewers
    edit the section files right in the PR (*Files changed* → *Edit file*, or
    press `.` for the web editor). Nothing is auto-approved.
-4. **It's marked reviewed.** Marking the PR *Ready for review* moves its
-   sections to `in_review`; approving and merging it moves them to
-   `reviewed`. Progress per language is on the
+4. **It's marked reviewed.** Each section's status lives in
+   `<document>/<language>/status.json`, and only `reviewed` counts for the
+   layout handoff. For the machine-draft PR this is automatic: marking it
+   *Ready for review* moves its sections to `in_review`, and merging moves
+   them to `reviewed`. **A later edit to a section, in its own PR, must set
+   that section's `status.json` entry to `reviewed` in the same PR** —
+   otherwise it stays `draft` and the language can't be handed off. Progress per language is on the
    [Documents & languages page](https://genai-security-project.github.io/translations/status.html).
 5. **Layout handoff.** Once every section of a language is reviewed, a
    manager runs the layout handoff from the
@@ -86,7 +95,8 @@ The site is at **https://genai-security-project.github.io/translations/**.
 | Add a **language** to a document that's already here | [Documents & languages page](https://genai-security-project.github.io/translations/status.html) → **+ Add languages** (or the [*Add languages* form](https://github.com/GenAI-Security-Project/translations/issues/new?template=add-language.yml)) |
 | Check how a translation is progressing | [Documents & languages page](https://genai-security-project.github.io/translations/status.html) |
 | Review and edit a drafted translation | Its draft PR — linked on the request, or [all translations awaiting review](https://github.com/GenAI-Security-Project/translations/pulls?q=is%3Apr+label%3Astatus%3Adraft%2Cstatus%3Ain_review) |
-| Mark a translation as reviewed | In its PR: *Ready for review* (→ in review), then approve and merge (→ reviewed) |
+| Mark a translation as reviewed | Machine-draft PR: *Ready for review* (→ in review), then approve and merge (→ reviewed). **Edited a section later in another PR?** Set its entry in `<document>/<language>/status.json` to `reviewed` (with reviewer, date, PR) in that PR — see the [contribution guide](translation-contribution-guide.md) |
+| See who the translations managers are | [Managers page](https://genai-security-project.github.io/translations/managers.html) |
 | Fix or improve a specific translated entry later | [`translation-contribution-guide.md`](translation-contribution-guide.md) |
 | Hand a fully reviewed language to the layout designer | [Publish page](https://genai-security-project.github.io/translations/publish.html) → *Run layout handoff* (watermarked draft) |
 | Sign off and publish | The *Ready to publish* issue for that document/language — three sign-offs required; see `tooling/docs/WORKFLOW.md` |

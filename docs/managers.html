@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Managers — OWASP GenAI Translations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Barlow:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/theme.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="brand-row">
+      <a class="brand" href="https://genai.owasp.org" target="_blank" rel="noopener">
+        <img class="brand-logo" src="assets/owasp-genai-security-project-logo.png" width="768" height="102"
+             alt="OWASP GenAI Security Project" />
+        <span class="brand-product">Translations</span>
+      </a>
+      <button type="button" class="theme-toggle" id="theme-toggle">◐ Auto</button>
+    </div>
+    <nav aria-label="Translations">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Onboard a document</a>
+        <a href="status.html">Documents &amp; languages</a>
+        <a href="publish.html">Publish</a>
+        <a href="managers.html" aria-current="page">Managers</a>
+        <a href="docs.html">Docs</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page">
+
+  <p class="hint">
+    <strong>Translations managers</strong> can onboard documents, add languages, run
+    machine drafting and layout handoffs, and confirm publishing. Everyone else can
+    view the site and review translations, but any pipeline action they start is
+    refused automatically.
+  </p>
+
+  <p id="managers-message" class="hint">Loading…</p>
+  <ul id="managers-list" class="manager-list" hidden></ul>
+
+  <h2>How managers are added or removed</h2>
+  <ul class="hint">
+    <li>A manager is anyone with the <strong>Maintain</strong> or <strong>Admin</strong>
+      role on the <code>translations</code> repository. Every pipeline workflow checks
+      this when it runs.</li>
+    <li>A repository or organization admin adds people in GitHub: org members through the
+      <code>translations-managers</code> team, and people outside the organization as
+      collaborators with Maintain on this repository only.</li>
+    <li>Nothing on this site changes who is a manager. This list is refreshed from GitHub
+      once a day (and whenever the <code>sync-managers</code> workflow is run).</li>
+  </ul>
+</div>
+
+<script src="js/managers.js"></script>
+</body>
+</html>

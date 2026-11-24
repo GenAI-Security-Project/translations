@@ -197,6 +197,18 @@ function renderLocaleItem(list, assetId, locale, summary) {
   list.appendChild(li);
 }
 
+// Counts come from the sections themselves rather than the file's stored
+// "summary": a status.json updated by hand in a PR (the documented way to
+// mark a later edit reviewed) may not carry an up-to-date summary.
+function summarize(status) {
+  const out = { total: 0, draft: 0, in_review: 0, reviewed: 0, stale: 0 };
+  for (const s of Object.values((status && status.sections) || {})) {
+    out.total++;
+    if (s.status in out) out[s.status]++;
+  }
+  return out;
+}
+
 // Live activity (js/activity.js), refreshed in place. GitHub allows ~60
 // unauthenticated API reads an hour per network and a refresh costs ~3, so:
 // every 3 minutes while something is queued/drafting; otherwise only when
@@ -279,7 +291,7 @@ async function loadStatus() {
     const list = renderAssetSection(container, assetId, entry);
     for (const locale of entry.locales || []) {
       const status = await fetchStatusJson(assetId, locale);
-      renderLocaleItem(list, assetId, locale, status && status.summary ? status.summary : {});
+      renderLocaleItem(list, assetId, locale, summarize(status));
     }
   }
   messageEl.textContent = "";
