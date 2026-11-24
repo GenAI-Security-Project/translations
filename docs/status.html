@@ -5,20 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Status — OWASP GenAI Translations</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Barlow:wght@400;500;600&display=swap" />
 <link rel="stylesheet" href="css/style.css" />
+<script src="js/theme.js"></script>
 </head>
 <body>
 <header class="site-header">
   <div class="site-header-inner">
-      <p class="brand-tagline">OWASP GenAI Security Project</p>
-      <h1 class="brand-lockup"><a class="brand-lockup-link" href="https://GenAI.OWASP.org" target="_blank" rel="noopener"><span class="brand-genai">GenAI</span> <span class="brand-rest">Translations</span></a></h1>
-      <nav>
+    <div class="brand-row">
+      <a class="brand" href="https://genai.owasp.org" target="_blank" rel="noopener">
+        <img class="brand-logo" src="assets/owasp-genai-security-project-logo.png" width="768" height="102"
+             alt="OWASP GenAI Security Project" />
+        <span class="brand-product">Translations</span>
+      </a>
+      <button type="button" class="theme-toggle" id="theme-toggle">◐ Auto</button>
+    </div>
+    <nav aria-label="Translations">
         <a href="index.html">Home</a>
         <a href="upload.html">Onboard a document</a>
-        <a href="status.html">Status</a>
+        <a href="status.html" aria-current="page">Documents &amp; languages</a>
         <a href="publish.html">Publish</a>
-      </nav>
+        <a href="docs.html">Docs</a>
+    </nav>
   </div>
 </header>
 

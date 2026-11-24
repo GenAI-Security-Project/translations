@@ -3,12 +3,14 @@
 This guide is for anyone who wants to fix or improve a specific piece of
 **already-drafted translated content** — a mistranslation, an awkward phrase,
 a missed technical term, a typo. It is not about requesting a brand-new
-translation or onboarding a new document/locale — that happens through the
-[upload page](https://genai-security-project.github.io/translations/upload.html)
-instead (see the root `README.md`).
+translation or onboarding a new document/language — new documents go through
+the [Onboard page](https://genai-security-project.github.io/translations/upload.html),
+and new languages through **+ Add languages** on the
+[Documents & languages page](https://genai-security-project.github.io/translations/status.html)
+(see the root `README.md`).
 
 If you just want to see how far along a locale is before deciding what to
-fix, check the [status page](https://genai-security-project.github.io/translations/status.html)
+fix, check the [Documents & languages page](https://genai-security-project.github.io/translations/status.html)
 first.
 
 ## 1. Find the file

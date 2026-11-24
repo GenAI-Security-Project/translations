@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Documentation — OWASP GenAI Translations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Barlow:wght@400;500;600&display=swap" />
+<link rel="stylesheet" href="css/style.css" />
+<script src="js/theme.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="brand-row">
+      <a class="brand" href="https://genai.owasp.org" target="_blank" rel="noopener">
+        <img class="brand-logo" src="assets/owasp-genai-security-project-logo.png" width="768" height="102"
+             alt="OWASP GenAI Security Project" />
+        <span class="brand-product">Translations</span>
+      </a>
+      <button type="button" class="theme-toggle" id="theme-toggle">◐ Auto</button>
+    </div>
+    <nav aria-label="Translations">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Onboard a document</a>
+        <a href="status.html">Documents &amp; languages</a>
+        <a href="publish.html">Publish</a>
+        <a href="docs.html" aria-current="page">Docs</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page">
+
+  <p class="hint">
+    Guides and reference for the translation pipeline. They live in the
+    <a href="https://github.com/GenAI-Security-Project/translations" target="_blank" rel="noopener">translations repository</a>
+    and open on GitHub.
+  </p>
+
+  <h2>Overview</h2>
+  <p class="hint">
+    A seven-minute walkthrough: adding a document or a language, where translations
+    are reviewed and edited, marking them reviewed, the watermarked layout draft,
+    final review and sign-off. <strong>Nothing is published without sign-off.</strong>
+  </p>
+  <video class="explainer" controls preload="metadata" playsinline
+         poster="media/explainer-poster.jpg">
+    <source src="media/GenAI-Translations-Explainer.mp4" type="video/mp4" />
+    <track kind="captions" src="media/GenAI-Translations-Explainer.vtt" srclang="en" label="English" default />
+    Your browser can't play this video. <a href="media/GenAI-Translations-Explainer.mp4">Download it</a>.
+  </video>
+  <ul class="doc-list">
+    <li>
+      <a href="media/GenAI-Translations-Manager-Overview.pptx" download>Manager overview slides (PowerPoint) ↓</a>
+      <p>The same twelve slides, with speaker notes, for presenting or sharing.</p>
+    </li>
+    <li>
+      <a href="media/GenAI-Translations-Explainer.mp4" download>Explainer video (MP4, 12 MB) ↓</a>
+      <p>The walkthrough above, to download or share; captions are built in.</p>
+    </li>
+  </ul>
+
+  <h2>For translations managers</h2>
+  <ul class="doc-list">
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/docs/WORKFLOW.md" target="_blank" rel="noopener">How the pipeline works →</a>
+      <p>Step by step: onboarding a document, adding languages, machine drafting, review, layout handoff and publishing.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/docs/README.md" target="_blank" rel="noopener">Using this site →</a>
+      <p>What each page does, who can do what, the two request forms, and how publishing access works.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/README.md" target="_blank" rel="noopener">Repository overview →</a>
+      <p>How the repository is laid out and where each document's translations live.</p>
+    </li>
+  </ul>
+
+  <h2>Reference</h2>
+  <ul class="doc-list">
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/README.md" target="_blank" rel="noopener">Tooling reference →</a>
+      <p>The scripts behind each step, the registry and status file formats, and the translation model settings.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/docs/DESIGN.md" target="_blank" rel="noopener">Design →</a>
+      <p>Technical design and the reasoning behind it.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/docs/REQUIREMENTS.md" target="_blank" rel="noopener">Requirements status →</a>
+      <p>Each requirement and how (or whether) it's met today.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/blob/main/tooling/docs/OPEN_ITEMS.md" target="_blank" rel="noopener">Open items →</a>
+      <p>Known gaps, pending decisions and follow-ups.</p>
+    </li>
+  </ul>
+
+  <h2>Requests and activity</h2>
+  <ul class="doc-list">
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/issues?q=label%3Aonboarding%2Cadd-language" target="_blank" rel="noopener">Onboarding and add-language requests →</a>
+      <p>Every request made through the two forms, with the pipeline's replies.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/pulls?q=is%3Apr+label%3Astatus%3Adraft%2Cstatus%3Ain_review" target="_blank" rel="noopener">Translations awaiting review →</a>
+      <p>Machine-drafted translations open for review.</p>
+    </li>
+    <li>
+      <a href="https://github.com/GenAI-Security-Project/translations/actions" target="_blank" rel="noopener">Workflow runs →</a>
+      <p>Progress and logs for drafting, layout handoff and publishing.</p>
+    </li>
+  </ul>
+</div>
+
+</body>
+</html>
