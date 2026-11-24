@@ -384,3 +384,15 @@ a.button-link-disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed
 .manager-list a { font-weight: 600; text-decoration: none; }
 .manager-list p { margin: 2px 0 0; font-size: 0.85rem; color: var(--muted); }
 .manager-list a { overflow-wrap: anywhere; }
+
+/* Live activity pills (js/activity.js) */
+.locale-activity { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+.locale-activity:empty { display: none; }
+.locale-activity a { font-weight: 600; }
+.status-pill-queued { background: var(--surface); color: var(--muted); border: 1px dashed var(--border); }
+.status-pill-active { background: rgba(7, 152, 255, 0.15); color: var(--accent); animation: pill-pulse 1.8s ease-in-out infinite; }
+.status-pill-ready { background: rgba(0, 53, 128, 0.12); color: var(--accent); }
+.status-pill-failed { background: rgba(179, 38, 30, 0.12); color: var(--error); }
+@media (prefers-reduced-motion: reduce) { .status-pill-active { animation: none; } }
+@keyframes pill-pulse { 50% { opacity: 0.55; } }
+.activity-note { font-size: 0.8rem; margin: 0 0 8px; }

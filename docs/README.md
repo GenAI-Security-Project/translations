@@ -9,7 +9,14 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
 
 - **`index.html`** — landing page linking the rest.
 - **`status.html`** — dashboard over every asset/locale's `status.json`,
-  live from the repo (NFR6). Each document has **+ Add languages**: a
+  live from the repo (NFR6), plus **live activity** (`js/activity.js`):
+  *Queued* / *Drafting…* while `translate-draft` is running for a language,
+  *Draft ready for review* (linking the open draft PR, marked partial if the
+  quota ran out), *Being reviewed*, or *Drafting failed* (linking the log).
+  Read from GitHub's public API with no token; GitHub allows ~60 such reads
+  an hour per network, so it refreshes every 3 minutes only while something
+  is drafting, otherwise on returning to the tab or **Refresh**, and pauses
+  itself when the hourly allowance runs low. Each document has **+ Add languages**: a
   checklist of languages (`js/languages.js`, plus an "other codes" box)
   that opens the **"Add languages" issue form** pre-filled (see below).
 - **`upload.html`** — onboarding (Process 1, FR1.1–FR1.5). Explains the
@@ -146,8 +153,9 @@ personal access token:
   the sign-off issue: the edit that completes the three-way checklist must
   be a manager's, otherwise nothing is published and a comment asks a
   manager to confirm.
-- **Testing-only `publish-direct.yml`** — Run workflow (`require-manager`);
-  its old `repository_dispatch` trigger, which needed a token, was removed.
+- **Preview-only `publish-direct.yml`** — Run workflow (`require-manager`):
+  a watermarked DRAFT PDF as a 14-day run artifact. It never commits or
+  releases anything, so nothing is published without sign-off.
 
 ## Publish page
 

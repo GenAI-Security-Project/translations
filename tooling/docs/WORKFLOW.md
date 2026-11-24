@@ -96,37 +96,26 @@ publish.yml  (fires on every edit to that issue)
 No step here can be skipped or reordered by a client-side action — the
 whole gate lives server-side in the Action.
 
-### The testing path: `publish-direct.yml`, manager check, no sign-off
+### The preview path: `publish-direct.yml` (watermarked, never published)
 
 ```
 Actions → publish-direct → Run workflow  (GitHub sign-in, no token;
-      │  inputs: asset, locale, watermark [default on]. Not offered on
-      │  docs/publish.html while Process 2 is being set up.)
+      │  inputs: asset, locale. Not offered on docs/publish.html.)
       ▼
 publish-direct.yml
       │  1. require-manager (same check as every pipeline workflow)
       │  2. check_render_override.py — same FR5 check as the real path
-      │  3. render.sh [--final if watermark unticked]
-      │  4. Commit to release/, cut a GitHub Release
+      │  3. render.sh WITHOUT --final: watermarked DRAFT preview PDF
+      │  4. Upload it as a workflow artifact (14 days) — nothing committed,
+      │     no GitHub Release
 ```
 
-**What this path guarantees and doesn't:**
-
-- It **does** still enforce FR5 (override-readiness) — that check isn't
-  bypassed, only the sign-off is.
-- It **does** still enforce `render.sh --final`'s own hard requirement that
-  every section be `reviewed` before a non-watermarked PDF is produced,
-  regardless of what `TESTING_MODE` chose to list as selectable.
-- It **does not** require any human sign-off beyond one translations
-  manager choosing to run it — there is no localization-lead /
-  technical-reviewer / ops-executive gate on this path at all.
-- **This is intentional and documented**, not a bug: it exists specifically
-  so the rendering pipeline (`render.js`, `render.sh`) can be exercised
-  end-to-end against real content before a live sign-off process (named
-  people, an actual habit of using the issue checklist) exists. Revisit —
-  fold into `publish.yml` behind a feature flag, or retire outright — once
-  real sign-off practice exists. Don't treat a `publish-direct.yml` release
-  as equivalent in trust to a `publish.yml` release.
+It renders the current translation (every section, whatever its status)
+with the DRAFT watermark, so the rendered layout can be checked before
+sign-off. **It cannot publish**: since 2026-11-24 it has no unwatermarked
+option, doesn't commit the PDF to `release/`, and doesn't create a
+Release. Per the project's rule — **nothing is published without the
+three-way sign-off** — the only publishing path is `publish.yml`.
 
 ## Process 4 — Assemble for Layout (designer handoff)
 

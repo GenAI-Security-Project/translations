@@ -41,10 +41,11 @@ been built). See `DESIGN.md` for the technical detail behind each pointer.
 | FR4.1 — Separate explicit trigger, never automatic from the generate process (Process 1) | Done | `check-freshness.yml` opens the issue; a human still has to sign off before `publish.yml` acts |
 | FR4.2 — Three-way sign-off required | Done | `check_signoff.py`'s checklist-structure check |
 
-**Addition beyond FR4:** `publish-direct.yml` + `publish.html`, a
-CAPTCHA + manager-gated path that **bypasses** FR4.2 entirely — see `WORKFLOW.md`
-for the exact scope. This exists for pipeline validation only and is a
-deliberate, documented exception to FR4, not a replacement for it.
+**Addition beyond FR4:** `publish-direct.yml`, a manager-only
+**watermarked preview** render (workflow artifact only — no commit, no
+Release), for checking the rendered layout before sign-off. Since
+2026-11-24 it cannot publish, so FR4.2 has no exception: nothing is
+published without the three-way sign-off.
 
 ### FR5 — Override-readiness check (the publish process, Process 2, part B)
 
@@ -96,7 +97,7 @@ deliberate, documented exception to FR4, not a replacement for it.
 | NFR4 | Tamper resistance — templates repo writable only by publish + admins | **Partial** | The repo itself exists and is private; the deploy key that would actually enforce "writable only by the publishing Action" (`TEMPLATES_DEPLOY_KEY`) is not yet configured, so `publish.yml`/`publish-direct.yml` cannot check it out in a real Actions run today |
 | NFR5 | No silent mis-rendering | Done | `check_render_override.py`'s hard fail |
 | NFR6 | Auditability (status, model, source commit) | Done | `status.json` + `translation_log.jsonl` + `docs/status.html` |
-| NFR7 | No automatic publishing | Done | Enforced structurally by the two-process split; `publish-direct.yml` is a documented, gated exception used for pipeline testing only, not a violation of intent |
+| NFR7 | No automatic publishing | Done | Enforced structurally by the two-process split; the only publishing path is `publish.yml` behind the three-way sign-off (`publish-direct.yml` only makes watermarked previews) |
 | NFR8 | Correct rendering across scripts | **Partial** | See FR8.1 — the mechanism exists (`render_config_schema.py`'s `direction`/`line_breaking`/`numerals` fields, `locale_script_categories.py`'s gate) but has only been exercised for Latin-script locales so far |
 | NFR9 | No lost work (migration preserves everything) | **Not applicable yet** | No migration has run — see FR9.1. Nothing has been *lost* (nothing has been migrated), but the requirement's actual goal (archived work carried forward) is unmet |
 | NFR10 | Self-service intake, no maintainer request needed | Done | the onboarding issue form's end-to-end flow (`onboard-from-issue.yml`), gated by the translations-manager role (a GitHub team), not a per-request human approval step |

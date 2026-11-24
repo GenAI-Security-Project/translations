@@ -44,11 +44,13 @@
   </p>
 
   <p class="hint">
-    Every onboarded document and its translations, read live from each
-    locale's <code>status.json</code>. A locale links to its actual
-    translated files on GitHub once at least one section has been drafted;
-    one registered with no draft yet shows "no sections yet" and isn't
-    linked, since there's nothing on <code>main</code> to link to.
+    Every onboarded document and its translations. Review progress comes from
+    each language's <code>status.json</code>; live activity comes straight from
+    GitHub: <strong>Queued</strong> and <strong>Drafting…</strong> while a machine
+    draft is being made, <strong>Draft ready for review</strong> (with its pull
+    request) once it's done, and <strong>Drafting failed</strong> with a link to
+    the log if a run didn't finish. A language links to its translated files once
+    reviewed sections are on <code>main</code>.
   </p>
 
   <p id="status-message" class="hint"></p>
@@ -59,6 +61,7 @@
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 <script src="js/github-api.js"></script>
 <script src="js/languages.js"></script>
+<script src="js/activity.js"></script>
 <script src="js/status.js"></script>
 </body>
 </html>

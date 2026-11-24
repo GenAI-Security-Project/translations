@@ -1,4 +1,9 @@
 name: translate-draft
+# Shown in the Actions list, and read by the site's live activity
+# (docs/js/activity.js) to tell which document/language a hand-started run
+# is drafting. (When called from another workflow, the caller's job names
+# carry that instead.)
+run-name: "translate-draft: ${{ inputs.asset || github.event.client_payload.asset }} / ${{ inputs.locale || github.event.client_payload.locale }}"
 
 # Component 2. Fired once per requested locale by the onboarding/add-locale
 # flow (today: manually via workflow_dispatch while component 6, the GitHub

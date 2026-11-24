@@ -185,3 +185,11 @@ section heading if none fits.*
 - [ ] **New version of an existing document** has no form any more (the
   old combined form's "new version" mode was dropped with the split). Add a
   third form if needed; until then, Actions → `bootstrap-asset`.
+
+## Sign-off rule enforced (2026-11-24)
+
+- [x] `publish-direct.yml` limited to watermarked previews: no unwatermarked
+  render, no commit to `release/`, no Release — just a 14-day artifact.
+  Nothing is published without the three-way sign-off (`publish.yml`).
+- [x] Japanese (`ja-JP`) removed from the Agentic Top 10 (live-test locale
+  from issue #76; nothing had been drafted).
