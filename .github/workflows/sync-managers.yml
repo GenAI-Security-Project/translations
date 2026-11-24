@@ -3,16 +3,29 @@
 #
 # A manager is anyone with Maintain or Admin on this repo -- the same rule
 # .github/actions/require-manager enforces. The collaborator list isn't
-# readable by a public page, so this job reads it with the workflow's own
-# token and commits the result to main (logins, roles and profile links
+# readable by a public page, so this job works it out with the workflow's
+# own token and commits the result to main (logins, roles and profile links
 # only -- all already public on GitHub). Runs daily and on demand; managers
 # are added and removed in GitHub settings, never here.
+#
+# The workflow token can't see org owners whose org membership is private
+# (they're admins through the org, not repo collaborators). So candidates
+# are: the repo's collaborators + public org members + everyone already on
+# the published list + any logins given in the `add` input -- and each one
+# is then checked with the same per-person permission lookup require-manager
+# uses. Nobody is listed without Maintain/Admin, and anyone who loses it
+# drops off at the next run.
 name: sync-managers
 
 on:
   schedule:
     - cron: "23 4 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      add:
+        description: "Extra GitHub usernames to check (comma-separated) -- e.g. org owners with private membership. Listed only if they really have Maintain/Admin."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -32,14 +45,31 @@ jobs:
       - name: List managers
         env:
           GH_TOKEN: ${{ github.token }}
+          ADD: ${{ inputs.add }}
+          ORG: ${{ github.repository_owner }}
         run: |
+          set -euo pipefail
           mkdir -p docs/data
-          gh api --paginate "repos/$GITHUB_REPOSITORY/collaborators?affiliation=all&per_page=100" \
-            | jq -s '[ .[][] | select(.type == "User" and (.role_name == "admin" or .role_name == "maintain"))
-                       | {login, role: .role_name, url: .html_url, avatar: .avatar_url} ]
-                     | sort_by(.role != "maintain", (.login | ascii_downcase))' > /tmp/managers.json
-          # Never publish an empty list (e.g. a token that can't see collaborators).
-          [ "$(jq length /tmp/managers.json)" -gt 0 ] || { echo "::error::no managers returned"; exit 1; }
+          {
+            gh api --paginate "repos/$GITHUB_REPOSITORY/collaborators?affiliation=all&per_page=100" --jq '.[] | select(.type == "User") | .login'
+            gh api --paginate "orgs/$ORG/public_members?per_page=100" --jq '.[].login'
+            [ -f docs/data/managers.json ] && jq -r '.managers[].login' docs/data/managers.json
+            printf '%s\n' "$ADD" | tr ', ' '\n\n'
+          } | grep -E '^[A-Za-z0-9](-?[A-Za-z0-9]){0,38}$' | sort -fu > /tmp/candidates.txt
+          echo "checking $(wc -l < /tmp/candidates.txt) candidates"
+          : > /tmp/managers.jsonl
+          while read -r login; do
+            perm=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$login/permission" 2>/dev/null) || continue
+            role=$(jq -r '.role_name' <<<"$perm")
+            case "$role" in
+              admin|maintain)
+                jq -c --arg role "$role" '.user | {login, role: $role, url: .html_url, avatar: .avatar_url}' <<<"$perm" >> /tmp/managers.jsonl ;;
+            esac
+          done < /tmp/candidates.txt
+          jq -s 'sort_by(.role != "maintain", (.login | ascii_downcase))' /tmp/managers.jsonl > /tmp/managers.json
+          # Never publish an empty list (e.g. a token that can't check permissions).
+          [ "$(jq length /tmp/managers.json)" -gt 0 ] || { echo "::error::no managers found"; exit 1; }
+          jq -c '.[] | [.login, .role]' /tmp/managers.json
           jq -n --slurpfile m /tmp/managers.json \
             '{generated_at: (now | todate), source: "Maintain/Admin on this repository", managers: $m[0]}' \
             > docs/data/managers.json.new

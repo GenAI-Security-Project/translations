@@ -7,7 +7,9 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
 
 ## Pages
 
-- **`index.html`** — landing page linking the rest.
+- **`index.html`** — landing page: onboarding, current translations, and a
+  **Contact** section (OWASP Slack `#team-genai-translations`, and the
+  Managers page).
 - **`status.html`** — dashboard over every asset/locale's `status.json`,
   live from the repo (NFR6), plus **live activity** (`js/activity.js`):
   *Queued* / *Drafting…* while `translate-draft` is running for a language,
@@ -34,8 +36,10 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
 
 - **`managers.html`** — the current translations managers (Maintain or
   Admin on this repo), from `data/managers.json`, which
-  `sync-managers.yml` writes daily from the repo's collaborator roles (a
-  public page can't read those itself).
+  `sync-managers.yml` writes daily (a public page can't read repo roles
+  itself). Candidates are collaborators, public org members and everyone
+  already listed, each checked for Maintain/Admin; org owners with private
+  membership are added once via the workflow's `add` input.
 
 ## Visibility
 
