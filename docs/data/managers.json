@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T17:20:09Z",
+  "generated_at": "2026-11-24T17:24:46Z",
   "source": "Maintain/Admin on this repository",
   "managers": [
     {
@@ -15,28 +15,10 @@
       "avatar": "https://avatars.githubusercontent.com/u/19329382?v=4"
     },
     {
-      "login": "GangGreenTemperTatum",
-      "role": "admin",
-      "url": "https://github.com/GangGreenTemperTatum",
-      "avatar": "https://avatars.githubusercontent.com/u/104169244?v=4"
-    },
-    {
-      "login": "mamicidal",
-      "role": "admin",
-      "url": "https://github.com/mamicidal",
-      "avatar": "https://avatars.githubusercontent.com/u/112129498?v=4"
-    },
-    {
       "login": "sclintonowasp",
       "role": "admin",
       "url": "https://github.com/sclintonowasp",
       "avatar": "https://avatars.githubusercontent.com/u/167656029?v=4"
-    },
-    {
-      "login": "vanderaj",
-      "role": "admin",
-      "url": "https://github.com/vanderaj",
-      "avatar": "https://avatars.githubusercontent.com/u/5029993?v=4"
     }
   ]
 }
