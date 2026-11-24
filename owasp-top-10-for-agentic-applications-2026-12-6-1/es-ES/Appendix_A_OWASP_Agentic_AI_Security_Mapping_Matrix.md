@@ -1,0 +1,24 @@
+<!-- status: draft -->
+# Apéndice A: Matriz de Mapeo de Seguridad de IA Agéntica de OWASP
+
+Mapeo cruzado de los 10 principales de ASI, los 10 principales de LLM, las amenazas y mitigaciones de IA agéntica, y los riesgos principales de AIVSS
+
+ID / Título de ASI | Top 10 de LLM de OWASP | Amenazas de IA agéntica y mitigaciones | Alineación con los riesgos principales de AIVSS (2025)
+---|---|---|---
+ASI 01 – Secuestro de Objetivos del Agente (Agent Goal Hijack) | LLM01:2025 Inyección de *Prompts* (Prompt Injection) · LLM06:2025 Agencia Excesiva (Excessive Agency) | T6 Manipulación de Objetivos · T7 Comportamientos Desalineados y Engañosos | Manipulación de Objetivos
+ASI 02 – Uso Incorrecto de Herramientas (Tool Misuse) | LLM06:2025 Agencia Excesiva (Excessive Agency) | T2 Uso Incorrecto de Herramientas · T4 Sobrecarga de Recursos · T16 Abuso de Protocolos Inseguros entre Agentes | Explotación del Uso Incorrecto de Herramientas
+ASI 03 – Abuso de Identidad y Privilegios (Identity and Privilege Abuse) | LLM01:2025 Inyección de *Prompts* (Prompt Injection) · LLM06:2025 Agencia Excesiva (Excessive Agency) · LLM02:2025 Divulgación de Información Sensible (Sensitive Info Disclosure) | T3 Compromiso de Acceso de Agentes | Violación de Control de Acceso
+ASI 04 – Cadena de Suministro Agéntica (Agentic Supply Chain) | LLM03:2025 Vulnerabilidades en la Cadena de Suministro (Supply Chain Vulnerabilities) | T17 Compromiso de la Cadena de Suministro de Agentes · T2 Ataques de Dependencia de Herramientas · T11 RCE Inesperado · T12 Envenenamiento de Comunicación entre Agentes · T13 Agente Deshonesto (Rogue Agent) · T16 Abuso de Protocolos Inseguros entre Agentes | Cadena de Suministro de Agentes y Dependencias de Herramientas
+ASI 05 – Ejecución de Código Crítico Inesperado (Unexpected Critical Code Execution) | LLM01:2025 Inyección de *Prompts* (Prompt Injection) · LLM05 Manejo Inadecuado de Salidas (Improper Output Handling) | T11 RCE Inesperado y Ataques a Sistemas de Agentes | Interacción Insegura con Sistemas
+ASI 06 – Envenenamiento de Memoria y Contexto (Memory & Context Poisoning) | LLM01:2025 Inyección de *Prompts* (Prompt Injection) · LLM04:2025 Envenenamiento de Datos y Modelos (Data & Model Poisoning) · LLM08:2025 Debilidades en Vectores y Memoria Compartida (Vector & Memory Poisoning) | T1 Envenenamiento de Memoria · T4 Uso de Memoria y Conciencia Contextual · T6 Objetivos Rotos | Memoria de Agentes y Manipulación de Contexto
+ASI 07 – Comunicación Insegura entre Agentes (Insecure Inter-Agent Communication) | LLM02:2025 Divulgación de Información Sensible (Sensitive Info Disclosure) · LLM06:2025 Agencia Excesiva (Excessive Agency) | T12 Envenenamiento de la Comunicación entre Agentes · T16 Abuso de Protocolos Inseguros entre Agentes | Envenenamiento de Memoria y Contexto
+ASI 08 – Fallos en Cascada (Cascading Failures) | LLM01:2025 Inyección de *Prompts* (Prompt Injection) · LLM04 Envenenamiento de Datos y Modelos · LLM06:2025 Agencia Excesiva (Excessive Agency) | T5 Ataques de Alucinación y Fallos en Cascada de Agentes · T8 Repudio e Infiltrabilidad | Fallos en Cascada y Repudio de Agentes
+ASI 09 – Explotación de la Confianza Humano-Agente / Manipulación Humana (Human-Agent Trust Exploitation / Human Manipulation) | LLM01:2025 Inyección de *Prompts* (Prompt Injection) · LLM05:2025 Manejo Inadecuado de Salidas (Improper Output Handling) · LLM06:2025 Agencia Excesiva · LLM09 Desinformación (Misinformation) | T7 Comportamientos Desalineados y Engañosos · T8 Repudio e Infiltrabilidad · T10 Abrumar al Humano en el Ciclo (*Overwhelming Human in the Loop*) | Desinformación / Manipulación Humana
+ASI 10 – Agentes Deshonestos (Rogue Agents) | LLM02:2025 Divulgación de Información Sensible (Sensitive Info Disclosure) · LLM09:2025 Desinformación (Misinformation) | T13 Agentes Deshonestos en Sistemas Multi-Agente · T14 Ataques Humanos a Sistemas Multi-Agente · T15 Manipulación Humana | Integridad Comportamental (BI) · Seguridad Operacional (OS) · Violaciones de Cumplimiento (CV)
+
+Notas
+
+* Alineación con el Top 10 de LLM: captura las vulnerabilidades raíz de los LLM extendidas en los sistemas agénticos.
+* Amenazas y Mitigaciones de IA Agéntica (T1–T17): representan rutas de ataque granulares referenciadas por el marco ASI.
+* Riesgos Principales de AIVSS: mapean a las categorías de puntuación cuantitativa para la priorización y la clasificación de gravedad (por ejemplo, BI, OS, CV).
+* Perspectiva de cruce: las entradas de ASI a menudo combinan múltiples entradas de LLM (por ejemplo, ASI01 combina LLM01:2025 [*prompt*] con LLM06 [autonomía]), lo que representa cómo la autonomía agéntica agrava los riesgos a nivel de modelo.

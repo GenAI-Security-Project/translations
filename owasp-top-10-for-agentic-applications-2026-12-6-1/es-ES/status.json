@@ -1,0 +1,114 @@
+{
+  "asset": "owasp-top-10-for-agentic-applications-2026-12-6-1",
+  "locale": "es-ES",
+  "sections": {
+    "ASI01_Agent_Goal_Hijack": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "ASI03_Identity_and_Privilege_Abuse": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.6-flash"
+    },
+    "ASI05_Unexpected_Code_Execution_RCE": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "ASI06_Memory_Context_Poisoning": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "ASI10_Rogue_Agents": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.6-flash"
+    },
+    "Acknowledgements": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Acknowledgements_Figure_3": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Agentic_Top_10_At_A_Glance": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Agentic_Top_10_At_A_Glance_Figure_2": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.6-flash"
+    },
+    "Appendix_A_OWASP_Agentic_AI_Security_Mapping_Matrix": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Appendix_B_Relationship_to_OWASP_CycloneDX_and_AIBOM": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Appendix_C_Mapping_Between_OWASP_Non_Human_Identities_Top_10_2025_and_OWASP_Agentic_AI_Top_10_Figure": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.6-flash"
+    },
+    "Appendix_E_Abbreviations": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Letter_from_The_Agentic_Top_10_Leaders": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "OWASP_Top_10_For_Agentic_Applications_2026": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "OWASP_Top_10_For_Agentic_Applications_2026_Figure_3": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Preface_Figure": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Project_Supporters": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.5-flash-lite"
+    },
+    "Table_of_Content": {
+      "status": "draft",
+      "source_commit": "8887d90",
+      "translator": "google:gemini-3.6-flash"
+    }
+  },
+  "summary": {
+    "total": 20,
+    "draft": 20,
+    "in_review": 0,
+    "reviewed": 0,
+    "stale": 0,
+    "migrated": 0
+  }
+}
