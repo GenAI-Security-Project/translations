@@ -27,9 +27,14 @@ renderer — is open and auditable in this repo.
 
 ## How a translation happens, step by step
 
-New to it? Watch the seven-minute
-[explainer video](https://genai-security-project.github.io/translations/docs.html) or download the
+New to it? Watch the seven-minute explainer video (click to play, with
+captions), or download the
 [manager overview slides](docs/media/GenAI-Translations-Manager-Overview.pptx).
+
+[![Explainer video: how the GenAI translation pipeline works (7 min)](docs/media/explainer-poster.jpg)](https://genai-security-project.github.io/translations/docs.html)
+
+▶ [Play the video](https://genai-security-project.github.io/translations/docs.html) ·
+[download the MP4](https://genai-security-project.github.io/translations/media/GenAI-Translations-Explainer.mp4)
 
 1. **Request it** (translations managers only). Either:
    - **a new document** — the *Onboard a new document* form, linked from the
