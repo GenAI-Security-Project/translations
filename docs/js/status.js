@@ -6,15 +6,21 @@ function languageLabel(code) {
   return LANGUAGE_NAMES[code] ? `${LANGUAGE_NAMES[code]} (${code})` : code;
 }
 
-// Opens the "Add languages" issue form with both fields filled in. GitHub
-// pre-fills issue-form inputs from query parameters named by field id.
+// Opens the "Add languages" issue form with the document and languages
+// chosen. GitHub pre-fills issue-form fields from query parameters named by
+// field id; for the dropdowns the value is the option's label (see
+// tooling/gen_issue_forms.py). Codes that aren't in the list go in the
+// free-text "other" field.
 function addLanguageUrl(assetId, codes) {
+  const listed = codes.map(languageOptionLabel).filter(Boolean);
+  const other = codes.filter((c) => !languageOptionLabel(c));
   const q = new URLSearchParams({
     template: "add-language.yml",
     title: `Add languages: ${assetId} — ${codes.join(", ")}`,
     asset: assetId,
-    locales: codes.join(", "),
   });
+  if (listed.length) q.set("locales", listed.join(","));
+  if (other.length) q.set("other_locales", other.join(", "));
   return `${NEW_ISSUE_URL}?${q}`;
 }
 

@@ -178,3 +178,10 @@ section heading if none fits.*
 - [ ] Live-test an add-language request end to end.
 - [ ] A new document onboarded with several locales: each locale's draft
   run splits the source itself; check the split PRs merge cleanly.
+- [x] Intake split into two generated forms (`tooling/gen_issue_forms.py`,
+  kept current by `sync-issue-forms.yml`): **Onboard a new document**
+  (file + dropdowns) and **Add languages to a document** (document and
+  language dropdowns, no file).
+- [ ] **New version of an existing document** has no form any more (the
+  old combined form's "new version" mode was dropped with the split). Add a
+  third form if needed; until then, Actions → `bootstrap-asset`.
