@@ -1,0 +1,12 @@
+# GitHub logins never shown on the Managers page (docs/managers.html), even
+# though they have Maintain/Admin on this repo -- e.g. org owners who have
+# Admin everywhere but don't manage translations. One login per line;
+# lines starting with # are ignored. Read by .github/workflows/sync-managers.yml
+# (left out of data/managers.json) and docs/js/managers.js (never displayed).
+#
+# This only affects the published list. As org owners these people keep
+# Admin, so .github/actions/require-manager still lets them run manager
+# actions.
+GangGreenTemperTatum
+mamicidal
+vanderaj

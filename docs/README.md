@@ -39,7 +39,9 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
   `sync-managers.yml` writes daily (a public page can't read repo roles
   itself). Candidates are collaborators, public org members and everyone
   already listed, each checked for Maintain/Admin; org owners with private
-  membership are added once via the workflow's `add` input.
+  membership are added once via the workflow's `add` input. Logins in
+  `docs/data/managers_exclude.txt` (org owners who don't manage translations)
+  are never listed.
 
 ## Visibility
 

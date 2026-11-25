@@ -1,9 +1,22 @@
 // Managers page: renders docs/data/managers.json, which the sync-managers
 // workflow writes from the repository's collaborator roles (Maintain/Admin).
+// Logins in data/managers_exclude.txt are never shown, even if listed.
 const ROLE_LABEL = {
   maintain: "Manager (Maintain)",
   admin: "Admin (org owner or repository admin)",
 };
+
+// Lower-cased logins from data/managers_exclude.txt (one per line, # comments).
+async function loadExcluded() {
+  try {
+    const res = await fetch("data/managers_exclude.txt", { cache: "no-cache" });
+    if (!res.ok) return new Set();
+    const text = await res.text();
+    return new Set(text.split(/\r?\n/).map((l) => l.trim().toLowerCase()).filter((l) => l && !l.startsWith("#")));
+  } catch (_) {
+    return new Set();
+  }
+}
 
 async function loadManagers() {
   const msg = document.getElementById("managers-message");
@@ -17,7 +30,9 @@ async function loadManagers() {
     msg.textContent = "The managers list isn't available yet.";
     return;
   }
-  for (const m of data.managers || []) {
+  const excluded = await loadExcluded();
+  const managers = (data.managers || []).filter((m) => !excluded.has(String(m.login).toLowerCase()));
+  for (const m of managers) {
     const li = document.createElement("li");
     const img = document.createElement("img");
     img.src = `${m.avatar}${m.avatar.includes("?") ? "&" : "?"}s=96`;
@@ -38,7 +53,7 @@ async function loadManagers() {
     list.appendChild(li);
   }
   const when = data.generated_at ? new Date(data.generated_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "";
-  msg.textContent = `${(data.managers || []).length} people can run the pipeline${when ? ` · list updated ${when}` : ""}.`;
+  msg.textContent = `${managers.length} people can run the pipeline${when ? ` · list updated ${when}` : ""}.`;
   list.hidden = false;
 }
 
