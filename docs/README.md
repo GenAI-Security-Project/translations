@@ -40,7 +40,7 @@ happens on GitHub itself, under the person's normal GitHub sign-in.
   itself). Candidates are collaborators, public org members and everyone
   already listed, each checked for Maintain/Admin; org owners with private
   membership are added once via the workflow's `add` input. Logins in
-  `tooling/managers_exclude.txt` (org owners who don't manage translations)
+  `docs/data/managers_exclude.txt` (org owners who don't manage translations)
   are never listed.
 
 ## Visibility

@@ -14,7 +14,7 @@
 # the published list + any logins given in the `add` input -- and each one
 # is then checked with the same per-person permission lookup require-manager
 # uses. Nobody is listed without Maintain/Admin, and anyone who loses it
-# drops off at the next run. Logins in tooling/managers_exclude.txt are
+# drops off at the next run. Logins in docs/data/managers_exclude.txt are
 # never listed (e.g. org owners who don't manage translations).
 name: sync-managers
 
@@ -58,7 +58,7 @@ jobs:
             printf '%s\n' "$ADD" | tr ', ' '\n\n'
           } | grep -E '^[A-Za-z0-9](-?[A-Za-z0-9]){0,38}$' | sort -fu > /tmp/all.txt
           # Drop excluded logins (case-insensitive).
-          { grep -vE '^\s*(#|$)' tooling/managers_exclude.txt 2>/dev/null || true; } | tr -d ' \r' > /tmp/exclude.txt
+          { grep -vE '^\s*(#|$)' docs/data/managers_exclude.txt 2>/dev/null || true; } | tr -d ' \r' > /tmp/exclude.txt
           grep -vixFf /tmp/exclude.txt /tmp/all.txt > /tmp/candidates.txt || true
           echo "checking $(wc -l < /tmp/candidates.txt) candidates"
           : > /tmp/managers.jsonl
